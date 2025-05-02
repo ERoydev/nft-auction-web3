@@ -1,3 +1,5 @@
+import HeaderText from "../components/ui/HeaderText";
+
 export default function StepsSection() {
     const steps = [
       {
@@ -28,9 +30,13 @@ export default function StepsSection() {
   
     return (
       <div className="px-6 sm:px-12 lg:px-24">
-        <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">
+        <div className="text-center">
+          <HeaderText title="How It Works" />
+
+        </div>
+        {/* <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">
           How It Works
-        </h2>
+        </h2> */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step) => (
             <div

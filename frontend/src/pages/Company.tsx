@@ -1,12 +1,11 @@
+import HeaderText from "../components/ui/HeaderText";
 
 export default function Company() {
   return (
     <div id="company" className="flex flex-col lg:flex-row items-center justify-between gap-12 px-6 sm:px-12 lg:px-24 py-52">
       {/* Text Section */}
       <div className="lg:w-1/2 text-center">
-        <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 mb-6 animate-pulse">
-          About Our Company
-        </h2>
+        <HeaderText title="About Our Company" />
         <p className="text-lg text-gray-600 leading-relaxed">
           We are a pioneering platform in the NFT space, empowering creators and collectors to explore the future of digital ownership. Our mission is to provide a seamless and secure experience for buying, selling, and trading NFTs. Join us in shaping the future of the metaverse and unlocking the full potential of digital art and blockchain technology.
         </p>

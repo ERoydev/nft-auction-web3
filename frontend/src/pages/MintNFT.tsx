@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ethers } from "ethers";
+import NFTContractABI from ""
 
 export default function MintNFT() {
   const [name, setName] = useState("");

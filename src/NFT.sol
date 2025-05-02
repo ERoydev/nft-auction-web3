@@ -25,6 +25,13 @@ Core Logic:
 /// @author E.Roydev
 /// @notice Used to mint nfts
 contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
+
+    /// @notice links a token's unique tokenId to its metadata URL stored on nft.storage service
+    mapping(uint256 => string) private _tokenURIs;
+    uint256 private _currentTokenId;
+
+    event TokenMinted(address indexed user, uint256 tokenId);
+
     constructor() ERC721("MyToken", "MTK") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender); // contract creator is DEFAULT_ADMIN
     }
@@ -51,9 +58,13 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
         emit MerkleRootUpdated(newRoot);
     }
 
+    /// @notice User who mints his token is the msg.sender so he mints to himself
+    function safeMint() public allowedRole(MINTER_ROLE) {
+        uint256 tokenId = _currentTokenId;
+        _currentTokenId ++;
 
-    function safeMint(address to, uint256 tokenId) public allowedRole(MINTER_ROLE) {
-        _safeMint(to, tokenId);
+        _safeMint(msg.sender, tokenId);
+        emit TokenMinted(msg.sender, tokenId);
     }
 
     function supportsInterface(bytes4 interfaceId)
