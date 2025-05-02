@@ -12,6 +12,8 @@ contract DeployNFT is Script {
         // Deploy the NFT contract
         NFT nft = new NFT();
 
+        console.log('Deployed NFT contract with an address: ', address(nft));
+
         vm.stopBroadcast();
     }
 }
