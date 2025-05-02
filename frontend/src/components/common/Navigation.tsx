@@ -1,6 +1,7 @@
 import { useState } from "react";
-import Navlinks from "../reusable/navlinks";
 import ConnectWallet from "../reusable/ConnectWallet";
+import Navlinks from "../reusable/Navlinks";
+import { Link} from "react-router-dom";
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -9,11 +10,11 @@ export default function Navigation() {
     <nav className="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
       {/* Logo */}
       <div className="flex lg:flex-1">
-        <a href="#" className="-m-1.5 p-1.5">
+        <Link to="/" className="-m-1.5 p-1.5">
           <span className="text-2xl font-bold text-indigo-600 tracking-wide hover:cursor-pointer p-2">
             Auctionize
           </span>
-        </a>
+        </Link>
       </div>
 
       {/* Mobile Menu Button */}
@@ -55,11 +56,11 @@ export default function Navigation() {
       {mobileMenuOpen && (
         <div className="absolute top-0 left-0 z-10 w-full bg-white p-6 lg:hidden">
           <div className="flex items-center justify-between">
-            <a href="#" className="-m-1.5 p-1.5">
+            <Link to="/" className="-m-1.5 p-1.5">
               <span className="text-2xl font-bold text-indigo-600 tracking-wide hover:cursor-pointer p-2">
                 Auctionize
               </span>
-            </a>
+            </Link>
             <button
               type="button"
               className="-m-2.5 rounded-md p-2.5 text-gray-700"
