@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
-import NFTContractABI from ""
+import NFTContractABI from "../abi/NFT.json";
+import { createCollection, getCollection, uploadMetadata } from "../services/IPFSService";
 
 export default function MintNFT() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [isMinting, setIsMinting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -19,7 +21,7 @@ export default function MintNFT() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!name || !description || !image) {
@@ -27,11 +29,36 @@ export default function MintNFT() {
       return;
     }
 
+    try {
+        setIsMinting(true);
+
+        // Check if MetaMask is connected
+        if (typeof window.ethereum === "undefined") {
+            alert("MetaMask is not installed. Please install it to mint NFTs.");
+            return;
+        }
+
+        // Connect to the wallet
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        const signer = provider.getSigner();
+
+        // create a collections
+        getCollection();
+        // const cid = await uploa÷dMetadata(name, description, image);
+
+
+        alert("NFT minted successfully!");
+    } catch (error) {
+        console.error("Error minting NFT:", error);
+        alert("Failed to mint NFT. Please try again.");
+    } finally {
+        setIsMinting(false);
+    }
+
     // Simulate minting process
     console.log("Minting NFT with the following data:");
     console.log({ name, description, image });
-
-    alert("NFT Minted Successfully!");
 
     // Reset form
     setName("");
