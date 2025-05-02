@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
-import {RoleManager} from "./libraries/RoleManager.sol";
+import {RoleManager} from "./abstract-contracts/RoleManager.sol";
 
 /*
 Core Logic:
@@ -25,7 +25,6 @@ Core Logic:
 /// @author E.Roydev
 /// @notice Used to mint nfts
 contract NFT is ERC721, ERC721Burnable, RoleManager {
-
     constructor() ERC721("MyToken", "MTK") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender); // contract creator is DEFAULT_ADMIN
     }
@@ -41,7 +40,7 @@ contract NFT is ERC721, ERC721Burnable, RoleManager {
     }
 
     // ===============================================
-    
+
 
     // function safeMint(address to, uint256 tokenId) public allowedRole(MINTER_ROLE) {
     //     _safeMint(to, tokenId);
