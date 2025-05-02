@@ -2,9 +2,11 @@ import { Route, Routes } from "react-router-dom";
 import BottomBackgroundBlur from "./components/background/BottomBackgroundBlur";
 import TopBackgroundBlur from "./components/background/TopBackgroundBlur";
 import Header from "./components/common/Header";
-import Hero from "./pages/Hero";
 import NFTMarketplace from "./pages/NftMarketplace";
-import StepsSection from "./pages/Steps";
+import MintNFT from "./pages/MintNFT";
+import Footer from "./components/common/Footer";
+import Home from "./pages/Home";
+import Company from "./pages/Company";
 
 function App() {
   return (
@@ -13,12 +15,14 @@ function App() {
         <TopBackgroundBlur />
         <Header />
           <Routes>
-            <Route path="/" element={<Hero />} />
+            <Route path="/" element={<Home />} />
             <Route path="/marketplace" element={<NFTMarketplace />} />
+            <Route path="/mintnft" element={<MintNFT />} />
+            <Route path="/company" element={<Company />} />
           </Routes>
-        <StepsSection />
         <BottomBackgroundBlur />
       </div>
+      <Footer />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import SmallBanner from "../components/ui/SmallBanner";
 
 export default function Hero() {
   return (
-    <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
+    <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-48">
       <SmallBanner title="Explore our latest NFT collections." />
 
       {/* Buy NFT Section */}

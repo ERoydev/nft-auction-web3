@@ -7,7 +7,7 @@ export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <nav className="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
+    <nav className="flex items-center justify-between p-10 lg:px-8" aria-label="Global">
       {/* Logo */}
       <div className="flex lg:flex-1">
         <Link to="/" className="-m-1.5 p-1.5">
