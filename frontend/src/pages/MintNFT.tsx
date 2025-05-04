@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
+import { uploadFileToPinata } from "../services/Pinata";
 
 export default function MintNFT() {
   const [name, setName] = useState("");
@@ -42,8 +43,11 @@ export default function MintNFT() {
         const signer = provider.getSigner();
 
         // create a collections
-        // UploadToCollection(name, description, image);
-        // const cid = await uploa÷dMetadata(name, description, image);
+        uploadFileToPinata(
+          name,
+          description,
+          image
+        );
 
 
         alert("NFT minted successfully!");
