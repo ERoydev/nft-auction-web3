@@ -1,19 +1,5 @@
-import { ethers } from "ethers";
 import { provider, contract } from "../utils/contract";
 
-
-// class NFTContract {
-//     private contract: ethers.Contract;
-
-//     constructor(address: string, abi: any, signerOrProvider: ethers.Signer | ethers.Provider) {
-//         this.contract = new ethers.Contract(address, abi, signerOrProvider);
-//     }
-
-//     async safeMint(tokenMetadataURL: string): Promise<any> {
-//         // Implement your custom logic here
-//         return this.contract.safeMint(tokenMetadataURL);
-//     }
-// }
 
 export async function mintNFT(tokenMetadataURL: string) {
     const signer = await provider.getSigner();
@@ -21,6 +7,7 @@ export async function mintNFT(tokenMetadataURL: string) {
 
     try {
         const tx = await contractWithSigner.safeMint(tokenMetadataURL);
+        // TODO: Find a way to extend the ethers.BaseContract to include the safeMint method or find better way
         await tx.wait();
         console.log("NFT minted successfully:", tx);
     } catch (error) {

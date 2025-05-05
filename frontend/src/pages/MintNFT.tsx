@@ -47,7 +47,6 @@ export default function MintNFT() {
 
         mintNFT(metadataURL); // Call the mintNFT function with the metadata URL
 
-
         alert("NFT minted successfully!");
     } catch (error) {
         console.error("Error minting NFT:", error);
@@ -55,11 +54,7 @@ export default function MintNFT() {
     } finally {
         setIsMinting(false);
     }
-
-    // Simulate minting process
-    console.log("Minting NFT with the following data:");
-    console.log({ name, description, image });
-
+    
     // Reset form
     setName("");
     setDescription("");

@@ -21,6 +21,7 @@ abstract contract MerkleWhiteList {
         return MerkleProof.verify(merkleProof, merkleRoot, leaf); 
     }
 
+    /// @dev - Admin just updates the root without any checks.
     function _setMerkleRoot(bytes32 newRoot) internal {
         merkleRoot = newRoot;
         emit MerkleRootUpdated(newRoot);

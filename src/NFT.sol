@@ -7,6 +7,7 @@ import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ER
 import {RoleManager} from "./abstract-contracts/RoleManager.sol";
 import {MerkleWhiteList} from "./abstract-contracts/MerkleWhiteList.sol";
 
+
 /*
 Core Logic:
     Stores:
@@ -26,9 +27,13 @@ Core Logic:
 /// @notice Used to mint nfts
 contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
 
-    /// @notice links a token's unique tokenId to its metadata URL stored on nft.storage service
+    /// @dev links a token's unique tokenId to its metadata URL stored on nft.storage service
     mapping(uint256 => string) private _tokenURIs;
     uint256 private _currentTokenId;
+    
+    /// @dev track the tokens each address owns
+    mapping(address => uint256[]) private _ownedTokens;
+    mapping(uint256 => uint256) private _ownedTokensIndex; // inside the array of tokens that address holds gives the index of the specific tokenId
 
     event TokenMinted(address indexed user, uint256 indexed tokenId);
 
@@ -47,7 +52,7 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
     }
 
     function getTokenURL(uint256 tokenId) public view returns (string memory) {
-        require(tokenId <= _currentTokenId, "token doesn't exist.");
+        require(tokenId <= _currentTokenId, "tokenId doesn't exist.");
         return _tokenURIs[tokenId];
     }
 
@@ -79,7 +84,22 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
         _currentTokenId ++;
 
         _safeMint(msg.sender, tokenId);
+
+        // token tracking logic
+        _addTokenToOwnerEnumeration(msg.sender, tokenId);
         emit TokenMinted(msg.sender, tokenId);
+    }
+
+    function _addTokenToOwnerEnumeration(address to, uint256 tokenId) internal {
+        // TODO: If i need to handle transfers i should add _removeTokenFromEnumeration type of functionality
+        uint256 length = _ownedTokens[to].length;
+        _ownedTokens[to].push(tokenId);
+        _ownedTokensIndex[tokenId] = length; 
+    }
+
+    function tokensOfOwner(address owner) public view returns (uint256[] memory) {
+        // TODO: Maybe i should make checks that only owner of the tokens can retrieve this information
+        return _ownedTokens[owner];
     }
 
     function supportsInterface(bytes4 interfaceId)

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { connectWallet, disconnectWallet } from "../../services/walletService";
+import { useNavigate } from "react-router-dom";
 
 export default function ConnectWallet() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [hovering, setHovering] = useState(false); // State to track hover
+  const navigate = useNavigate();
 
   const handleConnectWallet = async () => {
     if (typeof window.ethereum !== "undefined") {
@@ -26,8 +28,7 @@ export default function ConnectWallet() {
   };
 
   const handleUserSettings = () => {
-    // Logic to open user settings modal or navigate to settings page
-    console.log("Open user settings");
+    navigate("/profilemenu");
   };
 
   return (

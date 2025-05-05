@@ -7,6 +7,8 @@ import MintNFT from "./pages/MintNFT";
 import Footer from "./components/common/Footer";
 import Home from "./pages/Home";
 import Company from "./pages/Company";
+import ProfileMenu from "./pages/ProfileMenu";
+import AdminPanel from "./pages/AdminPanel";
 
 function App() {
   return (
@@ -16,9 +18,11 @@ function App() {
         <Header />
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/marketplace" element={<NFTMarketplace />} />
+            <Route path="/marketplace" element={<NFTMarketplace title={"NFT Marketplace"} />} />
             <Route path="/mintnft" element={<MintNFT />} />
             <Route path="/company" element={<Company />} />
+            <Route path="/profilemenu" element={<ProfileMenu />} />
+            <Route path="/admin" element={<AdminPanel />} />
           </Routes>
         <BottomBackgroundBlur />
       </div>
