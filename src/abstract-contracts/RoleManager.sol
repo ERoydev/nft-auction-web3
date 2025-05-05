@@ -12,7 +12,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  * This gives me ready to use methods like: _grantRole(), hasRole(), _revokeRole() and modifier onlyRole() out of the box.
  */
 abstract contract RoleManager is AccessControl {
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant WHITELIST_MANAGER = keccak256("WHITELIST_MANAGER");
     bytes32 public constant SALES_PRICE_MANAGER = keccak256("SALES_PRICE_MANAGER");
     bytes32 public constant PAYMENT_TOKENS_CONFIGURATOR = keccak256("PAYMENT_TOKENS_CONFIGURATOR");

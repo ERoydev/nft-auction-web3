@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import {RoleManager} from "./abstract-contracts/RoleManager.sol";
 import {MerkleWhiteList} from "./abstract-contracts/MerkleWhiteList.sol";
+
 /*
 Core Logic:
     Stores:
@@ -30,7 +30,7 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
     mapping(uint256 => string) private _tokenURIs;
     uint256 private _currentTokenId;
 
-    event TokenMinted(address indexed user, uint256 tokenId);
+    event TokenMinted(address indexed user, uint256 indexed tokenId);
 
     constructor() ERC721("MyToken", "MTK") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender); // contract creator is DEFAULT_ADMIN
@@ -51,21 +51,30 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
         return _tokenURIs[tokenId];
     }
 
-    // ===============================================
+    // =============================================== Merkle Root Functions
 
     modifier onlyWhitelistManager() {
         require(hasRole(WHITELIST_MANAGER, msg.sender), "not a whitelist manager");
         _;
     }
 
-    function setMerkleRoot(bytes32 newRoot) external override onlyWhitelistManager {
-        merkleRoot = newRoot;
-        emit MerkleRootUpdated(newRoot);
+    modifier isWhitelisted(bytes32[] calldata merkleProof) {
+        require(MerkleWhiteList.verifyProof(msg.sender, merkleProof), "this account is not whitelisted");
+        _;
     }
 
+
+    function setMerkleRoot(bytes32 newRoot) external onlyWhitelistManager {
+        MerkleWhiteList._setMerkleRoot(newRoot);
+    }
+
+    // ===============================================
+
     /// @notice User who mints his token is the msg.sender so he mints to himself
-    function safeMint(string calldata tokenMetadataURL) public {
+    function safeMint(string calldata tokenMetadataURL, bytes32[] calldata merkleProof) public isWhitelisted(merkleProof) {
         uint256 tokenId = _currentTokenId;
+        require(bytes(tokenMetadataURL).length > 0, "Invalid metadata URL");
+
         _tokenURIs[tokenId] = tokenMetadataURL;
         _currentTokenId ++;
 
