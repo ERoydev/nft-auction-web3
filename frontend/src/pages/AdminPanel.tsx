@@ -1,18 +1,37 @@
 import React, { useState } from "react";
 import NFTMarketplace from "./NftMarketplace";
+import { addToWhitelist, removeFromWhitelist } from "../services/WhitelistService";
+import { ethers } from "ethers";    
+import { isAddress } from "web3-validator";
 
 export default function AdminPanel() {
   const [whitelistAddress, setWhitelistAddress] = useState("");
   const [removeAddress, setRemoveAddress] = useState("");
 
-  const handleAddToWhitelist = () => {
-    console.log("Adding to whitelist:", whitelistAddress);
-    setWhitelistAddress("");
+  const handleAddToWhitelist = async () => {
+    // TODO: Validate the address format for etherium but since i work with anvil address i skip the checks
+    // if (isAddress(whitelistAddress) === false) {
+    //   alert("Invalid wallet address. Please enter a valid Ethereum address.");
+    //   return;
+    // }
+
+    try {
+        const newRoot = await addToWhitelist(whitelistAddress);
+        setWhitelistAddress("");
+        console.log("Added to whitelist:", newRoot);
+    } catch (error) {
+        console.error("Error adding to whitelist:", error);
+    }
   };
 
-  const handleRemoveFromWhitelist = () => {
-    console.log("Removing from whitelist:", removeAddress);
-    setRemoveAddress("");
+  const handleRemoveFromWhitelist = async () => {
+    try {
+        const newRoot = await removeFromWhitelist(removeAddress);
+        setRemoveAddress("");
+        console.log("Removed from whitelist: ", newRoot);
+    } catch (error) {
+        console.error("Error removing from whitelist: ", error);
+    }
   };
 
   return (

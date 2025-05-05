@@ -76,6 +76,32 @@ app.post('/addAddress', (req, res) => {
     }
 });
 
+app.post('/removeAddress', (req, res) => {
+    const {address} = req.body;
+
+    if (!address) {
+        return res.status(400).send('Address is required');
+    }
+
+    const whitelist = getWhitelist();
+
+    if (!whitelist.includes(address)) {
+        return res.status(400).send('Address does not exist in the whitelist');
+    }
+
+    const updatedWhitelist = whitelist.filter(addr => addr !== address);
+
+    try {
+        fs.writeFileSync(whitelistFilePath, JSON.stringify(updatedWhitelist, null, 2));
+        const { tree, merkleRoot } = generateMerkleTree(updatedWhitelist);
+        return res.json({ message: 'Address removed successfully', merkleRoot });
+
+    } catch (error) {
+        console.error('Error writing to whitelist:', error);
+        return res.status(500).send('Error writing to whitelist');
+    }   
+})
+
 // Start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

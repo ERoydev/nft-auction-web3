@@ -18,7 +18,8 @@
     "pinata": "^2.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.5.3"
+    "react-router-dom": "^7.5.3",
+    "web3-validator": "^2.0.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
