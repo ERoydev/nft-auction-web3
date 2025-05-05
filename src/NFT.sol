@@ -73,8 +73,8 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
     // =============================================== TOKENS
 
     /// @notice User who mints his token is the msg.sender so he mints to himself
-    // TODO: Make it whitelisted check laters isWhitelisted
-    function safeMint(string calldata tokenMetadataURL, bytes32[] calldata merkleProof) public  {
+    function safeMint(string calldata tokenMetadataURL, bytes32[] calldata merkleProof) public isWhitelisted(merkleProof) {
+        // TODO: I don't have good error handling when user is not Whitelisted to provide a good frontend response for this problem. Currently i give general error that something went wrong.
         uint256 tokenId = _currentTokenId;
         require(bytes(tokenMetadataURL).length > 0, "Invalid metadata URL");
 

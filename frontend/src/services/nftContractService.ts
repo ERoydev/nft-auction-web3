@@ -1,15 +1,12 @@
 import { provider, contract } from "../utils/contract";
-import normalizeHexArray from "../utils/NormalizeHexArray";
 
 
 export async function mintNFT(tokenMetadataURL: string, merkleProof: string[]) {
     const signer = await provider.getSigner();
     const contractWithSigner = contract.connect(signer);
-    
-    const merkleproof = normalizeHexArray(merkleProof);
 
     try {
-        const tx = await contractWithSigner.safeMint(tokenMetadataURL, merkleproof);
+        const tx = await contractWithSigner.safeMint(tokenMetadataURL, merkleProof);
         // TODO: Find a way to extend the ethers.BaseContract to include the safeMint method or find better way
         await tx.wait();
         console.log("NFT minted successfully:", tx);

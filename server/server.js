@@ -27,7 +27,7 @@ const getWhitelist = () => {
 const generateMerkleTree = (addresses) => {
     const leaves = addresses.map(addr => keccak256(addr)); 
     const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
-    const merkleRoot = tree.getRoot().toString('hex');
+    const merkleRoot = '0x' + tree.getRoot().toString('hex');
     return { tree, merkleRoot };
 };
 
@@ -49,6 +49,31 @@ app.post('/getProof', (req, res) => {
     const leaf = keccak256(address); // Hash the address
     const proof = tree.getProof(leaf).map(x => x.data.toString('hex')); // Generate proof
     res.json({ proof });
+});
+
+app.post('/addAddress', (req, res) => {
+    const { address } = req.body;
+
+    if (!address) {
+        return res.status(400).send('Address is required');
+    }
+
+    const whitelist = getWhitelist();
+
+    if (whitelist.includes(address)) {
+        return res.status(400).send('Address already exists in the whitelist');
+    }
+
+    whitelist.push(address);
+
+    try {
+        fs.writeFileSync(whitelistFilePath, JSON.stringify(whitelist, null, 2));
+        const { tree, merkleRoot } = generateMerkleTree(whitelist);
+        return res.json({ message: 'Address added successfully', merkleRoot });
+    } catch (error) {
+        console.error('Error writing to whitelist:', error);
+        return res.status(500).send('Error writing to whitelist');
+    }
 });
 
 // Start the server
