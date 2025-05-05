@@ -4,7 +4,11 @@ const keccak256 = require('keccak256');
 const app = express();
 const port = 3000;
 const fs = require('fs');
+const cors = require('cors');
 
+
+// Allow all origins (open CORS)
+app.use(cors());
 app.use(express.json());
 
 

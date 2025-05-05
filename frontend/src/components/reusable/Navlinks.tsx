@@ -42,12 +42,12 @@ export default function Navlinks() {
       >
         Marketplace
       </Link>
-      <a
-        href="#"
+      <Link
+        to="/auction"
         className="block text-sm font-semibold text-gray-900 hover:bg-gray-200 rounded-full p-2"
       >
         Auctions
-      </a>
+      </Link>
       <Link
         to="/mintnft"
         className="block text-sm font-semibold text-gray-900 hover:bg-gray-200 rounded-full p-2"

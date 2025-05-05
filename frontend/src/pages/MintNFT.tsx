@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
 import { uploadFileToPinata } from "../services/Pinata";
 import { mintNFT } from "../services/nftContractService";
+import { getMerkleProof } from "../services/WhitelistService";
+import { getUserAddress } from "../utils/getUserAddress";
 
 export default function MintNFT() {
   const [name, setName] = useState("");
@@ -45,7 +47,9 @@ export default function MintNFT() {
           image
         );
 
-        mintNFT(metadataURL); // Call the mintNFT function with the metadata URL
+        const userAddress = await getUserAddress();
+        const merkleProof = await getMerkleProof(userAddress);
+        mintNFT(metadataURL, merkleProof.proof); // Min the nft passing merkleProof
 
         alert("NFT minted successfully!");
     } catch (error) {

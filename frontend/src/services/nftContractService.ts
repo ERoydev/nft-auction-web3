@@ -1,16 +1,33 @@
 import { provider, contract } from "../utils/contract";
+import normalizeHexArray from "../utils/NormalizeHexArray";
 
 
-export async function mintNFT(tokenMetadataURL: string) {
+export async function mintNFT(tokenMetadataURL: string, merkleProof: string[]) {
     const signer = await provider.getSigner();
     const contractWithSigner = contract.connect(signer);
+    
+    const merkleproof = normalizeHexArray(merkleProof);
 
     try {
-        const tx = await contractWithSigner.safeMint(tokenMetadataURL);
+        const tx = await contractWithSigner.safeMint(tokenMetadataURL, merkleproof);
         // TODO: Find a way to extend the ethers.BaseContract to include the safeMint method or find better way
         await tx.wait();
         console.log("NFT minted successfully:", tx);
     } catch (error) {
         console.error("Error minting NFT:", error);
     }
+}
+
+export async function getNFTsByOwner(ownerAddress: string) {    
+    // Get all token IDs
+    // Fetch each tokenId to get his URL
+    try {
+        console.log("====trying here");
+        const tokenIds = await contract.tokensOfOwner(ownerAddress);
+        console.log("------TOKEN IDS", tokenIds);
+    } catch (error) {
+        console.error("Error fetching NFTs:", error);
+    }
+
+
 }

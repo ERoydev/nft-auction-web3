@@ -1,7 +1,12 @@
 import { useState, useEffect} from "react";
-
+import { getNFTsByOwner } from "../services/nftContractService";
+import { ethers } from "ethers";
 
 export default function ProfileMenu() {
+  const [walletAddress, setWalletAddress] = useState("");
+  const [nfts, setNfts] = useState([]);
+
+
   // Mock NFT data
   const mockNFTs = [
     {
@@ -25,9 +30,30 @@ export default function ProfileMenu() {
   ];
 
   useEffect(() => {
-    // I need the merkle proof of this address to prove that this is Whitelisted address in my merkle tree on-chain
-    // I need to get all the tokensMetadataURI's that are owned by this address
-  }, [])
+    // TODO: Whitelist logic implementation is missing yet
+
+    const getWalletAddress = async () => {
+      if (typeof window.ethereum !== "undefined") {
+        try {
+          const accounts = await window.ethereum.request({ method: "eth_accounts" });
+          if (accounts.length > 0) {
+            setWalletAddress(accounts[0]); // Set the first account as the wallet address
+            console.log("Wallet Address:", accounts[0]);
+          } else {
+            console.error("No accounts found. Please connect your wallet.");
+          }
+        } catch (error) {
+          console.error("Error fetching wallet address:", error);
+        }
+      } else {
+        console.error("MetaMask is not installed.");
+      }
+    };
+
+    getWalletAddress();
+    const allNfts = getNFTsByOwner(walletAddress); // Fetch NFTs owned by the wallet
+    console.log(allNfts)
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen py-22">

@@ -51,11 +51,6 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
         _;
     }
 
-    function getTokenURL(uint256 tokenId) public view returns (string memory) {
-        require(tokenId <= _currentTokenId, "tokenId doesn't exist.");
-        return _tokenURIs[tokenId];
-    }
-
     // =============================================== Merkle Root Functions
 
     modifier onlyWhitelistManager() {
@@ -73,10 +68,13 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
         MerkleWhiteList._setMerkleRoot(newRoot);
     }
 
-    // ===============================================
+    // =============================================== Merkle Root Functions
+
+    // =============================================== TOKENS
 
     /// @notice User who mints his token is the msg.sender so he mints to himself
-    function safeMint(string calldata tokenMetadataURL, bytes32[] calldata merkleProof) public isWhitelisted(merkleProof) {
+    // TODO: Make it whitelisted check laters isWhitelisted
+    function safeMint(string calldata tokenMetadataURL, bytes32[] calldata merkleProof) public  {
         uint256 tokenId = _currentTokenId;
         require(bytes(tokenMetadataURL).length > 0, "Invalid metadata URL");
 
@@ -101,6 +99,14 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
         // TODO: Maybe i should make checks that only owner of the tokens can retrieve this information
         return _ownedTokens[owner];
     }
+
+    function getTokenURL(uint256 tokenId) public view returns (string memory) {
+        require(tokenId <= _currentTokenId, "tokenId doesn't exist.");
+        return _tokenURIs[tokenId];
+    }
+
+
+    // =============================================== TOKENS
 
     function supportsInterface(bytes4 interfaceId)
         public
