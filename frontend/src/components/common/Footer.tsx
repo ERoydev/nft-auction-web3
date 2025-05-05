@@ -12,7 +12,7 @@ export default function Footer() {
             {/* Logo and Description */}
             <div className="text-center lg:text-left">
                 <div className="flex items-center gap-5">
-                    <img className="w-10 h-10" src="../../../public/auctionize-logo.svg"/>
+                    <img className="w-10 h-10" src="/auctionize-logo.svg"/>
                     <h2 className="text-3xl font-bold text-white">Auctionize</h2>
                 </div>
               <p className="text-sm mt-2 max-w-xs">

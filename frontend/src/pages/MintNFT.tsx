@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ethers } from "ethers";
 import { uploadFileToPinata } from "../services/Pinata";
+import { mintNFT } from "../services/nftContractService";
 
 export default function MintNFT() {
   const [name, setName] = useState("");
@@ -37,17 +38,14 @@ export default function MintNFT() {
             return;
         }
 
-        // Connect to the wallet
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-
-        // create a collections
-        uploadFileToPinata(
+        // Upload the image and metadata to Pinata and get the TokenURI holding all the metadata of this NFT
+        const { metadataURL } = await uploadFileToPinata(
           name,
           description,
           image
         );
+
+        mintNFT(metadataURL); // Call the mintNFT function with the metadata URL
 
 
         alert("NFT minted successfully!");

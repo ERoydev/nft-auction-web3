@@ -46,6 +46,11 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
         _;
     }
 
+    function getTokenURL(uint256 tokenId) public view returns (string memory) {
+        require(tokenId <= _currentTokenId, "token doesn't exist.");
+        return _tokenURIs[tokenId];
+    }
+
     // ===============================================
 
     modifier onlyWhitelistManager() {
@@ -59,8 +64,9 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
     }
 
     /// @notice User who mints his token is the msg.sender so he mints to himself
-    function safeMint() public allowedRole(MINTER_ROLE) {
+    function safeMint(string calldata tokenMetadataURL) public {
         uint256 tokenId = _currentTokenId;
+        _tokenURIs[tokenId] = tokenMetadataURL;
         _currentTokenId ++;
 
         _safeMint(msg.sender, tokenId);

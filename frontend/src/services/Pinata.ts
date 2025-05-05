@@ -17,7 +17,6 @@ export async function uploadFileToPinata(
         const imageCID = imageUpload.cid;
         const imageUrl = `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${imageCID}`;
 
-
         // 2. Create metadata
         const metadata = {
             name,
@@ -34,14 +33,10 @@ export async function uploadFileToPinata(
         // 4. Upload metadata to IPFS
         const metadataUpload = await pinata.upload.public.file(metadatFile);
 
-        console.log("Image CID:", imageCID);
-        console.log("Metadata CIT:", metadataUpload.cid);
-
-
         return {
             imageCID,
             metadataCID: metadataUpload.cid,
-            metadataURL: `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${metadataUpload.cid}`,
+            metadataURL: `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${metadataUpload.cid}`, // URL to access the metadata => pass this to the contract as parameter
         }
     } catch (error) {
         console.error("Upload failed:", error);
