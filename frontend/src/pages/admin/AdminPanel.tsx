@@ -6,7 +6,7 @@ import { assignRole } from "../../services/RolesService.ts";
 import { ROLES } from "./index.ts";
 import StatisticsSection from "../../components/ui/StatisticsSection.tsx";
 import SectionHeader from "../../components/ui/SectionHeader.tsx";
-import { useWallet } from "../../context/WalletContext.tsx";
+import { useWallet } from "../../context/Wallet/WalletContext.tsx";
 import ErrorMessageComponent from "../../components/reusable/ErrorMessageComponent.tsx";
 import SuccessMessage from "../../components/reusable/SuccessMessage.tsx";
 

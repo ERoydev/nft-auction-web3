@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { useWallet } from "../context/WalletContext";
+import { useWallet } from "../context/Wallet/WalletContext";
 
 interface AuthenticatedRouteProps {
   children: React.ReactNode;

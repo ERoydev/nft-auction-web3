@@ -10,10 +10,11 @@ import Company from "./pages/Company";
 import ProfileMenu from "./pages/ProfileMenu";
 import AdminPanel from "./pages/admin/AdminPanel";
 import Auction from "./pages/Auction";
-import { WalletProvider } from "./context/WalletContext";
+import { WalletProvider } from "./context/Wallet/WalletContext";
 import AuthenticatedRoute from "./guards/AuthenticatedRoute";
 import { useState } from "react";
 import ErrorMessageComponent from "./components/reusable/ErrorMessageComponent";
+import AdminRoute from "./guards/AdminGuard";
 
 function App() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -55,7 +56,11 @@ function App() {
               />
 
               {/* Admin Routes*/}
-              <Route path="/admin" element={<AdminPanel />} />
+              
+              <Route path="/admin" element={
+                  <AdminPanel />
+                } 
+              />
 
             </Routes>
           <BottomBackgroundBlur />

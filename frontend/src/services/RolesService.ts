@@ -33,3 +33,32 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
         throw error
     }
 }
+
+export const fetchRolesFromSmartContract = async (account: string) => {
+    if (typeof window.ethereum === 'undefined') {
+      throw new Error('Metamask is not installed.');
+    }
+  
+    try {
+      const isAdmin = await contract.isAdmin(account);
+      const isWhitelistManager = await contract.isWhitelistManager(account);
+      const isSalesPriceManager = await contract.isSalesPriceManager(account);
+      const isPaymentTokensConfigurator = await contract.isPaymentTokensConfigurator(account);
+  
+      return {
+        isAdmin,
+        isWhitelistManager,
+        isSalesPriceManager,
+        isPaymentTokensConfigurator,
+      };
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+      return {
+        isAdmin: false,
+        isWhitelistManager: false,
+        isSalesPriceManager: false,
+        isPaymentTokensConfigurator: false,
+      };
+    }
+  };
+  

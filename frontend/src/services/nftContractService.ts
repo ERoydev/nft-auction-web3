@@ -19,12 +19,21 @@ export async function getNFTsByOwner(ownerAddress: string) {
     // Get all token IDs
     // Fetch each tokenId to get his URL
     try {
-        console.log("====trying here");
         const tokenIds = await contract.tokensOfOwner(ownerAddress);
-        console.log("------TOKEN IDS", tokenIds);
+
+        // TODO: There could be a problem if tokenID is too large for JavaScript numbers when i convert them to number(token) array
+        const tokenIdsArray = tokenIds.map((token: any) => Number(token));
+        return tokenIdsArray;
     } catch (error) {
         console.error("Error fetching NFTs:", error);
     }
+}
 
-
+export async function getTokenURLFromTokenId(tokenId: number) {
+    try {
+        const tokenURL = await contract.getTokenURL(tokenId);
+        return tokenURL;
+    } catch (error) {
+        console.error("Error fetching token URL:", error);
+    }
 }

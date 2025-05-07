@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useWallet } from "../../context/WalletContext"; // Import useWallet hook for context
+import { useWallet } from "../../context/Wallet/WalletContext"; // Import useWallet hook for context
 
 const ConnectWallet = () => {
   const [hovering, setHovering] = useState(false); // State to track hover
