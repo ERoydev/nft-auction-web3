@@ -11,8 +11,13 @@ import ProfileMenu from "./pages/ProfileMenu";
 import AdminPanel from "./pages/admin/AdminPanel";
 import Auction from "./pages/Auction";
 import { WalletProvider } from "./context/WalletContext";
+import AuthenticatedRoute from "./guards/AuthenticatedRoute";
+import { useState } from "react";
+import ErrorMessageComponent from "./components/reusable/ErrorMessageComponent";
 
 function App() {
+  const [errorMessage, setErrorMessage] = useState("");
+
   return (
     <div className="bg-white">
       <div className="relative isolate px-6 pt-14 lg:px-8">
@@ -20,17 +25,44 @@ function App() {
           <TopBackgroundBlur />
           <Header />
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/marketplace" element={<NFTMarketplace title={"NFT Marketplace"} />} />
-              <Route path="/mintnft" element={<MintNFT />} />
               <Route path="/company" element={<Company />} />
-              <Route path="/auction" element={<Auction />} />
-              <Route path="/profilemenu" element={<ProfileMenu />} />
+
+              {/* Routes for Logged-In Wallets */}
+              <Route
+                path="/auction"
+                element={
+                  <AuthenticatedRoute setErrorMessage={setErrorMessage}>
+                    <Auction />
+                  </AuthenticatedRoute>
+                }
+              />
+
+              <Route path="/mintnft" element={
+                <AuthenticatedRoute setErrorMessage={setErrorMessage}>
+                  <MintNFT />
+                </AuthenticatedRoute>
+                } 
+              />
+
+              <Route path="/profilemenu" element={
+                <AuthenticatedRoute setErrorMessage={setErrorMessage}>
+                  <ProfileMenu />
+                </AuthenticatedRoute>
+                } 
+              />
+
+              {/* Admin Routes*/}
               <Route path="/admin" element={<AdminPanel />} />
+
             </Routes>
           <BottomBackgroundBlur />
         </WalletProvider>
       </div>
+
+      {errorMessage && <ErrorMessageComponent message={errorMessage} />}
       <Footer />
     </div>
   );

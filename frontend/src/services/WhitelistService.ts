@@ -18,13 +18,8 @@ export async function getMerkleProof(userAddress: string) {
         // Its an array of hex strings
         
         const proofHex = response.data.proof;
-
-        if (!Array.isArray(proofHex)) {
-            throw new Error("Invalid Merkle proof response");
-        }
-
-        // Convert hex strings to bytes32 that smart contract expects
-        const proofBytes32 = proofHex.map(p => arrayify(p));
+        const proofBytes32 = proofHex.map((hexString: string) => arrayify(hexString));
+   
         return proofBytes32;
 
     } catch (error) {

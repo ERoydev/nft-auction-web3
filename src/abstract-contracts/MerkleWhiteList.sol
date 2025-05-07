@@ -26,6 +26,11 @@ abstract contract MerkleWhiteList {
         return MerkleProof.verify(merkleProof, merkleRoot, leaf); 
     }
 
+    /// @dev - Used only for development to fix my errors and see how it works!
+    function verifyProofPublic(address account, bytes32[] calldata merkleProof) public view returns(bool) {
+        return verifyProof(account, merkleProof);
+    }
+
     /// @dev - Admin just updates the root without any checks.
     function _setMerkleRoot(bytes32 newRoot) internal {
         merkleRoot = newRoot;

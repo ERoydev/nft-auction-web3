@@ -1,42 +1,44 @@
 const express = require('express');
 const { MerkleTree } = require('merkletreejs');
 const keccak256 = require('keccak256');
-const app = express();
-const port = 3000;
+const { solidityPackedKeccak256, getAddress } = require('ethers');
 const fs = require('fs');
 const cors = require('cors');
 
+const app = express();
+const port = 3000;
 
 // Allow all origins (open CORS)
 app.use(cors());
 app.use(express.json());
 
-
-const whitelistFilePath= './whitelist.json';
+const whitelistFilePath = './whitelist.json';
 
 const getWhitelist = () => {
     try {
-      const data = fs.readFileSync(whitelistFilePath, 'utf8');
-      return JSON.parse(data);
+        const data = fs.readFileSync(whitelistFilePath, 'utf8');
+        return JSON.parse(data);
     } catch (err) {
-      console.error('Error reading whitelist:', err);
-      return [];
+        console.error('Error reading whitelist:', err);
+        return [];
     }
 };
 
 const generateMerkleTree = (addresses) => {
-    const leaves = addresses.map(addr => keccak256(addr)); 
+    const leaves = addresses.map(addr =>
+        Buffer.from(solidityPackedKeccak256(['address'], [getAddress(addr)]).slice(2), 'hex')
+    );
     const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
     const merkleRoot = '0x' + tree.getRoot().toString('hex');
     return { tree, merkleRoot };
 };
 
-const { tree, merkleRoot } = generateMerkleTree(getWhitelist());
+let { tree, merkleRoot } = generateMerkleTree(getWhitelist());
 
 // Route to get the Merkle root
 app.get('/getMerkleRoot', (req, res) => {
-    const { merkleRoot } = generateMerkleTree(getWhitelist()); 
-    res.json({ merkleRoot: merkleRoot });
+    const { merkleRoot } = generateMerkleTree(getWhitelist());
+    res.json({ merkleRoot });
 });
 
 // Route to get the Merkle proof for an address
@@ -46,20 +48,16 @@ app.post('/getProof', (req, res) => {
         return res.status(400).send('Address is required');
     }
 
-    const leaf = keccak256(address); // Hash the address
-    const proof = tree.getProof(leaf).map(x => '0x' + x.data.toString('hex')); // Generate proof with '0x' prefix for hex strings
+    const leaf = Buffer.from(solidityPackedKeccak256(['address'], [getAddress(address)]).slice(2), 'hex');
+    const proof = tree.getProof(leaf).map(x => '0x' + x.data.toString('hex'));
 
     res.json({ proof });
 });
 
-
+// Add address to whitelist
 app.post('/addAddress', (req, res) => {
     const { address, senderRole } = req.body;
 
-    // senderRole is used to check if the sender is an admin or not
-    // in this case sender role should be whitelistManager
-
-    console.log('Received role', senderRole);
     if (!address) {
         return res.status(400).send('Address is required');
     }
@@ -74,7 +72,9 @@ app.post('/addAddress', (req, res) => {
 
     try {
         fs.writeFileSync(whitelistFilePath, JSON.stringify(whitelist, null, 2));
-        const { tree, merkleRoot } = generateMerkleTree(whitelist);
+        const result = generateMerkleTree(whitelist);
+        tree = result.tree;
+        merkleRoot = result.merkleRoot;
         return res.json({ message: 'Address added successfully', merkleRoot });
     } catch (error) {
         console.error('Error writing to whitelist:', error);
@@ -82,8 +82,9 @@ app.post('/addAddress', (req, res) => {
     }
 });
 
+// Remove address from whitelist
 app.post('/removeAddress', (req, res) => {
-    const {address} = req.body;
+    const { address } = req.body;
 
     if (!address) {
         return res.status(400).send('Address is required');
@@ -99,14 +100,15 @@ app.post('/removeAddress', (req, res) => {
 
     try {
         fs.writeFileSync(whitelistFilePath, JSON.stringify(updatedWhitelist, null, 2));
-        const { tree, merkleRoot } = generateMerkleTree(updatedWhitelist);
+        const result = generateMerkleTree(updatedWhitelist);
+        tree = result.tree;
+        merkleRoot = result.merkleRoot;
         return res.json({ message: 'Address removed successfully', merkleRoot });
-
     } catch (error) {
         console.error('Error writing to whitelist:', error);
         return res.status(500).send('Error writing to whitelist');
-    }   
-})
+    }
+});
 
 // Start the server
 app.listen(port, () => {

@@ -1,11 +1,10 @@
 import { provider, contract } from "../utils/contract";
 
 
-export async function mintNFT(tokenMetadataURL: string, merkleProof: string[]) {
+export async function mintNFT(tokenMetadataURL: string, merkleProof: Uint8Array[]) {
     const signer = await provider.getSigner();
     const contractWithSigner = contract.connect(signer);
 
-    // console.log('MERKLE RPPOF', merkleProof);
     try {
         const tx = await contractWithSigner.safeMint(tokenMetadataURL, merkleProof);
         // TODO: Find a way to extend the ethers.BaseContract to include the safeMint method or find better way
