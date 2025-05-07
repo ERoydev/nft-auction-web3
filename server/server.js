@@ -54,8 +54,12 @@ app.post('/getProof', (req, res) => {
 
 
 app.post('/addAddress', (req, res) => {
-    const { address } = req.body;
+    const { address, senderRole } = req.body;
 
+    // senderRole is used to check if the sender is an admin or not
+    // in this case sender role should be whitelistManager
+
+    console.log('Received role', senderRole);
     if (!address) {
         return res.status(400).send('Address is required');
     }

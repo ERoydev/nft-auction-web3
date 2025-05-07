@@ -23,6 +23,32 @@ abstract contract RoleManager is AccessControl {
     event PaymentTokensConfiguratorAdded(address account);
     event PaymentTokensConfiguratorRemoved(address account);
 
+    // =============================================== Ownership Modifiers
+    modifier onlyOwner() {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "user not an admin");
+        _;
+    }
+
+    modifier allowedRole(bytes32 role) {
+        require(hasRole(role, msg.sender), "doesn't have specified role");
+        _;
+    }
+
+    modifier onlyWhitelistManager() {
+        require(hasRole(WHITELIST_MANAGER, msg.sender), "not a whitelist manager");
+        _;
+    }
+
+    modifier OnlyAdminOrWhitelistedManager() {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(WHITELIST_MANAGER, msg.sender),
+        "Not an admin or a whitelist manager"
+        );
+        _;
+    }
+    // =============================================== Ownership Modifiers
+    
+
+    // =============================================== Role Assignment Instructions Bellow
     function isAdmin(address account) public view returns (bool) {
         return hasRole(DEFAULT_ADMIN_ROLE, account);
     }

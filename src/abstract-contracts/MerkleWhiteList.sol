@@ -14,6 +14,11 @@ abstract contract MerkleWhiteList {
     bytes32 public merkleRoot;  
 
     event MerkleRootUpdated(bytes32 newMerkleRoot);
+    
+    modifier isWhitelisted(bytes32[] calldata merkleProof) {
+        require(MerkleWhiteList.verifyProof(msg.sender, merkleProof), "this account is not whitelisted");
+        _;
+    }
 
     /// @dev - User will get the proof for his account from backend/server and then reconstruct the root and verify it on-chain
     function verifyProof(address account, bytes32[] calldata merkleProof) internal view returns (bool) {

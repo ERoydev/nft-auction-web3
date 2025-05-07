@@ -2,6 +2,14 @@ import React, { createContext, useState, useContext, ReactNode, useEffect } from
 import { provider, contract} from "../utils/contract";
 import { ethers } from 'ethers';
 
+
+/*
+Keeps track of the current wallet address, connect, disconnect, and roles of the user:
+  - Added functionality to fetch roles from the smart contract.
+  - Added functionality to listen for account changes in MetaMask.
+*/
+
+
 interface WalletContextType {
   currentAccount: string | null;
   connectWallet: () => Promise<void>;
@@ -115,7 +123,18 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
   }
 
   return (
-    <WalletContext.Provider value={{ currentAccount, connectWallet, disconnectWallet }}>
+    <WalletContext.Provider 
+    value={{
+        currentAccount, 
+        connectWallet, 
+        disconnectWallet,
+        isAdmin: roles.isAdmin,
+        isWhitelistManager: roles.isWhitelistManager,
+        isSalesPriceManager: roles.isSalesPriceManager,
+        isPaymentTokensConfigurator: roles.isPaymentTokensConfigurator
+      }}
+    
+    >
       {children}
     </WalletContext.Provider>
   );

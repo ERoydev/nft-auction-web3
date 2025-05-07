@@ -33,13 +33,14 @@ export async function getMerkleProof(userAddress: string) {
     }
 }
 
-export async function addToWhitelist(walletAddress: string) {
+export async function addToWhitelist(walletAddress: string, senderRole: string) {
     const wallet = walletAddress.trim();
 
     try {
         // Add whitelist to the json file on the server
         const response = await axios.post(`${SERVER_URL}/addAddress`, {
             address: wallet,
+            senderRole: senderRole,
         });
         
         // Update the merkle root in the smart contract
@@ -48,17 +49,21 @@ export async function addToWhitelist(walletAddress: string) {
         return response.data;
     } catch (error) {
         console.error("Error adding to whitelist:", error);
+        if (error.response.data == "Address already exists in the whitelist") {
+            alert("Address already exists in the whitelist");
+        }
         throw error;
     }
 }
 
-export async function removeFromWhitelist(walletAddress: string) {
+export async function removeFromWhitelist(walletAddress: string, senderRole: string) {
     const wallet = walletAddress.trim();
 
     try {
         // Remove whitelist from the json file on the server
         const response = await axios.post(`${SERVER_URL}/removeAddress`, {
             address: wallet,
+            senderRole: senderRole,
         });
 
         // Update the merkle root in the smart contract
@@ -67,13 +72,16 @@ export async function removeFromWhitelist(walletAddress: string) {
         return response.data;
     } catch (error) {
         console.error("Error removing from whitelist:", error);
+        if (error.response.data == "Address does not exist in the whitelist") {
+            alert("Address does not exist in the whitelist");
+        }
         throw error;
     }
 }
 
 
 export async function updateTheRoot() {
-    // TODO: Implement this function, but have in mind that only Whitelist Manager should be able to do this
+    // Only Default admin and Whitelist Manager can update the root
     try {
         const response = await axios.get(`${SERVER_URL}/getMerkleRoot`);
 

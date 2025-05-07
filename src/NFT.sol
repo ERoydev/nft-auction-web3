@@ -41,36 +41,13 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender); // contract creator is DEFAULT_ADMIN
     }
 
-    modifier onlyOwner() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "user not an admin");
-        _;
-    }
-
-    modifier allowedRole(bytes32 role) {
-        require(hasRole(role, msg.sender), "doesn't have specified role");
-        _;
-    }
-
     // =============================================== Merkle Root Functions
-
-    modifier onlyWhitelistManager() {
-        require(hasRole(WHITELIST_MANAGER, msg.sender), "not a whitelist manager");
-        _;
-    }
-
-    modifier isWhitelisted(bytes32[] calldata merkleProof) {
-        require(MerkleWhiteList.verifyProof(msg.sender, merkleProof), "this account is not whitelisted");
-        _;
-    }
-
-
-    function setMerkleRoot(bytes32 newRoot) external onlyWhitelistManager {
+    function setMerkleRoot(bytes32 newRoot) external OnlyAdminOrWhitelistedManager {
         MerkleWhiteList._setMerkleRoot(newRoot);
     }
-
     // =============================================== Merkle Root Functions
 
-    // =============================================== TOKENS
+    // =============================================== TOKENS Functions
 
     /// @notice User who mints his token is the msg.sender so he mints to himself
     function safeMint(string calldata tokenMetadataURL, bytes32[] calldata merkleProof) public isWhitelisted(merkleProof) {
@@ -106,7 +83,7 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
     }
 
 
-    // =============================================== TOKENS
+    // =============================================== TOKENS Functions
 
     function supportsInterface(bytes4 interfaceId)
         public
