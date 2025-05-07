@@ -48,6 +48,7 @@ export async function removeFromWhitelist(walletAddress: string) {
     }
 }
 
-export async function updateTheRoot() {
-    
+
+export async function updateTheRoot(newRoot: string) {
+    // TODO: Implement this function, but have in mind that only Whitelist Manager should be able to do this
 }

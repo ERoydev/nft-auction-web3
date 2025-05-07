@@ -8,7 +8,7 @@ import Footer from "./components/common/Footer";
 import Home from "./pages/Home";
 import Company from "./pages/Company";
 import ProfileMenu from "./pages/ProfileMenu";
-import AdminPanel from "./pages/AdminPanel";
+import AdminPanel from "./pages/admin/AdminPanel";
 import Auction from "./pages/Auction";
 
 function App() {

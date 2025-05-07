@@ -19,7 +19,7 @@ export default function MintNFT() {
     const file = e.target.files?.[0];
     if (file) {
       setImage(file);
-      setPreview(URL.createObjectURL(file)); // Generate a preview URL for the uploaded image
+      setPreview(URL.createObjectURL(file)); 
     }
   };
 
@@ -40,7 +40,6 @@ export default function MintNFT() {
             return;
         }
 
-        // Upload the image and metadata to Pinata and get the TokenURI holding all the metadata of this NFT
         const { metadataURL } = await uploadFileToPinata(
           name,
           description,
@@ -49,7 +48,7 @@ export default function MintNFT() {
 
         const userAddress = await getUserAddress();
         const merkleProof = await getMerkleProof(userAddress);
-        mintNFT(metadataURL, merkleProof.proof); // Min the nft passing merkleProof
+        mintNFT(metadataURL, merkleProof.proof);
 
         alert("NFT minted successfully!");
     } catch (error) {
@@ -59,13 +58,12 @@ export default function MintNFT() {
         setIsMinting(false);
     }
     
-    // Reset form
     setName("");
     setDescription("");
     setImage(null);
     setPreview(null);
 
-    navigate("/"); // Redirect to home page after minting
+    navigate("/"); 
   };
 
   return (
