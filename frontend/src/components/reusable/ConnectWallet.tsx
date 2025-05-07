@@ -1,17 +1,16 @@
 import { useState } from "react";
-import { connectWallet, disconnectWallet } from "../../services/walletService";
 import { useNavigate } from "react-router-dom";
+import { useWallet } from "../../context/WalletContext"; // Import useWallet hook for context
 
-export default function ConnectWallet() {
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+const ConnectWallet = () => {
   const [hovering, setHovering] = useState(false); // State to track hover
+  const { currentAccount, connectWallet, disconnectWallet } = useWallet(); // Access the context
   const navigate = useNavigate();
-
+  
   const handleConnectWallet = async () => {
     if (typeof window.ethereum !== "undefined") {
-      const address = await connectWallet();
+      const address = await connectWallet(); // Call the connectWallet function from context
       if (address) {
-        setWalletAddress(address);
         window.localStorage.setItem("walletConnected", "true"); // Optional: Save connection state
       }
     } else {
@@ -20,9 +19,8 @@ export default function ConnectWallet() {
   };
 
   const handleDisconnectWallet = () => {
-    const success = disconnectWallet();
+    const success = disconnectWallet(); // Call the disconnectWallet function from context
     if (success) {
-      setWalletAddress(null); // Clear the wallet address from state
       window.location.reload(); // Force a page reload to reset the provider state
     }
   };
@@ -34,7 +32,7 @@ export default function ConnectWallet() {
   return (
     <div className="flex items-center gap-4">
       {/* User Settings Icon (Only visible when wallet is connected) */}
-      {walletAddress && (
+      {currentAccount && (
         <button
           onClick={handleUserSettings}
           className="text-gray-700 hover:text-indigo-600 hover:scale-110 transition hover:cursor-pointer"
@@ -51,7 +49,7 @@ export default function ConnectWallet() {
       )}
 
       {/* Wallet Address */}
-      {walletAddress ? (
+      {currentAccount ? (
         <div
           className="flex items-center gap-2 bg-green-500 text-white rounded-full px-4 py-2 shadow-md cursor-pointer transition-all duration-300 hover:bg-red-500"
           onClick={handleDisconnectWallet}
@@ -61,7 +59,7 @@ export default function ConnectWallet() {
           <p className="text-sm font-medium">
             {hovering
               ? "Disconnect Wallet" // Show this text on hover
-              : `${walletAddress.slice(0, 8)}...${walletAddress.slice(-4)}`} {/* Show wallet address */}
+              : `${currentAccount.slice(0, 8)}...${currentAccount.slice(-4)}`} {/* Show wallet address */}
           </p>
         </div>
       ) : (
@@ -74,4 +72,6 @@ export default function ConnectWallet() {
       )}
     </div>
   );
-}
+};
+
+export default ConnectWallet;

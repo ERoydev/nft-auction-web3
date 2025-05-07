@@ -43,13 +43,15 @@ app.get('/getMerkleRoot', (req, res) => {
 app.post('/getProof', (req, res) => {
     const { address } = req.body;
     if (!address) {
-    return res.status(400).send('Address is required');
+        return res.status(400).send('Address is required');
     }
 
     const leaf = keccak256(address); // Hash the address
-    const proof = tree.getProof(leaf).map(x => x.data.toString('hex')); // Generate proof
+    const proof = tree.getProof(leaf).map(x => '0x' + x.data.toString('hex')); // Generate proof with '0x' prefix for hex strings
+
     res.json({ proof });
 });
+
 
 app.post('/addAddress', (req, res) => {
     const { address } = req.body;

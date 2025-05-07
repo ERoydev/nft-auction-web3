@@ -2,6 +2,7 @@ import { useState } from "react";
 import ConnectWallet from "../reusable/ConnectWallet";
 import Navlinks from "../reusable/Navlinks";
 import { Link} from "react-router-dom";
+import { useWallet } from "../../context/WalletContext";
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

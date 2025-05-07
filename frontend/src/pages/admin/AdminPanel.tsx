@@ -25,6 +25,8 @@ export default function AdminPanel() {
         const newRoot = await addToWhitelist(whitelistAddress); // Pass userAddress as sender
         setWhitelistAddress("");
         console.log("Added to whitelist:", newRoot);
+
+        
     } catch (error) {
         console.error("Error adding to whitelist:", error);
     }

@@ -47,8 +47,9 @@ export default function MintNFT() {
         );
 
         const userAddress = await getUserAddress();
+        console.log("User Address:", userAddress);
         const merkleProof = await getMerkleProof(userAddress);
-        mintNFT(metadataURL, merkleProof.proof);
+        mintNFT(metadataURL, merkleProof);
 
         alert("NFT minted successfully!");
     } catch (error) {
