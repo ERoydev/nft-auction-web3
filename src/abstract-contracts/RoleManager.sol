@@ -10,11 +10,13 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  * - SALES_PRICE_MANAGER
  * - PAYMENT_TOKENS_CONFIGURATOR
  * This gives me ready to use methods like: _grantRole(), hasRole(), _revokeRole() and modifier onlyRole() out of the box.
+ * 
+ * The NFT Collection that is on the Marketplace sold by us is going to be minted from DEFAULT_ADMIN
  */
 abstract contract RoleManager is AccessControl {
-    bytes32 public constant WHITELIST_MANAGER = keccak256("WHITELIST_MANAGER");
-    bytes32 public constant SALES_PRICE_MANAGER = keccak256("SALES_PRICE_MANAGER");
-    bytes32 public constant PAYMENT_TOKENS_CONFIGURATOR = keccak256("PAYMENT_TOKENS_CONFIGURATOR");
+    bytes32 public constant WHITELIST_MANAGER = keccak256("WHITELIST_MANAGER"); // Whitelist allows who can mint/purchase nft's
+    bytes32 public constant SALES_PRICE_MANAGER = keccak256("SALES_PRICE_MANAGER"); // Markeplace NFT price management
+    bytes32 public constant PAYMENT_TOKENS_CONFIGURATOR = keccak256("PAYMENT_TOKENS_CONFIGURATOR"); // Configure the supported payment tokens -> (USDC Chainlin Oracle Logic)
 
     event WhitelistManagerAdded(address account);
     event WhitelistManagerRemoved(address account);
