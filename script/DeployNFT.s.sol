@@ -20,7 +20,7 @@ contract DeployNFT is Script {
         // Deploy the NFT contract
         NFT nft = new NFT(address(erc20Mock));
 
-        nft.updatePriceFeedAddress(address(chainlinkPriceFeed));
+        nft.updatePriceFeedAddress(address(chainlinkPriceFeed)); // To setup the deployed Chainlink Price Feed
 
         console.log('Deployed NFT contract with an address: ', address(nft));
 

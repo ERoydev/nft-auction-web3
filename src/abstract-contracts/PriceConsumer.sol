@@ -13,6 +13,7 @@ abstract contract PriceConsumer {
 
     event ChainlinkPriceFeedIsUpdated(address indexed updatedBy, address newPriceFeed);
     event DefaultChainlinkPriceFeed();
+    event USDCTokenAddressChanged(address indexed updatedBy, address indexed newTokenAddress);
 
     // Function to get the latest ETH/USD price from the Chainlink feed
     function _getLatestPrice() internal view returns (int) {
@@ -45,11 +46,18 @@ abstract contract PriceConsumer {
     }
 
     function _updatePriceFeedAddress(address _newPriceFeedAddress) internal {
-        require(_newPriceFeedAddress != address(priceFeed), "Price Feed address is the same");
+        require(_newPriceFeedAddress != address(priceFeed), "Price Feed address is the same as the current active one");
         customChainlinkPriceFeedAddress = _newPriceFeedAddress;
         priceFeed = AggregatorV3Interface(_newPriceFeedAddress);
 
         emit ChainlinkPriceFeedIsUpdated(msg.sender, _newPriceFeedAddress);
+    }
+
+    function _updateUsdcTokenAddress(address _newUsdcTokenAddress) internal {
+        require(_newUsdcTokenAddress != address(usdcToken), "USDC token address is the same as the current active one");
+        usdcToken = _newUsdcTokenAddress;
+        
+        emit USDCTokenAddressChanged(msg.sender, _newUsdcTokenAddress);
     }
 
     function _default() internal {

@@ -51,7 +51,6 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
     ) ERC721("MyToken", "MTK") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender); // contract creator is DEFAULT_ADMIN
         PriceConsumer.usdcToken = _usdcTokenContractAddress;
-        PriceConsumer.priceFeed = AggregatorV3Interface(PriceConsumer.DEFAULT_CHAINLINK_SEPOLIA_ETH_USD_CONTRACT);
     }
 
     // ================================================ Price and Payment Tokens this requires me to deploy on a TESTNET
@@ -62,6 +61,10 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
 
     function updatePriceFeedAddress(address _newPriceFeedAddress) external OnlyAdminOrPaymentTokensConfigurator {
         PriceConsumer._updatePriceFeedAddress(_newPriceFeedAddress);
+    }
+
+    function updateUsdcTokenAddress(address _newTokenAddress) external OnlyAdminOrPaymentTokensConfigurator {
+        PriceConsumer._updateUsdcTokenAddress(_newTokenAddress);
     }
 
     // ================================================ Price and Payment Tokens
