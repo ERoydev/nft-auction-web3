@@ -32,6 +32,17 @@ contract EnglishAuction {
     event AuctionEnded(address winner, uint256 amount);
     event AuctionExtendedBy5Minutes(uint256 indexed _tokenId, address indexed seller);
 
+       // Reentrancy guard state variable
+    bool private locked;
+
+    // Modifier to prevent reentrancy
+    modifier nonReentrant() {
+        require(!locked, "ReentrancyGuard: reentrant call");
+        locked = true;
+        _;
+        locked = false;
+    }
+
     function createAuction(
         address _nftAddress,
         uint256 _nftTokenId,
@@ -56,7 +67,7 @@ contract EnglishAuction {
         return auctionId;
     }
 
-    function placeBid(uint256 _auctionId) external payable {
+    function placeBid(uint256 _auctionId) external payable nonReentrant {
         require(_auctionId < nextAuctionId, "Auction with this id doesn't exist");
         
         Auction storage auction = auctions[_auctionId];
@@ -81,7 +92,7 @@ contract EnglishAuction {
         emit NewBid(auction.highestBidder, auction.highestBid);
     }
 
-    function endAuction(uint256 _auctionId) external {
+    function endAuction(uint256 _auctionId) external nonReentrant {
         require(_auctionId < nextAuctionId, "Auction with this id doesn't exist");
         Auction storage auction = auctions[_auctionId];
 
@@ -103,7 +114,7 @@ contract EnglishAuction {
         emit AuctionEnded(auction.highestBidder, auction.highestBid);
     }
 
-    function withdraw(uint256 _auctionId) external {
+    function withdraw(uint256 _auctionId) external nonReentrant {
         require(_auctionId < nextAuctionId, "Auction with this id doesn't exist");
         Auction storage auction = auctions[_auctionId];
 
