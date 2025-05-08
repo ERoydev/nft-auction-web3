@@ -18,24 +18,14 @@ abstract contract RoleManager is AccessControl {
     bytes32 public constant SALES_PRICE_MANAGER = keccak256("SALES_PRICE_MANAGER"); // Markeplace NFT price management
     bytes32 public constant PAYMENT_TOKENS_CONFIGURATOR = keccak256("PAYMENT_TOKENS_CONFIGURATOR"); // Configure the supported payment tokens -> (USDC Chainlin Oracle Logic)
 
-    event WhitelistManagerAdded(address account);
-    event WhitelistManagerRemoved(address account);
-    event SalesPriceManagerAdded(address account);
-    event SalesPriceManagerRemoved(address account);
-    event PaymentTokensConfiguratorAdded(address account);
-    event PaymentTokensConfiguratorRemoved(address account);
+    event WhitelistManagerAdded(address indexed account);
+    event WhitelistManagerRemoved(address indexed account);
+    event SalesPriceManagerAdded(address indexed account);
+    event SalesPriceManagerRemoved(address indexed account);
+    event PaymentTokensConfiguratorAdded(address indexed account);
+    event PaymentTokensConfiguratorRemoved(address indexed account);
 
     // =============================================== Ownership Modifiers
-    modifier onlyOwner() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "user not an admin");
-        _;
-    }
-
-    modifier allowedRole(bytes32 role) {
-        require(hasRole(role, msg.sender), "doesn't have specified role");
-        _;
-    }
-
     modifier onlyWhitelistManager() {
         require(hasRole(WHITELIST_MANAGER, msg.sender), "not a whitelist manager");
         _;
@@ -44,6 +34,20 @@ abstract contract RoleManager is AccessControl {
     modifier OnlyAdminOrWhitelistedManager() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(WHITELIST_MANAGER, msg.sender),
         "Not an admin or a whitelist manager"
+        );
+        _;
+    }
+
+    modifier OnlyAdminOrPaymentTokensConfigurator() {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(PAYMENT_TOKENS_CONFIGURATOR, msg.sender),
+        "Not an admin or Payment tokens configurator"
+        );
+        _;
+    }
+
+    modifier OnlyAdminOrSalesPriceManager() {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(SALES_PRICE_MANAGER, msg.sender),
+        "Not an admin or Saler price manager"
         );
         _;
     }

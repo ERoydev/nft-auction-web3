@@ -6,6 +6,13 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import {RoleManager} from "./abstract-contracts/RoleManager.sol";
 import {MerkleWhiteList} from "./abstract-contracts/MerkleWhiteList.sol";
+import {ERC721Consecutive} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Consecutive.sol";
+
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {PriceConsumer} from "./abstract-contracts/PriceConsumer.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
+import {ReentrancyGuard} from "../src/utils/ReentrancyGuard.sol";
+
 
 
 /*
@@ -23,55 +30,43 @@ Core Logic:
 */
 
 
-interface AggregatorV3Interface {
-    function latestRoundData()
-        external
-        view
-        returns (
-            uint80 roundID,
-            int256 answer,
-            uint256 startedAt,
-            uint256 updatedAt,
-            uint80 answeredInRound
-        );
-}
-
 
 /// @title Nft Contract
 /// @author E.Roydev
 /// @notice Used to mint nfts
-contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
+contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsumer, ReentrancyGuard  {
     /// @dev links a token's unique tokenId to its metadata URL stored on nft.storage service
-    mapping(uint256 => string) private _tokenURIs;
     uint256 private _currentTokenId;
     
     /// @dev track the tokens each address owns
     mapping(address => uint256[]) private _ownedTokens;
-    mapping(uint256 => uint256) private _ownedTokensIndex; // inside the array of tokens that address holds gives the index of the specific tokenId
+    mapping(uint256 => uint256) private _ownedTokensIndex; // inside the array of tokens that address holds gives the index of the specific tokenId (tokenId => index)
+    mapping(uint256 => TokenInfo) public tokenInfo; // tokenId => TokenInfo to get metadataURL
 
     event TokenMinted(address indexed user, uint256 indexed tokenId);
+    event TokenPurchased(address indexed seller, address indexed receiver, uint256 indexed tokenId);
+
+    constructor(
+        address _usdcTokenContractAddress
+    ) ERC721("MyToken", "MTK") {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender); // contract creator is DEFAULT_ADMIN
+        PriceConsumer.usdcToken = _usdcTokenContractAddress;
+        PriceConsumer.priceFeed = AggregatorV3Interface(PriceConsumer.DEFAULT_CHAINLINK_SEPOLIA_ETH_USD_CONTRACT);
+    }
 
     // ================================================ Price and Payment Tokens this requires me to deploy on a TESTNET
-    address public priceFeed = 0x5F4eC3DF9cBd43714b98F28De5C6F1b6C6a1665d; // Rinkeby ETH/USD Feed
-    address public usdcToken; // USDC Token contract
 
-    // TODO: Finish the payment logic, you should deploy to Sepolia and test the payment logic
-    function setPriceFeed(address _feed) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        priceFeed = _feed;
+    function defaultPriceFeed() internal OnlyAdminOrPaymentTokensConfigurator {
+        PriceConsumer._default();
     }
 
-
-    function getLatestETHPrice() public view returns (uint256) {
-        (, int256 price,,,) = AggregatorV3Interface(priceFeed).latestRoundData();
-        require(price > 0, "Invalid price");
-        return uint256(price); // e.g., 3000 * 1e8
+    function updatePriceFeedAddress(address _newPriceFeedAddress) external OnlyAdminOrPaymentTokensConfigurator {
+        PriceConsumer._updatePriceFeedAddress(_newPriceFeedAddress);
     }
+
     // ================================================ Price and Payment Tokens
 
 
-    constructor() ERC721("MyToken", "MTK") {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender); // contract creator is DEFAULT_ADMIN
-    }
 
     // =============================================== Merkle Root Functions
     function setMerkleRoot(bytes32 newRoot) external OnlyAdminOrWhitelistedManager {
@@ -81,31 +76,78 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
 
     // =============================================== TOKENS Functions
 
+    struct TokenInfo {
+        uint256 priceInUSDC;
+        address owner;
+        string metadataURI;
+    }
+
     /// @notice User who mints his token is the msg.sender so he mints to himself
     function safeMint(
             string calldata tokenMetadataURL, 
             bytes32[] calldata merkleProof,
-            bool payWithETH, 
-            bool isPaid 
-        ) public isWhitelisted(merkleProof) {
+            uint256 _priceInUSDC
+        ) external isWhitelisted(merkleProof) {
+
         // TODO: I don't have good error handling when user is not Whitelisted to provide a good frontend response for this problem. Currently i give general error that something went wrong.
         uint256 tokenId = _currentTokenId;
         require(bytes(tokenMetadataURL).length > 0, "Invalid metadata URL");
+        _currentTokenId ++;
 
-        if (isPaid) {
-            // Should be paid with USDC or ETH
+        _safeMint(msg.sender, tokenId);
+
+        // before transfer 
+        _beforeTokenTransfer(address(0), msg.sender, tokenId);
+
+        tokenInfo[tokenId] = TokenInfo({
+            priceInUSDC: _priceInUSDC,
+            owner: msg.sender,
+            metadataURI: tokenMetadataURL
+        });
+
+        emit TokenMinted(msg.sender, tokenId);
+    }
+
+    function purchaseNFT(
+            uint256 _tokenId, 
+            bool payWithETH, 
+            bytes32[] calldata merkleProof
+        ) external payable nonReentrant isWhitelisted(merkleProof) {
+            
+        TokenInfo memory info = tokenInfo[_tokenId];
+        require(info.owner != address(0), "Token not found");
+        require(ownerOf(_tokenId) == info.owner, "Already sold");
+
+        if (payWithETH) {
+            uint256 requiredETH = PriceConsumer.getETHPriceForUSDCAmount(info.priceInUSDC);
+            require(msg.value >= requiredETH, "Insufficient ETH");
+
+            payable(info.owner).transfer(requiredETH);
+
+            if (msg.value > requiredETH) {
+                payable(msg.sender).transfer(msg.value - requiredETH); // refund excess 
+            } 
         } else {
-            // Just mint the token, no payment required
-            _tokenURIs[tokenId] = tokenMetadataURL;
-            _currentTokenId ++;
-
-            _safeMint(msg.sender, tokenId);
-
-            // token tracking logic
-            _addTokenToOwnerEnumeration(msg.sender, tokenId);
-            emit TokenMinted(msg.sender, tokenId);
+            require(IERC20(usdcToken).transferFrom(msg.sender, info.owner, info.priceInUSDC), "USDC transfer failed");
         }
 
+        _beforeTokenTransfer(address(this), address(0), _tokenId);
+        _transfer(info.owner, msg.sender, _tokenId);
+        emit TokenPurchased(info.owner, msg.sender, _tokenId);
+    }
+
+    // Util function
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal  {
+        if (from != address(0)) {
+            _removeTokenFromOwnerEnumeration(from, tokenId);
+        }
+        if (to != address(0)) {
+            _addTokenToOwnerEnumeration(to, tokenId);
+        }
     }
 
     function _addTokenToOwnerEnumeration(address to, uint256 tokenId) internal {
@@ -115,16 +157,30 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList  {
         _ownedTokensIndex[tokenId] = length; 
     }
 
+    function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId) private {
+        uint256 lastTokenIndex = _ownedTokens[from].length - 1;
+        uint256 tokenIndex = _ownedTokensIndex[tokenId];
+
+        if (tokenIndex != lastTokenIndex) {
+            uint256 lastTokenId = _ownedTokens[from][lastTokenIndex];
+            // Switch the tokens position in the array to pop the last index in the end
+            _ownedTokens[from][tokenIndex] = lastTokenId;
+            _ownedTokensIndex[lastTokenId] = tokenIndex;
+        }
+
+        _ownedTokens[from].pop();
+        delete _ownedTokensIndex[tokenId];
+    }
+
     function tokensOfOwner(address owner) public view returns (uint256[] memory) {
         // TODO: Maybe i should make checks that only owner of the tokens can retrieve this information
         return _ownedTokens[owner];
     }
 
     function getTokenURL(uint256 tokenId) public view returns (string memory) {
-        require(tokenId <= _currentTokenId, "tokenId doesn't exist.");
-        return _tokenURIs[tokenId];
+        require(tokenInfo[tokenId].owner != address(0), "Token doesn't exist");
+        return tokenInfo[tokenId].metadataURI;
     }
-
 
     // =============================================== TOKENS Functions
 
