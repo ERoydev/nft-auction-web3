@@ -4,9 +4,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract EnglishAuction {
-    address public seller;
-    IERC721 public nft; // The ERC721(NFT) token being auctioned
-
     struct Auction {
         address seller;
         IERC721 nft;
@@ -62,7 +59,7 @@ contract EnglishAuction {
 
         auction.nft.transferFrom(auction.seller, address(this), _nftTokenId);
 
-        emit AuctionStarted(seller, _startPrice, auction.endTime);
+        emit AuctionStarted(auction.seller, _startPrice, auction.endTime);
         return auctionId;
     }
 
@@ -79,7 +76,7 @@ contract EnglishAuction {
         // Extend endTime logic here
         if (auction.endTime - block.timestamp <= 2 minutes) {
             auction.endTime += AUCTION_EXTEND_TIME;
-            emit AuctionExtendedBy5Minutes(_auctionId, seller);
+            emit AuctionExtendedBy5Minutes(_auctionId, auction.seller);
         }
 
         auction.highestBidder = msg.sender;
