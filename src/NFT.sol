@@ -134,11 +134,13 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
                 payable(msg.sender).transfer(msg.value - requiredETH); // refund excess 
             } 
         } else {
+            // if i use usdc i use ERC20 instructions to transfer tokens 
+            // Remember user must approve that address(this) can spend this USDC => Do it in the frontend
             require(IERC20(usdcToken).transferFrom(msg.sender, info.owner, info.priceInUSDC), "USDC transfer failed");
         } 
 
-        _beforeTokenTransfer(info.owner, address(0), _tokenId);
-        _transfer(info.owner, msg.sender, _tokenId);
+        _beforeTokenTransfer(info.owner, msg.sender, _tokenId);
+        _transfer(info.owner, msg.sender, _tokenId); // Transfers the nft from owner to the sender 
         emit TokenPurchased(info.owner, msg.sender, _tokenId);
     }
 

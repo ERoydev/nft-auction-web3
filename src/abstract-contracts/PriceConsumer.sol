@@ -62,7 +62,7 @@ abstract contract PriceConsumer {
     }
 
     function _updateUsdcTokenAddress(address _newUsdcTokenAddress) internal {
-        require(_newUsdcTokenAddress != address(usdcToken), "USDC token address is the same as the current active one");
+        require(_newUsdcTokenAddress != usdcToken, "USDC token address is the same as the current active one");
         usdcToken = _newUsdcTokenAddress;
         
         emit USDCTokenAddressChanged(msg.sender, _newUsdcTokenAddress);

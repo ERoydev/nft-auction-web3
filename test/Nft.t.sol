@@ -7,7 +7,13 @@ import { NFT} from "../src/NFT.sol";
 import "forge-std/console.sol";
 
 contract NFTTest is BaseNFTTest {
-    
+
+    struct TokenInfo {
+        uint256 priceInUSDC;
+        address owner;
+        string metadataURI;
+    }
+
     function testDeployment() public view {
         assertTrue(nft.hasRole(nft.DEFAULT_ADMIN_ROLE(), owner));
     }
@@ -108,11 +114,72 @@ contract NFTTest is BaseNFTTest {
         nft.safeMint(TOKEN_METADATA_URI, ownerProof, usdcAmount); // Creates a token with id `0`
         uint256 _tokenId = 0;
 
+        // (uint256 priceInUSDC, address tokenOwner, string memory metadataURI) = nft.tokenInfo(_tokenId);
+
+        assertEq(nft.ownerOf(_tokenId), owner);
+
+        uint256[] memory oneToken = new uint256[](1);
+        oneToken[0] = 0;
+        assertEq(nft.tokensOfOwner(owner), oneToken);
+
+
         uint256 expectedEth = nft.getTokenPriceInEth(_tokenId);
         vm.deal(addr1, 1 ether);
         vm.prank(addr1);
         nft.purchaseNFT{value: expectedEth}(_tokenId, true, addr1Proof);
         
-        // assertEq(nft.ownerOf(1), addr1);
+        uint256[] memory noTokens = new uint256[](0);
+        assertEq(nft.tokensOfOwner(owner), noTokens);
+
+        assertNotEq(nft.ownerOf(_tokenId), owner);
+        assertEq(nft.ownerOf(_tokenId), addr1);
+    }
+
+    function testPurchaseWithUSDCSuccess() public {
+        uint256 usdcAmount = 100;
+
+        vm.prank(owner);
+        nft.safeMint(TOKEN_METADATA_URI, ownerProof, usdcAmount); // Creates a token with id `0`
+        uint256 _tokenId = 0;
+
+        // Check that the owner actually have this token in his collection
+        assertEq(nft.ownerOf(_tokenId), owner);
+        uint256[] memory tokenReceived = new uint256[](1);
+        tokenReceived[0] = 0;
+        assertEq(nft.tokensOfOwner(owner), tokenReceived);
+
+        vm.startPrank(addr1);
+        // Mint USDC tokens for addr1
+        ERC20Mock(nft.usdcToken()).mint(addr1, 150); 
+        uint256 balanceOfAddr1 = ERC20Mock(nft.usdcToken()).balanceOf(addr1);
+        assertEq(balanceOfAddr1, 150);
+
+        // Approve NFT contract to spend addr1's USDC tokens
+        bool approvalSucccess = ERC20Mock(nft.usdcToken()).approve(address(nft), 120);
+        assertTrue(approvalSucccess);
+
+        // Check the allowance after approval
+        uint256 allowance = ERC20Mock(address(nft.usdcToken())).allowance(addr1, address(nft));
+        assertEq(allowance, 120);
+
+        nft.purchaseNFT(_tokenId, false, addr1Proof);
+
+        assertEq(ERC20Mock(nft.usdcToken()).balanceOf(addr1), 50); // Remaind total in this token Account
+        assertEq(ERC20Mock(address(nft.usdcToken())).allowance(addr1, address(nft)), 20); // Remained allowed to spend from nft contract
+        
+        assertEq(ERC20Mock(nft.usdcToken()).balanceOf(owner), 100); // Owner received amount in his token Account
+
+        // Check that owner no more own this token
+        uint256[] memory emptyTokenWallet = new uint256[](0);
+        assertNotEq(nft.ownerOf(_tokenId), owner);
+        assertEq(nft.tokensOfOwner(owner), emptyTokenWallet);
+
+        // Check that addr1 is the owner of this NFT token
+        assertEq(nft.ownerOf(_tokenId), addr1);
+        uint256[] memory receivedToken = new uint256[](1);
+        receivedToken[0] = 0;
+        assertEq(nft.tokensOfOwner(addr1), receivedToken);
+
+        vm.stopPrank();
     }
 }
