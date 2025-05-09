@@ -6,6 +6,7 @@ import {NFT} from "../src/NFT.sol";
 import "forge-std/console.sol";
 import {ERC20Mock} from "./mocks/ERC20Mock.sol";
 import {MockV3Aggregator} from "./mocks/MockChainlinkAddress.sol";
+import {EnglishAuction} from  "../src/Auction.sol";
 
 contract DeployNFT is Script {
     function run() external {
@@ -19,11 +20,14 @@ contract DeployNFT is Script {
 
         // Deploy the NFT contract
         NFT nft = new NFT();
+        EnglishAuction auction = new EnglishAuction();
+
 
         nft.updatePriceFeedAddress(address(chainlinkPriceFeed)); // To setup the deployed Chainlink Price Feed
         nft.updateUsdcTokenAddress(address(erc20Mock)); // setup usdToken mock
 
         console.log('Deployed NFT contract with an address: ', address(nft));
+        console.log('Deployed Auction contract with an address: ', address(auction));
 
         vm.stopBroadcast();
     }
