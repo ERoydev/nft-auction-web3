@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import {BaseNFTTest} from "./BaseNFTTest.t.sol";
 import {ERC20Mock} from "../src/utils/ERC20Mock.sol";
 import { NFT} from "../src/NFT.sol";
+import "forge-std/console.sol";
 
 contract NFTTest is BaseNFTTest {
     
@@ -100,16 +101,18 @@ contract NFTTest is BaseNFTTest {
         nft.safeMint("", addr1Proof, priceInUsdc);
     }
 
-    // function testPurchaseWithETHSuccess() public {
-    //     uint256 usdcAmount = 100;
+    function testPurchaseWithETHSuccess() public {
+        uint256 usdcAmount = 100;
 
-    //     uint256 expectedETH = nft.getETHPriceForUSDCAmount(100); // $100 in ETH
+        vm.prank(owner);
+        nft.safeMint(TOKEN_METADATA_URI, ownerProof, usdcAmount); // Creates a token with id `0`
+        uint256 _tokenId = 0;
 
-    //     vm.deal(buyer, 1 ether); // give buyer ETH
-
-    //     vm.prank(buyer);
-    //     marketplace.purchaseNFT{value: expectedETH}(1, true, merkleProofForBuyer);
-
-    //     assertEq(nft.ownerOf(1), buyer);
-    // }
+        uint256 expectedEth = nft.getTokenPriceInEth(_tokenId);
+        vm.deal(addr1, 1 ether);
+        vm.prank(addr1);
+        nft.purchaseNFT{value: expectedEth}(_tokenId, true, addr1Proof);
+        
+        // assertEq(nft.ownerOf(1), addr1);
+    }
 }

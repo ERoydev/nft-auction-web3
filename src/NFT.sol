@@ -12,7 +12,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {PriceConsumer} from "./abstract-contracts/PriceConsumer.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {ReentrancyGuard} from "../src/guards/ReentrancyGuard.sol";
-
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 
 /*
@@ -103,19 +103,22 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
 
         tokenInfo[tokenId] = TokenInfo({
             priceInUSDC: _priceInUSDC,
-            owner: msg.sender,
+            owner: payable(msg.sender),
             metadataURI: tokenMetadataURL
         });
 
         emit TokenMinted(msg.sender, tokenId);
     }
 
+    // This function shall recieve eth using `nft.purchaseNFT{value: expectedETH}(1, true, addr1Proof)` type of syntax
     function purchaseNFT(
             uint256 _tokenId, 
             bool payWithETH, 
             bytes32[] calldata merkleProof
-        ) external payable nonReentrant isWhitelisted(merkleProof) {
-            
+        ) external payable nonReentrant {
+        
+        verifyProof(msg.sender, merkleProof);
+    
         TokenInfo memory info = tokenInfo[_tokenId];
         require(info.owner != address(0), "Token not found");
         require(ownerOf(_tokenId) == info.owner, "Already sold");
@@ -124,7 +127,8 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
             uint256 requiredETH = getETHPriceForUSDCAmount(info.priceInUSDC);
             require(msg.value >= requiredETH, "Insufficient ETH");
 
-            payable(info.owner).transfer(requiredETH);
+            (bool success,) = info.owner.call{value: requiredETH}("");
+            require(success, "Transfer failed");
 
             if (msg.value > requiredETH) {
                 payable(msg.sender).transfer(msg.value - requiredETH); // refund excess 
@@ -133,9 +137,17 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
             require(IERC20(usdcToken).transferFrom(msg.sender, info.owner, info.priceInUSDC), "USDC transfer failed");
         } 
 
-        _beforeTokenTransfer(address(this), address(0), _tokenId);
+        _beforeTokenTransfer(info.owner, address(0), _tokenId);
         _transfer(info.owner, msg.sender, _tokenId);
         emit TokenPurchased(info.owner, msg.sender, _tokenId);
+    }
+
+    function getTokenPriceInEth(uint256 _tokenId) public view returns (uint256) {
+        TokenInfo memory info = tokenInfo[_tokenId];
+        require(info.owner != address(0), "Token not found");
+        require(ownerOf(_tokenId) == info.owner, "Already sold");
+
+        return getETHPriceForUSDCAmount(info.priceInUSDC);
     }
 
     // Util function

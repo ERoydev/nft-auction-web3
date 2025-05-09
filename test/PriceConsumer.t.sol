@@ -72,6 +72,6 @@ contract PriceConsumerTest is BaseNFTTest {
         uint usdcAmount = 150;
         uint256 price = nft.getETHPriceForUSDCAmount(usdcAmount); // In WEI
         assertGt(price, 0, "Price should be greater than 0");
-        assertEq(price, 76064908722109533);
+        assertEq(price, 76054495581233806);
     }
 }

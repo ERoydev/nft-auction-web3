@@ -31,6 +31,11 @@ abstract contract BaseNFTTest is Test {
         bytes32(0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9)
     ];
 
+    bytes32[] public ownerProof = [
+        bytes32(0xd52688a8f926c816ca1e079067caba944f158e764817b83fc43594370ca9cf62),
+        bytes32(0x5b70e80538acdabd6137353b0f9d8d149f4dba91e8be2e7946e409bfdbe685b9)
+    ];
+
     bytes32 public merkleRoot = bytes32(0x344510bd0c324c3912b13373e89df42d1b50450e9764a454b2aa6e2968a4578a);
     string TOKEN_METADATA_URI = "https://example.com/tokenMetadata.json";
 

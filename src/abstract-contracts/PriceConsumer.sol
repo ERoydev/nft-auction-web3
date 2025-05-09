@@ -37,16 +37,17 @@ abstract contract PriceConsumer {
     }
 
     function getETHPriceForUSDCAmount(uint256 _usdcAmount) public view returns (uint256) {
-        int usdPriceForOneEth = _getLatestPrice(); 
-        require(usdPriceForOneEth > 0, "Eth has collapsed, escape with your money and leave people crying :)");
+        // REMEMBER: => When working with money, i should always do calculations with as much decimals as possible(precission),
+        // and only round or format for display
+        
+        int256 price = _getLatestPrice(); // returns ETH/USD with 8 decimals
+        require(price > 0, "Invalid price");
 
-        uint256 ethPriceInUsd = uint256(usdPriceForOneEth) / 1e8;// Descale it recieve 1967.21 price for example 
+        uint256 ethPrice = uint256(price); // still 8 decimals
+        // Scale USDC amount from 6 decimals to 18 to match ETH wei
+        // And do the division considering price has 8 decimals
+        uint256 ethAmountInWei = (_usdcAmount * 1e18 * 1e8) / ethPrice;
 
-        // Ensure that the ETH price is not zero
-        require(ethPriceInUsd > 0, "ETH price seems invalid");
-
-        // I convert usdc to ETH to match the 18 decimals of eth price in USD
-        uint256 ethAmountInWei = (_usdcAmount * 1e18) / ethPriceInUsd; // i will receive wei 7612900000000000000 WEI
         return ethAmountInWei;
     }
 
