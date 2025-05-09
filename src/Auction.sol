@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 contract EnglishAuction {
     address public seller;
     IERC721 public nft; // The ERC721(NFT) token being auctioned
-    uint256 public nftTokenId; 
 
     struct Auction {
         address seller;
@@ -107,10 +106,8 @@ contract EnglishAuction {
             require(sent, "Transfer to seller failed");
             deposits[_auctionId][auction.highestBidder] = 0; // clear highest bidder
 
-            auction.nft.transferFrom(address(this), auction.highestBidder, nftTokenId);
+            auction.nft.transferFrom(address(this), auction.highestBidder, auction.nftTokenId);
         }
-
-        // Return money mechanism here
         emit AuctionEnded(auction.highestBidder, auction.highestBid);
     }
 
