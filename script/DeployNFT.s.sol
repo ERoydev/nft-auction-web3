@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 import {Script} from "forge-std/Script.sol";
 import {NFT} from "../src/NFT.sol";
 import "forge-std/console.sol";
-import {ERC20Mock} from "../src/utils/ERC20Mock.sol";
-import {MockV3Aggregator} from "../src/utils/MockChainlinkAddress.sol";
+import {ERC20Mock} from "./mocks/ERC20Mock.sol";
+import {MockV3Aggregator} from "./mocks/MockChainlinkAddress.sol";
 
 contract DeployNFT is Script {
     function run() external {

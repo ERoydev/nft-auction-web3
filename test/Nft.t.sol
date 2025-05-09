@@ -2,9 +2,12 @@
 pragma solidity ^0.8.0;
 
 import {BaseNFTTest} from "./BaseNFTTest.t.sol";
-import {ERC20Mock} from "../src/utils/ERC20Mock.sol";
 import { NFT} from "../src/NFT.sol";
 import "forge-std/console.sol";
+
+// Mocked contracts
+import {ERC20Mock} from "../script/mocks/ERC20Mock.sol";
+import {MockV3Aggregator} from "../script/mocks/MockChainlinkAddress.sol";
 
 contract NFTTest is BaseNFTTest {
 
@@ -182,4 +185,75 @@ contract NFTTest is BaseNFTTest {
 
         vm.stopPrank();
     }
+
+    function testUpdateSalePriceOfMarketplaceToken() public {
+        uint256 initialPrice = 100;
+
+        vm.startPrank(owner);
+        
+        nft.safeMint(TOKEN_METADATA_URI, ownerProof, initialPrice);
+        uint256 _tokenId = 0;
+        (uint256 priceInUsdc, ,) = nft.tokenInfo(_tokenId);
+        assertEq(priceInUsdc, 100);
+
+        nft.updateSalePriceOfMarketplaceToken(_tokenId, 50);
+
+        (uint256 newPriceInUsdc, ,) = nft.tokenInfo(_tokenId);
+
+        assertEq(newPriceInUsdc, 50);
+        vm.stopPrank();
+    }
+
+    function testGetTokenURI() public {
+        uint256 initialPrice = 100;
+
+        vm.startPrank(owner);
+        nft.safeMint(TOKEN_METADATA_URI, ownerProof, initialPrice);
+        uint256 _tokenId = 0;
+
+        string memory metadataURI = nft.getTokenURL(_tokenId);
+
+        ( , ,string memory tokenMetadataURI) = nft.tokenInfo(_tokenId);
+
+        assertEq(metadataURI, tokenMetadataURI);
+        vm.stopPrank();
+    } 
+
+    function testTokenInfoStorage() public pure {
+        NFT.TokenInfo memory info = NFT.TokenInfo({
+            priceInUSDC: 100e6,
+            owner: address(0xABCD),
+            metadataURI: "ipfs://some-uri"
+        });
+
+        assertEq(info.priceInUSDC, 100e6);
+        assertEq(info.owner, address(0xABCD));
+        assertEq(info.metadataURI, "ipfs://some-uri");
+    }
+
+    function testRevertIfTokenDoesNotExist() public {
+        // Assume _currentTokenId is still 0
+        vm.prank(owner);
+        vm.expectRevert("This tokenId does not exist");
+        nft.updateSalePriceOfMarketplaceToken(999, 15); // tokenId 999 doesn't exist
+    }
+
+    function testRevertNotAdminToUpdateSalesPrice() public {
+        // Assume _currentTokenId is still 0
+        vm.prank(addr1);
+        vm.expectRevert();
+        nft.updateSalePriceOfMarketplaceToken(0, 15); 
+    }
+
+    function testRevertIfNewPriceIsSame() public {
+        uint priceInUSDC = 15;
+        vm.startPrank(owner);
+        nft.safeMint("ipfs://token1", ownerProof, priceInUSDC);
+
+        vm.expectRevert("New price is the same as the current price");
+        nft.updateSalePriceOfMarketplaceToken(0, priceInUSDC);
+
+        vm.stopPrank();
+    }
+
 }

@@ -104,6 +104,7 @@ contract EnglishAuction {
         if (auction.highestBidder != address(0)) {
             (bool sent, ) = auction.seller.call{value: auction.highestBid}("");
             require(sent, "Transfer to seller failed");
+            
             deposits[_auctionId][auction.highestBidder] = 0; // clear highest bidder
 
             auction.nft.transferFrom(address(this), auction.highestBidder, auction.nftTokenId);

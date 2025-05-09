@@ -2,12 +2,12 @@
 pragma solidity ^0.8.0;
 
 import {BaseNFTTest} from "./BaseNFTTest.t.sol";
-import {ERC20Mock} from "../src/utils/ERC20Mock.sol";
 import { NFT} from "../src/NFT.sol";
 import "forge-std/console.sol";
 
-
-import {MockV3Aggregator} from "../src/utils/MockChainlinkAddress.sol";
+// Mocked contracts
+import {ERC20Mock} from "../script/mocks/ERC20Mock.sol";
+import {MockV3Aggregator} from "../script/mocks/MockChainlinkAddress.sol";
 
 contract PriceConsumerTest is BaseNFTTest {
     function testInitialPriceFeedAndUsdcToken() public {

@@ -66,6 +66,16 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
         PriceConsumer._updateUsdcTokenAddress(_newTokenAddress);
     }
 
+    function updateSalePriceOfMarketplaceToken(uint256 _tokenId, uint256 _newUsdcPrice) external OnlyAdminOrSalesPriceManager {
+        require(_tokenId < _currentTokenId, "This tokenId does not exist");
+        TokenInfo storage tokenToUpdate = tokenInfo[_tokenId];
+        if (tokenToUpdate.priceInUSDC == _newUsdcPrice) {
+            revert("New price is the same as the current price");
+        }
+
+        tokenToUpdate.priceInUSDC = _newUsdcPrice;
+    }
+
     // ================================================ Price and Payment Tokens
 
 
@@ -166,7 +176,7 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
         }
     }
 
-    function _addTokenToOwnerEnumeration(address to, uint256 tokenId) internal {
+    function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
         // TODO: If i need to handle transfers i should add _removeTokenFromEnumeration type of functionality
         uint256 length = _ownedTokens[to].length;
         _ownedTokens[to].push(tokenId);

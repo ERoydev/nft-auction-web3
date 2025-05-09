@@ -3,10 +3,12 @@ pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
-import {ERC20Mock} from "../src/utils/ERC20Mock.sol";
 import { NFT} from "../src/NFT.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import {MockV3Aggregator} from "../src/utils/MockChainlinkAddress.sol";
+
+// Mocked contracts
+import {ERC20Mock} from "../script/mocks/ERC20Mock.sol";
+import {MockV3Aggregator} from "../script/mocks/MockChainlinkAddress.sol";
 
 /*
 The whole points of this is because in all of the files i test the NFT contract:

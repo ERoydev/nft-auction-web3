@@ -2,8 +2,11 @@
 pragma solidity ^0.8.0;
 
 import {BaseNFTTest} from "./BaseNFTTest.t.sol";
-import {ERC20Mock} from "../src/utils/ERC20Mock.sol";
 import { NFT} from "../src/NFT.sol";
+
+// Mocked contracts
+import {ERC20Mock} from "../script/mocks/ERC20Mock.sol";
+import {MockV3Aggregator} from "../script/mocks/MockChainlinkAddress.sol";
 
 contract RoleManagerTest is BaseNFTTest {
 
@@ -85,7 +88,6 @@ contract RoleManagerTest is BaseNFTTest {
         assertFalse(nft.isSalesPriceManager(addr2));
     }
 
-
     function testOnlyAdminCanAddPaymentTokensConfigurator() public {
         vm.prank(addr1);
         vm.expectRevert();
@@ -146,5 +148,21 @@ contract RoleManagerTest is BaseNFTTest {
         assertEq(nft.WHITELIST_MANAGER(), keccak256("WHITELIST_MANAGER"));
         assertEq(nft.SALES_PRICE_MANAGER(), keccak256("SALES_PRICE_MANAGER"));
         assertEq(nft.PAYMENT_TOKENS_CONFIGURATOR(), keccak256("PAYMENT_TOKENS_CONFIGURATOR"));
+    }
+
+    function testOnlyAdminOrPaymentTokensConfigurator() public {
+        vm.prank(addr2);
+        vm.expectRevert("Not an admin or Payment tokens configurator");
+        nft.updatePriceFeedAddress(address(0x13));
+    }
+
+    function testRoleAssignmentPersistence() public {
+        vm.prank(owner);
+        nft.addWhitelistManager(addr2);
+        assertTrue(nft.isWhitelistManager(addr2));
+
+        vm.prank(owner);
+        nft.removeWhitelistManager(addr2);
+        assertFalse(nft.isWhitelistManager(addr2));
     }
 }

@@ -133,68 +133,72 @@ contract EnglishAuctionTest is Test {
         vm.deal(bidder1, 2 ether);
         vm.prank(bidder1);
         auction.placeBid{value: 2 ether}(auctionId);
+        assertNotEq(nft.ownerOf(nftId), bidder1);
+
+        assertEq(seller.balance, 0); // Seller is broke
+        assertEq(nft.ownerOf(nftId), address(auction)); // But he sell nft
 
         assertEq(nft.balanceOf(address(auction)), 1);
         vm.warp(block.timestamp + 130 minutes); // fast-forward time
         vm.prank(seller);
         auction.endAuction(auctionId);
+        assertEq(nft.balanceOf(address(auction)), 0);
 
-        // assertEq(nft.ownerOf(nftId), bidder1);
+        // Check seller should recieve highestBid
+        assertEq(seller.balance, 2 ether); // Seller is rich now
+        assertNotEq(nft.ownerOf(nftId), address(auction));
+        assertEq(nft.ownerOf(nftId), bidder1);
+
+        assertEq(auction.deposits(auctionId, address(bidder1)), 0);
+
+        (, , , , , , , bool auctionEnded) = auction.auctions(auctionId);
+        assertTrue(auctionEnded);
     }
 
     function testWithdraw() public {
-        // vm.prank(seller);
-        // uint256 auctionId = auction.createAuction(address(nft), nftId, 1 ether, 10);
+        vm.deal(bidder1, 2 ether);
+        vm.prank(bidder1);
+        auction.placeBid{value: 2 ether}(auctionId);
 
-        // vm.deal(bidder1, 2 ether);
-        // vm.prank(bidder1);
-        // auction.placeBid{value: 2 ether}(auctionId);
+        vm.deal(bidder2, 3 ether);
+        vm.prank(bidder2);
+        auction.placeBid{value: 3 ether}(auctionId);
 
-        // vm.deal(bidder2, 3 ether);
-        // vm.prank(bidder2);
-        // auction.placeBid{value: 3 ether}(auctionId);
+        vm.warp(block.timestamp + 121 minutes);
+        vm.prank(seller);
+        auction.endAuction(auctionId);
 
-        // vm.warp(block.timestamp + 11 minutes);
-        // vm.prank(seller);
-        // auction.endAuction(auctionId);
+        uint256 preBalance = bidder1.balance;
+        vm.prank(bidder1);
+        auction.withdraw(auctionId);
+        uint256 postBalance = bidder1.balance;
 
-        // uint256 preBalance = bidder1.balance;
-        // vm.prank(bidder1);
-        // auction.withdraw(auctionId);
-        // uint256 postBalance = bidder1.balance;
-
-        // assertGt(postBalance, preBalance);
+        assertGt(postBalance, preBalance);
     }
 
     function testCannotEndAuctionTwice() public {
-        // vm.prank(seller);
-        // uint256 auctionId = auction.createAuction(address(nft), nftId, 1 ether, 10);
+        vm.deal(bidder1, 2 ether);
+        vm.prank(bidder1);
+        auction.placeBid{value: 2 ether}(auctionId);
 
-        // vm.deal(bidder1, 2 ether);
-        // vm.prank(bidder1);
-        // auction.placeBid{value: 2 ether}(auctionId);
+        vm.warp(block.timestamp + 121 minutes);
+        vm.prank(seller);
+        auction.endAuction(auctionId);
 
-        // vm.warp(block.timestamp + 11 minutes);
-        // vm.prank(seller);
-        // auction.endAuction(auctionId);
-
-        // vm.prank(seller);
-        // vm.expectRevert("Auction has already ended");
-        // auction.endAuction(auctionId);
+        vm.prank(seller);
+        vm.expectRevert("Auction has already ended");
+        auction.endAuction(auctionId);
     }
 
     function testAuctionExtendTime() public {
-        // vm.prank(seller);
-        // uint256 auctionId = auction.createAuction(address(nft), nftId, 1 ether, 10);
+        // fast-forward to 1 min before end
+        vm.warp(block.timestamp + 119 minutes);
 
-        // // fast-forward to 1 min before end
-        // vm.warp(block.timestamp + 9 minutes);
+        vm.deal(bidder1, 2 ether);
+        vm.prank(bidder1);
+        auction.placeBid{value: 2 ether}(auctionId);
 
-        // vm.deal(bidder1, 2 ether);
-        // vm.prank(bidder1);
-        // auction.placeBid{value: 2 ether}(auctionId);
-
-        // (, , , , , , uint256 newEndTime,) = auction.auctions(auctionId);
-        // assertGt(newEndTime, block.timestamp + 1 minutes); // auction extended
+        (, , , , , , uint256 newEndTime,) = auction.auctions(auctionId);
+        assertGt(newEndTime, block.timestamp + 1 minutes); // auction extended
     }
 }
