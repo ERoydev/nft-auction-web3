@@ -11,7 +11,7 @@ import {ERC721Consecutive} from "@openzeppelin/contracts/token/ERC721/extensions
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {PriceConsumer} from "./abstract-contracts/PriceConsumer.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
-import {ReentrancyGuard} from "../src/utils/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "../src/guards/ReentrancyGuard.sol";
 
 
 
@@ -46,24 +46,23 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
     event TokenMinted(address indexed user, uint256 indexed tokenId);
     event TokenPurchased(address indexed seller, address indexed receiver, uint256 indexed tokenId);
 
-    constructor(
-        address _usdcTokenContractAddress
-    ) ERC721("MyToken", "MTK") {
+    constructor() ERC721("MyToken", "MTK") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender); // contract creator is DEFAULT_ADMIN
-        PriceConsumer.usdcToken = _usdcTokenContractAddress;
     }
 
     // ================================================ Price and Payment Tokens this requires me to deploy on a TESTNET
 
-    function defaultPriceFeed() internal OnlyAdminOrPaymentTokensConfigurator {
+    function defaultPriceSetup() external OnlyAdminOrPaymentTokensConfigurator {
         PriceConsumer._default();
     }
 
     function updatePriceFeedAddress(address _newPriceFeedAddress) external OnlyAdminOrPaymentTokensConfigurator {
+         require(_newPriceFeedAddress != address(0), "Invalid Price Feed address");
         PriceConsumer._updatePriceFeedAddress(_newPriceFeedAddress);
     }
 
     function updateUsdcTokenAddress(address _newTokenAddress) external OnlyAdminOrPaymentTokensConfigurator {
+        require(_newTokenAddress != address(0), "Invalid USDC token address");
         PriceConsumer._updateUsdcTokenAddress(_newTokenAddress);
     }
 
@@ -122,7 +121,7 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
         require(ownerOf(_tokenId) == info.owner, "Already sold");
 
         if (payWithETH) {
-            uint256 requiredETH = PriceConsumer.getETHPriceForUSDCAmount(info.priceInUSDC);
+            uint256 requiredETH = getETHPriceForUSDCAmount(info.priceInUSDC);
             require(msg.value >= requiredETH, "Insufficient ETH");
 
             payable(info.owner).transfer(requiredETH);
@@ -132,7 +131,7 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
             } 
         } else {
             require(IERC20(usdcToken).transferFrom(msg.sender, info.owner, info.priceInUSDC), "USDC transfer failed");
-        }
+        } 
 
         _beforeTokenTransfer(address(this), address(0), _tokenId);
         _transfer(info.owner, msg.sender, _tokenId);

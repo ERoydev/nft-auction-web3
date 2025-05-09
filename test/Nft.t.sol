@@ -11,20 +11,22 @@ contract NFTTest is BaseNFTTest {
         assertTrue(nft.hasRole(nft.DEFAULT_ADMIN_ROLE(), owner));
     }
 
-    function testInitialization() public view {
-        
-        
+    function testDefaultAdminRoleAssigned() public view {
+        bytes32 DEFAULT_ADMIN_ROLE = 0x00; // Taken from built-in code of AccessControl Contract from openzeppelin
+        assertTrue(nft.hasRole(DEFAULT_ADMIN_ROLE, owner));
+    }
+
+    function testNameAndSymbol() public view {
+        assertEq(nft.name(), "MyToken");
+        assertEq(nft.symbol(), "MTK");
     }
 
     function testSetMerkleRootWithoutSetUp() public {
         address _owner = address(0x1);
 
-         // Deploy mock USDC token
-        ERC20Mock _usdcToken = new ERC20Mock();
-
         // Deploy the NFT contract
         vm.startPrank(_owner);
-        NFT _nft = new NFT(address(_usdcToken));
+        NFT _nft = new NFT();
 
         // Set the Merkle root
         _nft.setMerkleRoot(merkleRoot);
@@ -33,7 +35,7 @@ contract NFTTest is BaseNFTTest {
         assertEq(_nft.merkleRoot(), merkleRoot);
     }
 
-    function testMinting() public {
+    function testMintingTokenInfoSetting() public {
         uint256 priceInUsdc = 100;
 
         vm.prank(addr1);
@@ -41,8 +43,73 @@ contract NFTTest is BaseNFTTest {
 
         (uint256 price, address ownerOfToken, string memory metadata) = nft.tokenInfo(0);
         
+        // Check tokenInfo sets
         assertEq(price, priceInUsdc);
         assertEq(ownerOfToken, addr1); 
         assertEq(metadata, TOKEN_METADATA_URI);
     }
+
+    function testMintingTokensOfOwnerSetting() public {
+        uint256 priceInUsdc = 100;
+
+        vm.prank(addr1);
+        nft.safeMint(TOKEN_METADATA_URI, addr1Proof, priceInUsdc);
+
+        uint256[] memory expectedTokens = new uint256[](1);
+        expectedTokens[0] = 0;
+        assertEq(nft.tokensOfOwner(addr1), expectedTokens);
+
+        vm.prank(addr1);
+        nft.safeMint(TOKEN_METADATA_URI, addr1Proof, 24);
+
+        uint256[] memory expectedTokens2 = new uint256[](2);
+        expectedTokens2[0] = 0;
+        expectedTokens2[1] = 1;
+        assertEq(nft.tokensOfOwner(addr1), expectedTokens2);
+    }
+    
+    function testMintingAddToTokenEnumeration() public {
+        uint256[] memory emptyTokens = new uint256[](0);
+        assertEq(nft.tokensOfOwner(addr1), emptyTokens);
+
+        uint256 priceInUsdc = 100;
+        vm.prank(addr1);
+        nft.safeMint(TOKEN_METADATA_URI, addr1Proof, priceInUsdc);
+
+        uint256[] memory oneToken = new uint256[](1);
+        oneToken[0] = 0;
+        assertEq(nft.tokensOfOwner(addr1), oneToken);
+    }
+
+    function testMintingTokenOwnership() public {
+        uint256 priceInUsdc = 100;
+        vm.prank(addr1);
+        nft.safeMint(TOKEN_METADATA_URI, addr1Proof, priceInUsdc);
+
+        assertEq(nft.ownerOf(0), addr1, "addr1 should be the owner of tokenId 0");
+
+        uint256[] memory expectedTokens = new uint256[](1);
+        expectedTokens[0] = 0;
+        assertEq(nft.tokensOfOwner(addr1), expectedTokens, "addr1 should own tokenId 0");
+    }
+
+    function testMintingShouldRevertBecauseEmptyMetadataURI() public {
+        uint256 priceInUsdc = 100;
+        vm.prank(addr1);
+        vm.expectRevert("Invalid metadata URL");
+        nft.safeMint("", addr1Proof, priceInUsdc);
+    }
+
+    // function testPurchaseWithETHSuccess() public {
+    //     uint256 usdcAmount = 100;
+
+    //     uint256 expectedETH = nft.getETHPriceForUSDCAmount(100); // $100 in ETH
+
+    //     vm.deal(buyer, 1 ether); // give buyer ETH
+
+    //     vm.prank(buyer);
+    //     marketplace.purchaseNFT{value: expectedETH}(1, true, merkleProofForBuyer);
+
+    //     assertEq(nft.ownerOf(1), buyer);
+    // }
 }

@@ -34,7 +34,11 @@ abstract contract BaseNFTTest is Test {
     bytes32 public merkleRoot = bytes32(0x344510bd0c324c3912b13373e89df42d1b50450e9764a454b2aa6e2968a4578a);
     string TOKEN_METADATA_URI = "https://example.com/tokenMetadata.json";
 
+    address DEFAULT_CHAINLINK_SEPOLIA_ETH_USD_CONTRACT_USED = 0x694AA1769357215DE4FAC081bf1f309aDC325306; 
+    address DEFAULT_USDC_TOKEN_SEPOLIA_ADDRESS_USED = 0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8;
+
     function setUp() public {
+
         owner = address(0x1);
         addr1 = address(0x2);
         addr2 = address(0x3);
@@ -45,12 +49,14 @@ abstract contract BaseNFTTest is Test {
         vm.startPrank(owner);
 
         // Deploy Mocked Chainlink Price Feed
-        chainlinkPriceFeed = new MockV3Aggregator(8, 0);
+        // Second parameter is the answer that this mock will return on latestRoundPrice for example
+        chainlinkPriceFeed = new MockV3Aggregator(8, 197227000000);
 
         // Deploy NFT contract with mock usdc and price feed address ()
-        nft = new NFT(address(usdcToken));
+        nft = new NFT();
 
         nft.updatePriceFeedAddress(address(chainlinkPriceFeed)); // I update it to change from default to custom
+        nft.updateUsdcTokenAddress(address(usdcToken)); // Set mock usdc token address
 
         nft.setMerkleRoot(merkleRoot);
 

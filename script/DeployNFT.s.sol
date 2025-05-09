@@ -18,9 +18,10 @@ contract DeployNFT is Script {
         MockV3Aggregator chainlinkPriceFeed = new MockV3Aggregator(8, 0);
 
         // Deploy the NFT contract
-        NFT nft = new NFT(address(erc20Mock));
+        NFT nft = new NFT();
 
         nft.updatePriceFeedAddress(address(chainlinkPriceFeed)); // To setup the deployed Chainlink Price Feed
+        nft.updateUsdcTokenAddress(address(erc20Mock)); // setup usdToken mock
 
         console.log('Deployed NFT contract with an address: ', address(nft));
 

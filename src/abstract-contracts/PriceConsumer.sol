@@ -4,6 +4,8 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interf
 
 
 /// @dev - Tested in Remix on Sepolia it works
+/// @notice - When NFT is deployed this Price Configurations will not be set until specifically is called:
+/// .updated.... or .default() instructions
 abstract contract PriceConsumer {
     address public usdcToken; // USDC Token contract
 
@@ -11,8 +13,11 @@ abstract contract PriceConsumer {
     address public DEFAULT_CHAINLINK_SEPOLIA_ETH_USD_CONTRACT = 0x694AA1769357215DE4FAC081bf1f309aDC325306; 
     address public customChainlinkPriceFeedAddress; // allow PriceFeed to be updated
 
+    // https://sepolia.ethplorer.io/address/0x94a9d9ac8a22534e3faca9f4e7f2e2cf85d5e4c8#
+    address private DEFAULT_USDC_TOKEN_SEPOLIA_ADDRESS = 0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8;
+
     event ChainlinkPriceFeedIsUpdated(address indexed updatedBy, address newPriceFeed);
-    event DefaultChainlinkPriceFeed();
+    event DefaultSepoliaPriceSetup();
     event USDCTokenAddressChanged(address indexed updatedBy, address indexed newTokenAddress);
 
     // Function to get the latest ETH/USD price from the Chainlink feed
@@ -45,6 +50,8 @@ abstract contract PriceConsumer {
         return ethAmountInWei;
     }
 
+
+    // =================================== Configuration set instructions
     function _updatePriceFeedAddress(address _newPriceFeedAddress) internal {
         require(_newPriceFeedAddress != address(priceFeed), "Price Feed address is the same as the current active one");
         customChainlinkPriceFeedAddress = _newPriceFeedAddress;
@@ -62,7 +69,8 @@ abstract contract PriceConsumer {
 
     function _default() internal {
         priceFeed = AggregatorV3Interface(DEFAULT_CHAINLINK_SEPOLIA_ETH_USD_CONTRACT);
+        usdcToken = DEFAULT_USDC_TOKEN_SEPOLIA_ADDRESS;
 
-        emit DefaultChainlinkPriceFeed();
+        emit DefaultSepoliaPriceSetup();
     }
 }
