@@ -4,40 +4,40 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const nftContractABI = [
-    {
-      "type": "function",
-      "name": "getRoles",
-      "inputs": [
-        {
-          "name": "account",
-          "type": "address",
-          "internalType": "address"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "_Admin",
-          "type": "bool",
-          "internalType": "bool"
-        },
-        {
-          "name": "_WhitelistManager",
-          "type": "bool",
-          "internalType": "bool"
-        },
-        {
-          "name": "_SalesPriceManager",
-          "type": "bool",
-          "internalType": "bool"
-        },
-        {
-          "name": "_PaymentTokensConfigurator",
-          "type": "bool",
-          "internalType": "bool"
-        }
-      ],
-      "stateMutability": "view"
-    }
+  {
+    "type": "function",
+    "name": "getRoles",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "_Admin",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "_WhitelistManager",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "_SalesPriceManager",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "_PaymentTokensConfigurator",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
   ];
   
 
@@ -52,8 +52,6 @@ const signer = new ethers.Wallet(adminPrivateKey, provider);
 
 // Contract addresses
 const nftContractAddress = process.env.NFT_CONTRACT_ADDRESS;
-const auctionContractAddress = process.env.AUCTION_CONTRACT_ADDRESS;
-
 
 // Create contract instance
 const nftContract = new ethers.Contract(nftContractAddress, nftContractABI, signer);

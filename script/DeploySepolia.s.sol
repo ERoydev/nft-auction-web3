@@ -34,15 +34,19 @@ contract Deploy is Script {
     }
 }
 
+
 // ##### sepolia
-// ✅  [Success] Hash: 0x34b5ad2e068f07699c5fe4c23c4f824d32cbff9e1f6024178c3035620c8e89aa
-// Contract Address: 0x85A3986355b5328E5854b2664844C74c7C328DED
-// Block: 8309631
-// Paid: 0.000006234341465212 ETH (5387348 gas * 0.001157219 gwei)
+// ✅  [Success] Hash: 0xffe87bab6e9e2412caa820138408b37e3834a4ac661b28d1f93f400179c4a340
+// Contract Address: 0x47eE21F4693E78721458b5B54069B634A32B0910
+// Block: 8310560
+// Paid: 0.000001789789915206 ETH (1778949 gas * 0.001006094 gwei)
 
 
 // ##### sepolia
-// ✅  [Success] Hash: 0x460fa2a21390e138e41e9f87dd070d0d5a45f57138cda6ccb9bd59fcb2cd3158
-// Contract Address: 0xe0A8e0d0aDADaB4f574333Ea557EE86A5a38141C
-// Block: 8309631
-// Paid: 0.000002058633582831 ETH (1778949 gas * 0.001157219 gwei)
+// ✅  [Success] Hash: 0x1924ca7da3a99a71d723b9f094effd2818ca048b556efc5669499261a8620ab4
+// Contract Address: 0x203f62985434663F62CE1c581B2C020c2AAcf305
+// Block: 8310560
+// Paid: 0.000005420178498712 ETH (5387348 gas * 0.001006094 gwei)
+
+// ✅ Sequence #1 on sepolia | Total Paid: 0.000007331579020074 ETH (7287171 gas * avg 0.001006094 gwei)
+                                                                                                                                                                                                  

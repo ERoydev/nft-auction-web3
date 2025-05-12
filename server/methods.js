@@ -5,7 +5,6 @@ export async function getRolesForUser(userAddress) {
 
         const roles = await nftContract.getRoles(userAddress);
         return roles;
-        
     } catch (error) {
         console.error("Error settings role:", error);
     }

@@ -25,7 +25,6 @@ export default function AdminPanel() {
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
 
-
     const handleAddToWhitelist = async () => {
         // TODO: Validate the address format for etherium but since i work with anvil address i skip the checks
         // if (isAddress(whitelistAddress) === false) {
@@ -34,7 +33,7 @@ export default function AdminPanel() {
         // }
         // i use `web3-validator` library to validate the address format
 
-        if (!isWhitelistManager) {
+        if (!isWhitelistManager && !isAdmin) {
             setErrorMessage("You do not have permission to add to the whitelist.");
             return;
         }
@@ -61,7 +60,7 @@ export default function AdminPanel() {
     };
 
     const handleRemoveFromWhitelist = async () => {
-        if (!isWhitelistManager) {
+        if (!isWhitelistManager && !isAdmin) {
             setErrorMessage("You do not have permission to remove from the whitelist.");
             return;
         }

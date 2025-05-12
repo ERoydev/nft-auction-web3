@@ -116,7 +116,7 @@ app.post('/removeAddress', (req, res) => {
 });
 
 app.post('/roles', async (req, res) => {
-    const { address} = req.body;
+    const { address } = req.body;
 
     if (!address) {
         return res.status(400).send('Address is required');
@@ -132,27 +132,57 @@ app.post('/roles', async (req, res) => {
             console.error('Error reading database:', err);
         }
 
+        // Check if the address already exists in the database
         if (database[address]) {
             console.log("Returning roles from database");
-            return res.json({roles: database[address]});
+            return res.json({ roles: database[address] });
         }
 
-        const roles = await getRolesForUser(address); // use your helper function
-    
+        // Fetch roles if not already in the database
+        const roles = await getRolesForUser(address);
+
         if (!roles) {
             return res.status(500).send('Could not retrieve roles');
         }
 
+        // Add the address and roles to the database
         database[address] = roles;
-        fs.writeFileSync(databasePath, JSON.stringify(database, null, 2)); // Save in the database
-    
+
+        // Write to the database only if the address is new
+        fs.writeFileSync(databasePath, JSON.stringify(database, null, 2));
+
         return res.json({ roles });
     } catch (error) {
         console.error('Error fetching roles:', error);
         return res.status(500).send('Error fetching roles');
     }
 });
-  
+
+app.post('/deleteAddress', (req, res) => {
+    const { address } = req.body;
+
+    if (!address) {
+        return res.status(400).send('Address is required');
+    }
+
+    try {
+        const data = JSON.parse(fs.readFileSync(databasePath, 'utf8'));
+
+        if (!data[address]) {
+            return res.status(200).send('Address does not exist in the database');
+        }
+
+        delete data[address];
+
+        fs.writeFileSync(databasePath, JSON.stringify(data, null, 2), 'utf8');
+
+        return res.status(200).send('Address deleted successfully');
+    } catch (err) {
+        console.error('Error deleting address:', err);
+        return res.status(500).send('Error deleting address');
+    }
+    
+})
 
 // Start the server
 app.listen(port, () => {
