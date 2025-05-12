@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { ROLES } from "../pages/admin";
-import { getBrowserProvider, nftContract } from "../utils/contract";
+import { getBrowserProvider, nftReadContract, getNFtWriteContract } from "../utils/contract";
 import { addToWhitelist, updateTheRoot } from "./WhitelistService";
 import axios from "axios";
 
@@ -15,9 +15,7 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
         if (role == ROLES[0]) {
             console.log("Assigning Whitelist Manager role to:", userAddress);
 
-            const signer = await getBrowserProvider();
-            const contractWithSigner = nftContract.connect(signer);
-;
+            const contractWithSigner = await getNFtWriteContract();
 
             const result = await contractWithSigner.addWhitelistManager(userAddress);
         
