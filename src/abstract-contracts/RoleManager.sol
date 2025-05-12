@@ -52,6 +52,19 @@ abstract contract RoleManager is AccessControl {
         _;
     }
     // =============================================== Ownership Modifiers
+
+    function getRoles(address account) external view returns (
+        bool _Admin,
+        bool _WhitelistManager,
+        bool _SalesPriceManager,
+        bool _PaymentTokensConfigurator
+    ) {
+        _Admin = hasRole(DEFAULT_ADMIN_ROLE, account);
+        _WhitelistManager = hasRole(WHITELIST_MANAGER, account);
+        _SalesPriceManager = hasRole(SALES_PRICE_MANAGER, account);
+        _PaymentTokensConfigurator = hasRole(PAYMENT_TOKENS_CONFIGURATOR, account);
+    }
+
     
 
     // =============================================== Role Assignment Instructions Bellow

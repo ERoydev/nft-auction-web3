@@ -1,7 +1,7 @@
 import axios from "axios"
 import { ethers } from "ethers";
 import {arrayify} from "@ethersproject/bytes";
-import { provider, nftContract} from "../utils/contract";
+import { getBrowserProvider, nftContract} from "../utils/contract";
 
 
 // Used only from admins to add/remove users from the whitelist
@@ -82,7 +82,7 @@ export async function updateTheRoot() {
 
         const newRoot = response.data.merkleRoot;
 
-        const signer = await provider.getSigner();
+        const signer = await getBrowserProvider();
 
         const contractWithSigner = nftContract.connect(signer);
 

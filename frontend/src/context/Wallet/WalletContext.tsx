@@ -10,6 +10,8 @@ Keeps track of the current wallet address, connect, disconnect, and roles of the
   - Added functionality to listen for account changes in MetaMask.
 */
 
+// TODO: Need to find the most optimal way to fetch the roles from smart contract and store them in a way i dont make too many requests. Possile solution is to use backend memoization
+
 interface WalletContextType {
   currentAccount: string | null;
   connectWallet: () => Promise<void>;

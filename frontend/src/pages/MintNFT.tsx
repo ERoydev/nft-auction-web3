@@ -1,77 +1,63 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ethers } from "ethers";
 import { uploadFileToPinata } from "../services/Pinata";
 import { mintNFT } from "../services/nftContractService";
 import { getMerkleProof } from "../services/WhitelistService";
 import { useWallet } from "../context/Wallet/WalletContext";
+import ControlledForm from "../components/forms/ControlledForm";
 
 export default function MintNFT() {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [image, setImage] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
-  const { currentAccount} = useWallet();
-
+  const { currentAccount } = useWallet();
   const navigate = useNavigate();
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      setPreview(URL.createObjectURL(file)); 
-    }
-  };
+  const handleFormSubmit = async (formData: {
+    name: string;
+    description: string;
+    image: File | null;
+    price: string;
+  }) => {
+    const { name, description, image, price } = formData;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!name || !description || !image) {
-      alert("Please fill out all fields and upload an image.");
+    if (!name || !description || !image || !price) {
+      alert("Please fill out all fields, upload an image, and set a price.");
       return;
     }
 
     try {
-        setIsMinting(true);
+      setIsMinting(true);
 
-        // Check if MetaMask is connected
-        if (typeof window.ethereum === "undefined") {
-            alert("MetaMask is not installed. Please install it to mint NFTs.");
-            return;
-        }
+      if (typeof window.ethereum === "undefined") {
+        alert("MetaMask is not installed. Please install it to mint NFTs.");
+        return;
+      }
 
-        const { metadataURL } = await uploadFileToPinata(
-          name,
-          description,
-          image
-        );
+      const { metadataURL } = await uploadFileToPinata(name, description, image);
 
-        const userAddress = currentAccount;
-        if (!userAddress) {
-          alert("No wallet connected. Please connect your wallet.");
-          return;
-        }
-        
-        console.log("User Address:", userAddress);
-        const merkleProof = await getMerkleProof(userAddress);
-        console.log("Merkle Proof:", merkleProof);
-        mintNFT(metadataURL, merkleProof);
+      const userAddress = currentAccount;
+      if (!userAddress) {
+        alert("No wallet connected. Please connect your wallet.");
+        return;
+      }
 
-        alert("NFT minted successfully!");
+      const merkleProof = await getMerkleProof(userAddress);
+
+      const priceInUSDCx = parseFloat(price);
+      if (isNaN(priceInUSDCx) || priceInUSDCx <= 0) {
+        alert("Please enter a valid price.");
+        return;
+      }
+
+      await mintNFT(metadataURL, merkleProof, priceInUSDCx);
+
+      alert("NFT minted successfully!");
+      navigate("/");
     } catch (error) {
-        console.error("Error minting NFT:", error);
-        alert("Failed to mint NFT. Please try again.");
+      console.error("Error minting NFT:", error);
+      alert("Failed to mint NFT. Please try again.");
     } finally {
-        setIsMinting(false);
+      setIsMinting(false);
     }
-    
-    setName("");
-    setDescription("");
-    setImage(null);
-    setPreview(null);
-
-    navigate("/"); 
   };
 
   return (
@@ -90,69 +76,7 @@ export default function MintNFT() {
         <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-500 mb-6 text-center lg:text-left">
           Mint Your NFT
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name Input */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="p-4 rounded-full mt-1 block w-full border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-              placeholder="Enter NFT name"
-            />
-          </div>
-
-          {/* Description Input */}
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-              Description
-            </label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="mt-1 block w-full p-4 rounded-2xl border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-sm"
-              placeholder="Enter NFT description"
-              rows={4}
-            ></textarea>
-          </div>
-
-          {/* Image Upload */}
-          <div>
-            <label htmlFor="image" className="block text-sm font-medium text-gray-700">
-              Upload Image
-            </label>
-            <input
-              type="file"
-              id="image"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-50 file:text-cyan-600 hover:file:bg-cyan-100"
-            />
-            {preview && (
-              <div className="mt-4">
-                <p className="text-sm text-gray-500">Image Preview:</p>
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="mt-2 w-full h-64 object-cover rounded-lg shadow-md"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white py-2 px-4 rounded-md shadow-md hover:from-cyan-600 hover:to-blue-600 transition"
-          >
-            Mint NFT
-          </button>
-        </form>
+        <ControlledForm onSubmit={handleFormSubmit} isSubmitting={isMinting} />
       </div>
     </div>
   );

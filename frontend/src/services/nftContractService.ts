@@ -1,13 +1,10 @@
-import { provider, nftContract } from "../utils/contract";
+import { getBrowserProvider, nftContract, getNFtWriteContract } from "../utils/contract";
 
-
-export async function mintNFT(tokenMetadataURL: string, merkleProof: Uint8Array[]) {
-    const signer = await provider.getSigner();
-    const contractWithSigner = nftContract.connect(signer);
+export async function mintNFT(tokenMetadataURL: string, merkleProof: Uint8Array[], priceInUSDCx: number) {
+    const contractWithSigner = await getNFtWriteContract();
 
     try {
-        const tx = await contractWithSigner.safeMint(tokenMetadataURL, merkleProof);
-        // TODO: Find a way to extend the ethers.BaseContract to include the safeMint method or find better way
+        const tx = await contractWithSigner.safeMint(tokenMetadataURL, merkleProof, priceInUSDCx);
         await tx.wait();
         console.log("NFT minted successfully:", tx);
     } catch (error) {

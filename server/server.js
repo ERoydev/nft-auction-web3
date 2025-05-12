@@ -4,15 +4,20 @@ const keccak256 = require('keccak256');
 const { solidityPackedKeccak256, getAddress } = require('ethers');
 const fs = require('fs');
 const cors = require('cors');
+const dotenv = require('dotenv');
+const { getRolesForUser } = require('./methods');
+
 
 const app = express();
 const port = 3000;
+dotenv.config();
 
 // Allow all origins (open CORS)
 app.use(cors());
 app.use(express.json());
 
 const whitelistFilePath = './whitelist.json';
+const databasePath = './database.json';
 
 const getWhitelist = () => {
     try {
@@ -109,6 +114,45 @@ app.post('/removeAddress', (req, res) => {
         return res.status(500).send('Error writing to whitelist');
     }
 });
+
+app.post('/roles', async (req, res) => {
+    const { address} = req.body;
+
+    if (!address) {
+        return res.status(400).send('Address is required');
+    }
+
+    try {
+        // Read the database
+        let database = {};
+        try {
+            const data = fs.readFileSync(databasePath, 'utf8');
+            database = JSON.parse(data);
+        } catch (err) {
+            console.error('Error reading database:', err);
+        }
+
+        if (database[address]) {
+            console.log("Returning roles from database");
+            return res.json({roles: database[address]});
+        }
+
+        const roles = await getRolesForUser(address); // use your helper function
+    
+        if (!roles) {
+            return res.status(500).send('Could not retrieve roles');
+        }
+
+        database[address] = roles;
+        fs.writeFileSync(databasePath, JSON.stringify(database, null, 2)); // Save in the database
+    
+        return res.json({ roles });
+    } catch (error) {
+        console.error('Error fetching roles:', error);
+        return res.status(500).send('Error fetching roles');
+    }
+});
+  
 
 // Start the server
 app.listen(port, () => {

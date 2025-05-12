@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
 import { ROLES } from "../pages/admin";
-import { provider, nftContract } from "../utils/contract";
+import { getBrowserProvider, nftContract } from "../utils/contract";
 import { addToWhitelist, updateTheRoot } from "./WhitelistService";
+import axios from "axios";
 
 
 export async function assignRole(role: string, userAddress: string, senderRole: string) {
@@ -14,7 +15,7 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
         if (role == ROLES[0]) {
             console.log("Assigning Whitelist Manager role to:", userAddress);
 
-            const signer = await provider.getSigner();
+            const signer = await getBrowserProvider();
             const contractWithSigner = nftContract.connect(signer);
 ;
 
@@ -34,31 +35,38 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
     }
 }
 
+
 export const fetchRolesFromSmartContract = async (account: string) => {
-    if (typeof window.ethereum === 'undefined') {
-      throw new Error('Metamask is not installed.');
-    }
-  
-    try {
-      const isAdmin = await nftContract.isAdmin(account);
-      const isWhitelistManager = await nftContract.isWhitelistManager(account);
-      const isSalesPriceManager = await nftContract.isSalesPriceManager(account);
-      const isPaymentTokensConfigurator = await nftContract.isPaymentTokensConfigurator(account);
-  
-      return {
-        isAdmin,
-        isWhitelistManager,
-        isSalesPriceManager,
-        isPaymentTokensConfigurator,
-      };
-    } catch (error) {
-      console.error('Error fetching roles:', error);
-      return {
-        isAdmin: false,
-        isWhitelistManager: false,
-        isSalesPriceManager: false,
-        isPaymentTokensConfigurator: false,
-      };
-    }
-  };
-  
+  if (typeof window.ethereum === 'undefined') {
+    throw new Error('Metamask is not installed.');
+  } 
+
+  console.log('ACCOUNT', account);
+
+  try {
+    // Send a POST request with the account address in the JSON body
+    const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/roles/`, {
+      address: account,  // send the address in the body of the request
+    });
+
+    const roles = response.data.roles;
+    console.log('Roles for address', roles);
+
+    // Returning the roles in the structured format
+    return {
+      isAdmin: roles.isAdmin,
+      isWhitelistManager: roles.isWhitelistManager,
+      isSalesPriceManager: roles.isSalesPriceManager,
+      isPaymentTokensConfigurator: roles.isPaymentTokensConfigurator,
+    };
+  } catch (error) {
+    console.error('Error fetching roles:', error);
+    // Return default values if there's an error
+    return {
+      isAdmin: false,
+      isWhitelistManager: false,
+      isSalesPriceManager: false,
+      isPaymentTokensConfigurator: false,
+    };
+  }
+};

@@ -165,4 +165,33 @@ contract RoleManagerTest is BaseNFTTest {
         nft.removeWhitelistManager(addr2);
         assertFalse(nft.isWhitelistManager(addr2));
     }
+
+    function testGetRoles() public {
+        vm.prank(owner);
+        nft.addWhitelistManager(addr1);
+
+        // Check Whitelist Manager
+        (bool isAdmin, bool isWhitelist, bool isSales, bool isPayment) = nft.getRoles(addr1);
+        assertEq(isAdmin, false);
+        assertEq(isWhitelist, true);
+        assertEq(isSales, false);
+        assertEq(isPayment, false);
+
+        // Check Admin
+        (isAdmin, isWhitelist, isSales, isPayment) = nft.getRoles(owner);
+        assertEq(isAdmin, true);
+        assertEq(isWhitelist, false);
+        assertEq(isSales, false);
+        assertEq(isPayment, false);
+
+        vm.prank(owner);
+        nft.addSalesPriceManager(addr2);
+
+        // Check Sales price manager
+        (isAdmin, isWhitelist, isSales, isPayment) = nft.getRoles(addr2);
+        assertEq(isAdmin, false);
+        assertEq(isWhitelist, false);
+        assertEq(isSales, true);
+        assertEq(isPayment, false);
+    }
 }

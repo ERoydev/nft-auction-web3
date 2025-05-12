@@ -160,6 +160,19 @@
   },
   {
     "type": "function",
+    "name": "contractLabel",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "customChainlinkPriceFeedAddress",
     "inputs": [],
     "outputs": [
@@ -231,6 +244,40 @@
         "name": "",
         "type": "bytes32",
         "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRoles",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "_Admin",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "_WhitelistManager",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "_SalesPriceManager",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "_PaymentTokensConfigurator",
+        "type": "bool",
+        "internalType": "bool"
       }
     ],
     "stateMutability": "view"
