@@ -25,10 +25,19 @@ contract EnglishAuction {
 
     uint256 constant private AUCTION_EXTEND_TIME = 5 minutes; // Bid placed in withit 2 minutes before endTime, extends endTime by 5 min
 
-    event AuctionStarted(address indexed seller, uint256 startPrice, uint256 endTime);
-    event NewBid(address indexed bidder, uint256 amount);
-    event AuctionEnded(address winner, uint256 amount);
-    event AuctionExtendedBy5Minutes(uint256 indexed _tokenId, address indexed seller);
+    event AuctionStarted(
+        address indexed seller, 
+        uint256 indexed auctionId, 
+        uint256 startPrice, 
+        uint256 endTime,
+        uint256 highestBid,
+        address highestBidder
+    );
+
+    event AuctionEnded(address indexed winner, uint256 auctionId, uint256 amount);
+    event NewBid(address indexed bidder,uint256 indexed auctionId, uint256 amount);
+    event AuctionExtendedBy5Minutes(uint256 indexed _tokenId, address indexed seller, uint256 newDuration);
+    event Withdraw(address indexed user, uint256 indexed auctionId, uint256 amount);
 
        // Reentrancy guard state variable
     bool private locked;
@@ -65,7 +74,14 @@ contract EnglishAuction {
 
         auction.nft.transferFrom(auction.seller, address(this), _nftTokenId);
 
-        emit AuctionStarted(auction.seller, _startPrice, auction.endTime);
+        emit AuctionStarted(
+            auction.seller, 
+            auctionId, 
+            _startPrice, 
+            auction.endTime,
+            auction.highestBid,
+            auction.highestBidder
+        );
         return auctionId;
     }
 
@@ -82,7 +98,7 @@ contract EnglishAuction {
         // Extend endTime logic here
         if (auction.endTime - block.timestamp <= 2 minutes) {
             auction.endTime += AUCTION_EXTEND_TIME;
-            emit AuctionExtendedBy5Minutes(_auctionId, auction.seller);
+            emit AuctionExtendedBy5Minutes(_auctionId, auction.seller, auction.endTime);
         }
 
         auction.highestBidder = msg.sender;
@@ -91,7 +107,7 @@ contract EnglishAuction {
         uint moneyToGive = auction.highestBid - deposits[_auctionId][auction.highestBidder]; // If not exist => will return default value == 0
         deposits[_auctionId][auction.highestBidder] += moneyToGive;
 
-        emit NewBid(auction.highestBidder, auction.highestBid);
+        emit NewBid(auction.highestBidder, _auctionId, auction.highestBid);
     }
 
     function endAuction(uint256 _auctionId) external nonReentrant {
@@ -112,9 +128,8 @@ contract EnglishAuction {
 
             auction.nft.transferFrom(address(this), auction.highestBidder, auction.nftTokenId);
         }
-        emit AuctionEnded(auction.highestBidder, auction.highestBid);
+        emit AuctionEnded(auction.highestBidder, auction.highestBid, _auctionId);
     }
-
     function withdraw(uint256 _auctionId) external nonReentrant {
         require(_auctionId < nextAuctionId, "Auction with this id doesn't exist");
         Auction storage auction = auctions[_auctionId];
@@ -126,6 +141,7 @@ contract EnglishAuction {
         deposits[_auctionId][msg.sender] = 0;
 
         payable(msg.sender).transfer(amount);
-    }
 
+        emit Withdraw(msg.sender, _auctionId, amount);
+    }
 }

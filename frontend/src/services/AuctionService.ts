@@ -1,5 +1,6 @@
-import { getAuctionWriteContract } from "../utils/contract";
+import { getBrowserProvider, getAuctionWriteContract, auctionReadContract } from "../utils/contract";
 import { approveNFT } from "./nftContractService";
+import { ethers } from "ethers";
 
 
 export async function createAuction(data: any) {
@@ -14,5 +15,38 @@ export async function createAuction(data: any) {
         console.log("Auction created successfully:", tx);
     } catch (error) {
         console.error("Error creating auction:", error);
+    }
+}
+
+export async function fetchActiveAuctions() {
+    try {        
+        const provider = getBrowserProvider();
+
+        const currentBlock = await provider.getBlockNumber();
+        
+        // Fetch all "AuctionStarted" events
+        const events = await auctionReadContract.queryFilter("AuctionStarted", 0, currentBlock);
+
+        const now = Math.floor(Date.now() / 1000); // Current timestamp in seconds
+
+        // Map and filter active auctions
+        const activeAuctions = events
+            .map((event) => {
+                const { seller, startPrice, endTime, highestBid, highestBidder } = (event as any).args;
+
+                return {
+                    seller,
+                    startPrice: ethers.formatEther(startPrice),
+                    endTime: typeof endTime === "bigint" ? Number(endTime) : endTime.toNumber(),
+                    highestBid: ethers.formatEther(highestBid),
+                    highestBidder,
+                };
+            })
+            .filter((auction) => auction.endTime > now); // Filter only active auctions
+
+        return activeAuctions;
+    } catch (error) {
+        console.error("Error fetching auctions:", error);
+        return [];
     }
 }

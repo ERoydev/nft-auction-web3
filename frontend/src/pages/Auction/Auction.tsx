@@ -9,8 +9,6 @@ export default function Auction() {
   const { tokensData } = useFetchTokenUrls(nftIds);
   const location = useLocation(); // Get the current route
 
-  console.log(tokensData)
-
   const handleStartAuction = async (selectedNFT: TokenData, startingPrice: number, duration: number) => {
     const data = {
       tokenId: selectedNFT.tokenId,

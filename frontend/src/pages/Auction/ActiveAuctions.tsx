@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { fetchActiveAuctions } from "../../services/AuctionService";
+import { useFetchActiveAuctions } from "../../hooks/useFetchActiveAuctions";
 
 interface AuctionData {
   id: number;
@@ -33,6 +35,11 @@ const mockAuctions: AuctionData[] = [
 ];
 
 export default function ActiveAuction() {
+  const { loading, auctions } = useFetchActiveAuctions();
+
+
+  console.log("Active Auctions:", auctions);
+
   const formatTimeLeft = (endTime: string) => {
     const end = new Date(endTime).getTime();
     const now = new Date().getTime();

@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "../src/Auction.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "forge-std/console.sol";
+import {NFT} from "../src/NFT.sol";
 
 // Simple mock NFT contract
 contract MockNFT is ERC721 {

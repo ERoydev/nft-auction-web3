@@ -166,12 +166,20 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
         return getETHPriceForUSDCAmount(info.priceInUSDC);
     }
 
+    function transferFrom(address from, address to, uint256 tokenId) public virtual override {
+        // I use this to apply deletion logic from _ownedTokens when for example i create action and trasnfer this token to another contract
+        super.transferFrom(from, to, tokenId);
+
+        _beforeTokenTransfer(from, to, tokenId);
+    }
+
+
     // Util function
     function _beforeTokenTransfer(
         address from,
         address to,
         uint256 tokenId
-    ) internal  {
+    ) internal {
         if (from != address(0)) {
             _removeTokenFromOwnerEnumeration(from, tokenId);
         }
@@ -181,7 +189,6 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
     }
 
     function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
-        // TODO: If i need to handle transfers i should add _removeTokenFromEnumeration type of functionality
         uint256 length = _ownedTokens[to].length;
         _ownedTokens[to].push(tokenId);
         _ownedTokensIndex[tokenId] = length; 
