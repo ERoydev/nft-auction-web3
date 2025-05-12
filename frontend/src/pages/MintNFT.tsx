@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 import { uploadFileToPinata } from "../services/Pinata";
 import { mintNFT } from "../services/nftContractService";
 import { getMerkleProof } from "../services/WhitelistService";
-import { getUserAddress } from "../utils/getUserAddress";
+import { useWallet } from "../context/Wallet/WalletContext";
 
 export default function MintNFT() {
   const [name, setName] = useState("");
@@ -12,6 +12,7 @@ export default function MintNFT() {
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isMinting, setIsMinting] = useState(false);
+  const { currentAccount} = useWallet();
 
   const navigate = useNavigate();
 
@@ -46,7 +47,12 @@ export default function MintNFT() {
           image
         );
 
-        const userAddress = await getUserAddress();
+        const userAddress = currentAccount;
+        if (!userAddress) {
+          alert("No wallet connected. Please connect your wallet.");
+          return;
+        }
+        
         console.log("User Address:", userAddress);
         const merkleProof = await getMerkleProof(userAddress);
         console.log("Merkle Proof:", merkleProof);

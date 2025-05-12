@@ -89,9 +89,6 @@ npm install</code></pre>
     <li>Frontend hosted on <a href="https://render.com">Render</a></li>
   </ul>
 
-  <h2>License</h2>
-  <p>This project is <strong>not</strong> licensed for commercial use. Do not use it for business purposes.</p>
-
 </body>
 </html>
 

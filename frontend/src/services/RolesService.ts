@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import { ROLES } from "../pages/admin";
-import { provider, contract } from "../utils/contract";
+import { provider, nftContract } from "../utils/contract";
 import { addToWhitelist, updateTheRoot } from "./WhitelistService";
 
 
@@ -15,7 +15,7 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
             console.log("Assigning Whitelist Manager role to:", userAddress);
 
             const signer = await provider.getSigner();
-            const contractWithSigner = contract.connect(signer);
+            const contractWithSigner = nftContract.connect(signer);
 ;
 
             const result = await contractWithSigner.addWhitelistManager(userAddress);
@@ -40,10 +40,10 @@ export const fetchRolesFromSmartContract = async (account: string) => {
     }
   
     try {
-      const isAdmin = await contract.isAdmin(account);
-      const isWhitelistManager = await contract.isWhitelistManager(account);
-      const isSalesPriceManager = await contract.isSalesPriceManager(account);
-      const isPaymentTokensConfigurator = await contract.isPaymentTokensConfigurator(account);
+      const isAdmin = await nftContract.isAdmin(account);
+      const isWhitelistManager = await nftContract.isWhitelistManager(account);
+      const isSalesPriceManager = await nftContract.isSalesPriceManager(account);
+      const isPaymentTokensConfigurator = await nftContract.isPaymentTokensConfigurator(account);
   
       return {
         isAdmin,

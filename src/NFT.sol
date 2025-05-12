@@ -37,7 +37,10 @@ Core Logic:
 contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsumer, ReentrancyGuard  {
     /// @dev links a token's unique tokenId to its metadata URL stored on nft.storage service
     uint256 private _currentTokenId;
-    
+
+    /// @dev to have a name when deployed
+    string public contractLabel;
+
     /// @dev track the tokens each address owns
     mapping(address => uint256[]) private _ownedTokens;
     mapping(uint256 => uint256) private _ownedTokensIndex; // inside the array of tokens that address holds gives the index of the specific tokenId (tokenId => index)
@@ -48,6 +51,7 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
 
     constructor() ERC721("MyToken", "MTK") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender); // contract creator is DEFAULT_ADMIN
+        contractLabel = "NFT Contract v1";
     }
 
     // ================================================ Price and Payment Tokens this requires me to deploy on a TESTNET

@@ -15,6 +15,8 @@ contract EnglishAuction {
         bool auctionEnded;
     }
 
+    string public contractLabel;
+
     mapping(uint256 => Auction) public auctions; // index => Auction struct
     mapping(uint256 => mapping(address => uint256)) public deposits; // auction index => deposits
 
@@ -37,6 +39,10 @@ contract EnglishAuction {
         locked = true;
         _;
         locked = false;
+    }
+
+    constructor() {
+        contractLabel = "Auction Contract v1";
     }
 
     function createAuction(

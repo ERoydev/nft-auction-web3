@@ -2,14 +2,16 @@ import { ethers } from 'ethers';
 import contractABI from "../abi/NFT.json";
 
 
-// Set up contract ABI and address
-const contractAddress = import.meta.env.VITE_NFT_CONTRACT_ADDRESS; 
+// Connect to Sepolia
+const provider = new ethers.JsonRpcProvider(import.meta.env.VITE_SEPOLIA_RPC); 
 
-// Connect to Ethereum
-const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545"); // Local Anvil RPC URL
+// Contract addresses
+const nftContractAddress = import.meta.env.VITE_NFT_CONTRACT_ADDRESS;
+const auctionContractAddress = import.meta.env.VITE_AUCTION_CONTRACT_ADDRESS;
+
 
 // Create contract instance
-const contract = new ethers.Contract(contractAddress, contractABI, provider);
+const nftContract = new ethers.Contract(nftContractAddress, contractABI, provider);
 
 
-export { provider, contract };
+export { provider, nftContract };

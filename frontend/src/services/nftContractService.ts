@@ -1,9 +1,9 @@
-import { provider, contract } from "../utils/contract";
+import { provider, nftContract } from "../utils/contract";
 
 
 export async function mintNFT(tokenMetadataURL: string, merkleProof: Uint8Array[]) {
     const signer = await provider.getSigner();
-    const contractWithSigner = contract.connect(signer);
+    const contractWithSigner = nftContract.connect(signer);
 
     try {
         const tx = await contractWithSigner.safeMint(tokenMetadataURL, merkleProof);
@@ -19,7 +19,7 @@ export async function getNFTsByOwner(ownerAddress: string) {
     // Get all token IDs
     // Fetch each tokenId to get his URL
     try {
-        const tokenIds = await contract.tokensOfOwner(ownerAddress);
+        const tokenIds = await nftContract.tokensOfOwner(ownerAddress);
 
         // TODO: There could be a problem if tokenID is too large for JavaScript numbers when i convert them to number(token) array
         const tokenIdsArray = tokenIds.map((token: any) => Number(token));
@@ -31,7 +31,7 @@ export async function getNFTsByOwner(ownerAddress: string) {
 
 export async function getTokenURLFromTokenId(tokenId: number) {
     try {
-        const tokenURL = await contract.getTokenURL(tokenId);
+        const tokenURL = await nftContract.getTokenURL(tokenId);
         return tokenURL;
     } catch (error) {
         console.error("Error fetching token URL:", error);
