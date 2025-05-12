@@ -158,6 +158,7 @@ app.post('/roles', async (req, res) => {
     }
 });
 
+// Used to delete the address from the database, because he need to fetch his roles again. Used after admin has made an operation that changes the roles of the user
 app.post('/deleteAddress', (req, res) => {
     const { address } = req.body;
 
@@ -181,7 +182,6 @@ app.post('/deleteAddress', (req, res) => {
         console.error('Error deleting address:', err);
         return res.status(500).send('Error deleting address');
     }
-    
 })
 
 // Start the server

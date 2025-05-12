@@ -3,6 +3,7 @@ import { getNFTsByOwner, getTokenURLFromTokenId } from "../services/nftContractS
 import { ethers } from "ethers";
 import { useWallet } from "../context/Wallet/WalletContext";
 import { Link } from "react-router-dom";
+import Spinner from "../components/reusable/Spinner";
 
 interface TokenData {
   name: string;
@@ -13,8 +14,10 @@ interface TokenData {
 export default function ProfileMenu() {
   const { currentAccount, nftIds} = useWallet();
   const [tokensData, setTokensData] = useState<TokenData[]>([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   const fetchTokenURLs = async () => {
+    setLoading(true);
     const allTokenData: TokenData[] = [];
 
     for(let i = 0;i < nftIds.length; i++){
@@ -30,6 +33,7 @@ export default function ProfileMenu() {
       allTokenData.push(tokenData);
     }
     setTokensData(allTokenData);
+    setLoading(false);
   }
 
   useEffect(() => { 
@@ -50,6 +54,8 @@ export default function ProfileMenu() {
         <p className="text-center text-gray-600 mb-8">
           Below is a list of NFTs you own. Click on an NFT to view more details or manage it.
         </p>
+
+        {loading && <Spinner />}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {tokensData.map((nft, idx) => (

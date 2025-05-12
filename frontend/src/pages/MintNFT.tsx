@@ -32,7 +32,8 @@ export default function MintNFT() {
         return;
       }
 
-      const { metadataURL } = await uploadFileToPinata(name, description, image);
+      // TODO: Price is string, should be number
+      const { metadataURL } = await uploadFileToPinata(name, description, image, price);
 
       const userAddress = currentAccount;
       if (!userAddress) {

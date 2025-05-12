@@ -10,6 +10,7 @@ export async function uploadFileToPinata(
     name: string,
     description: string,
     image: File,
+    price: string,
 ) {
     try {   
         // 1. Upload the image to Pinata
@@ -22,6 +23,7 @@ export async function uploadFileToPinata(
             name,
             description,
             image: imageUrl,
+            price: price,
         };
 
         const metadataBlob = new Blob([JSON.stringify(metadata)], 
