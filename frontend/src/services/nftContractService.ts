@@ -34,3 +34,16 @@ export async function getTokenURLFromTokenId(tokenId: number) {
         console.error("Error fetching token URL:", error);
     }
 }
+
+export async function approveNFT(tokenId: number) {
+    try {
+        const contractWithSigner = await getNFtWriteContract();
+        const _contractToApprove = import.meta.env.VITE_AUCTION_CONTRACT_ADDRESS;
+
+        const tx = await contractWithSigner.approve(_contractToApprove, tokenId);
+        await tx.wait();
+        console.log("NFT approved successfully:", tx);
+    } catch (error) {
+        console.log("Error approving NFT:", error);
+    }
+}

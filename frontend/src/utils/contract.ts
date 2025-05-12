@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import nftContractABI from "../abi/NFT.json";
+import auctionContractABI from "../abi/EnglishAuction.json";
 
 
 // Contract addresses
@@ -11,6 +12,7 @@ const jsonRpcProvider = new ethers.JsonRpcProvider(import.meta.env.VITE_SEPOLIA_
 
 // 2. Contract with read-only provider
 const nftReadContract = new ethers.Contract(nftContractAddress, nftContractABI, jsonRpcProvider);
+const auctionReadContract = new ethers.Contract(auctionContractAddress, auctionContractABI, jsonRpcProvider);
 
 // 3. Wallet provider (for frontend)
 const getBrowserProvider = () => {
@@ -27,4 +29,21 @@ const getNFtWriteContract = async () => {
     return new ethers.Contract(nftContractAddress, nftContractABI, signer);
 }
 
-export { jsonRpcProvider, nftReadContract, getBrowserProvider, getNFtWriteContract };
+const getAuctionWriteContract = async () => {
+  const provider = getBrowserProvider();
+  const signer = await provider.getSigner();
+  return new ethers.Contract(auctionContractAddress, auctionContractABI, signer);
+}
+
+export { 
+  jsonRpcProvider, 
+
+  // Read-only contracts
+  nftReadContract, 
+  auctionReadContract,
+
+  // Write contracts
+  getBrowserProvider, 
+  getNFtWriteContract, 
+  getAuctionWriteContract 
+};

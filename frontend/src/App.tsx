@@ -7,14 +7,17 @@ import MintNFT from "./pages/MintNFT";
 import Footer from "./components/common/Footer";
 import Home from "./pages/Home";
 import Company from "./pages/Company";
-import ProfileMenu from "./pages/ProfileMenu";
+import ProfileMenu from "./pages/Profile/ProfileMenu";
 import AdminPanel from "./pages/admin/AdminPanel";
-import Auction from "./pages/Auction";
+import Auction from "./pages/Auction/Auction";
 import { WalletProvider } from "./context/Wallet/WalletContext";
 import AuthenticatedRoute from "./guards/AuthenticatedRoute";
 import { useState } from "react";
 import ErrorMessageComponent from "./components/reusable/ErrorMessageComponent";
 import AdminRoute from "./guards/AdminGuard";
+import StartAuction from "./pages/Auction/StartAuction";
+import ActiveAuction from "./pages/Auction/ActiveAuctions";
+import PastAuctions from "./pages/Auction/PastAuctions";
 
 function App() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -33,13 +36,18 @@ function App() {
 
               {/* Routes for Logged-In Wallets */}
               <Route
+                // Auction Routes
                 path="/auction"
                 element={
                   <AuthenticatedRoute setErrorMessage={setErrorMessage}>
                     <Auction />
                   </AuthenticatedRoute>
                 }
-              />
+                >
+                  <Route path="start" element={<StartAuction  />} />
+                  <Route path="active" element={<ActiveAuction />} />
+                  <Route path="past" element={<PastAuctions />} />
+                </Route>
 
               <Route path="/mintnft" element={
                 <AuthenticatedRoute setErrorMessage={setErrorMessage}>

@@ -1,44 +1,12 @@
-import { useState, useEffect} from "react";
-import { getNFTsByOwner, getTokenURLFromTokenId } from "../services/nftContractService";
-import { ethers } from "ethers";
-import { useWallet } from "../context/Wallet/WalletContext";
+import { useWallet } from "../../context/Wallet/WalletContext";
 import { Link } from "react-router-dom";
-import Spinner from "../components/reusable/Spinner";
+import Spinner from "../../components/reusable/Spinner";
+import { useFetchTokenUrls } from "../../hooks/useFetchTokenUrls";
 
-interface TokenData {
-  name: string;
-  description: string;
-  image: string;
-}
 
 export default function ProfileMenu() {
-  const { currentAccount, nftIds} = useWallet();
-  const [tokensData, setTokensData] = useState<TokenData[]>([]);
-  const [loading, setLoading] = useState(true); // Add loading state
-
-  const fetchTokenURLs = async () => {
-    setLoading(true);
-    const allTokenData: TokenData[] = [];
-
-    for(let i = 0;i < nftIds.length; i++){
-      const tokenURL = await getTokenURLFromTokenId(nftIds[i]);
-      
-      const res = await fetch(tokenURL);
-      if(!res.ok) {
-        console.error("Error fetching token URL:", res.statusText);
-        continue;
-      }
-
-      const tokenData: TokenData = await res.json();    
-      allTokenData.push(tokenData);
-    }
-    setTokensData(allTokenData);
-    setLoading(false);
-  }
-
-  useEffect(() => { 
-    fetchTokenURLs();
-  }, [])
+  const { nftIds} = useWallet();
+  const { loading, tokensData } = useFetchTokenUrls(nftIds);
 
   return (
     <div className="flex flex-col min-h-screen py-22">
