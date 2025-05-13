@@ -5,8 +5,8 @@ import { useFetchTokenUrls } from "../../hooks/useFetchTokenUrls";
 
 
 export default function ProfileMenu() {
-  const { nftIds} = useWallet();
-  const { loading, tokensData } = useFetchTokenUrls(nftIds);
+  const { nftIds, currentAccount} = useWallet();
+  const { loading, tokensData } = useFetchTokenUrls(currentAccount);
 
   return (
     <div className="flex flex-col min-h-screen py-22">

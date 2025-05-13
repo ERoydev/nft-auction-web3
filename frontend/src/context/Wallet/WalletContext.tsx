@@ -21,6 +21,7 @@ interface WalletContextType {
   isSalesPriceManager: boolean;
   isPaymentTokensConfigurator: boolean; 
   nftIds: number[];
+  setTokenIdsOwned: () => Promise<void>; // Function to set NFT IDs
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -138,6 +139,7 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
         isSalesPriceManager: roles.isSalesPriceManager,
         isPaymentTokensConfigurator: roles.isPaymentTokensConfigurator,
         nftIds: nftIds, // Provide the NFT IDs to the context
+        setTokenIdsOwned, // Provide the function to set NFT IDs
       }}
     >
       {children}

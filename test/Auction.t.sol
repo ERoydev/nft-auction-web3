@@ -29,6 +29,16 @@ contract EnglishAuctionTest is Test {
     uint256 public nftId = 1;
     uint256 public auctionId;
 
+    
+    event AuctionStarted(
+        address indexed seller, 
+        uint256 indexed auctionId, 
+        uint256 startPrice, 
+        uint256 endTime,
+        uint256 highestBid,
+        address highestBidder
+    );
+
     function setUp() public {
         auction = new EnglishAuction();
         nft = new MockNFT();
@@ -65,6 +75,9 @@ contract EnglishAuctionTest is Test {
         testingNft.mint(seller, testingNftId);
         testingNft.approve(address(testingAuction), testingNftId);
 
+        vm.expectEmit(true, true, true, true);
+        emit AuctionStarted(seller, auctionId, 1 ether, block.timestamp + 10 * 1 minutes, 1 ether, address(0));
+ 
         uint256 testAuctionId = testingAuction.createAuction(address(testingNft), testingNftId, 1 ether, 10);
 
         (

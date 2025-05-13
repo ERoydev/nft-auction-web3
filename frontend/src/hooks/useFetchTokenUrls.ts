@@ -1,40 +1,60 @@
-// useFetch.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import TokenData from '../intefaces/TokenData';
-import { getTokenURLFromTokenId } from '../services/nftContractService';
+import { getNFTsByOwner, getTokenURLFromTokenId } from '../services/nftContractService';
 
-
-export function useFetchTokenUrls(nftIds: any) {
+export function useFetchTokenUrls(account: string | null) {
     const [loading, setLoading] = useState(true);
-
     const [tokensData, setTokensData] = useState<TokenData[]>([]);
+    const [nftIds, setNftIds] = useState<number[]>([]); // State to store NFT IDs
 
-    const fetchTokenURLs = async () => {
+
+
+    const setTokenIdsOwned = async () => {
+        if (!account) {
+            console.error('No account connected');
+            return [];
+        }
+        const tokenIds = await getNFTsByOwner(account);
+        setNftIds(tokenIds); // Update state with fetched NFT IDs
+        return tokenIds; // Return the fetched token IDs
+    };
+
+    const fetchTokenURLs = async (tokenIds: number[]) => {
         setLoading(true);
         const allTokenData: TokenData[] = [];
 
-        for(let i = 0;i < nftIds.length; i++){
-          const tokenURL = await getTokenURLFromTokenId(nftIds[i]);
-          
-          const res = await fetch(tokenURL);
-          if(!res.ok) {
-            console.error("Error fetching token URL:", res.statusText);
-            continue;
-          }
+        for (let i = 0; i < tokenIds.length; i++) {
+            const tokenURL = await getTokenURLFromTokenId(tokenIds[i]);
 
-          const tokenData: TokenData = await res.json();   
-          tokenData.tokenId = i; 
-          allTokenData.push(tokenData);
+            const res = await fetch(tokenURL);
+            if (!res.ok) {
+                console.error("Error fetching token URL:", res.statusText);
+                continue;
+            }
+
+            const tokenData: TokenData = await res.json();
+            tokenData.tokenId = tokenIds[i]; // Use the correct tokenId from the fetched list
+            allTokenData.push(tokenData);
         }
         setTokensData(allTokenData);
         setLoading(false);
-    } 
+    };
 
     useEffect(() => {
-      if (nftIds.length > 0) {
-        fetchTokenURLs();
-      }
-    }, [nftIds]);
+        const fetchData = async () => {
+            const tokenIds = await setTokenIdsOwned(); // Wait for token IDs to be fetched
+            if (tokenIds && tokenIds.length > 0) {
+                await fetchTokenURLs(tokenIds); // Pass the fetched token IDs to fetchTokenURLs
+            } else {
+                setLoading(false); // No tokens, stop loading
+            }
+        };
 
-    return {loading, tokensData};
+        fetchData();
+    }, [account]); // Re-run when the account changes
+
+    // Use useMemo to memoize the tokensData and avoid unnecessary re-fetching
+    const memoizedTokensData = useMemo(() => tokensData, [tokensData]);
+
+    return { loading, tokensData: memoizedTokensData };
 }

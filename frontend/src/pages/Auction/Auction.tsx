@@ -5,9 +5,10 @@ import { useWallet } from "../../context/Wallet/WalletContext";
 import { createAuction } from "../../services/AuctionService";
 
 export default function Auction() {
-  const { nftIds } = useWallet();
-  const { tokensData } = useFetchTokenUrls(nftIds);
+  const { nftIds, currentAccount } = useWallet();
+  const { tokensData } = useFetchTokenUrls(currentAccount);
   const location = useLocation(); // Get the current route
+  const { setTokenIdsOwned } = useWallet();
 
   const handleStartAuction = async (selectedNFT: TokenData, startingPrice: number, duration: number) => {
     const data = {
@@ -18,6 +19,7 @@ export default function Auction() {
 
     await createAuction(data);
     alert(`Auction started for ${selectedNFT.name}!`);
+    setTokenIdsOwned(); // Refresh the token IDs after starting an auction
   };
 
   return (
@@ -62,7 +64,7 @@ export default function Auction() {
             </svg>
             Active Auctions
           </Link>
-          <Link
+          {/* <Link
             to="/auction/past"
             className={`flex items-center gap-3 text-lg font-semibold rounded-lg p-3 ${
               location.pathname === "/auction/past"
@@ -78,7 +80,7 @@ export default function Auction() {
               <path d="M192 0c-41.8 0-77.4 26.7-90.5 64L64 64C28.7 64 0 92.7 0 128L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64l-37.5 0C269.4 26.7 233.8 0 192 0zm0 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM112 192l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z" />
             </svg>
             Past Auctions
-          </Link>
+          </Link> */}
         </nav>
       </div>
       
