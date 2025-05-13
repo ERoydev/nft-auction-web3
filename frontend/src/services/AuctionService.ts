@@ -60,6 +60,44 @@ export async function fetchActiveAuctions() {
     }
 }
 
+export async function fetchNonActiveAuctions() {
+    try {
+        const provider = getBrowserProvider();
+        const currentBlock = await provider.getBlockNumber();
+
+        // Fetch all "AuctionStarted" events
+        const events = await auctionReadContract.queryFilter("AuctionEnded", 0, currentBlock);
+
+        console.log("events", events);
+        // Fetch the latest state of each auction
+        const nonActiveAuctions = await Promise.all(
+            events.map(async (event: any) => {
+                const auctionId = event.args.auctionId;
+                console.log("auctionId", Number(auctionId));
+                // // Query the latest state of the auction from the contract
+                // const auctionData = await auctionReadContract.getAuction(auctionId);
+                // console.log("auctionData", auctionData);
+                // return {
+                //     seller: auctionData.seller,
+                //     auctionId: Number(auctionId),
+                //     startPrice: ethers.formatEther(auctionData.startPrice),
+                //     endTime: Number(auctionData.endTime),
+                //     highestBid: ethers.formatEther(auctionData.highestBid),
+                //     highestBidder: auctionData.highestBidder,
+                //     auctionEnded: auctionData.auctionEnded, // Fetch auctionEnded status
+                //     imageurl: "", // Placeholder for image URL
+                //     nftName: "", // Placeholder for NFT name
+                // };
+            })
+        );
+
+        // Filter only non-active auctions (where auctionEnded is true)
+        return nonActiveAuctions
+    } catch (error) {
+        console.error("Error fetching non-active auctions:", error);
+        return [];
+    }
+}
 
 export async function placeBidAuction(auctionId: number, bidAmount: string) {
     try {
@@ -72,6 +110,20 @@ export async function placeBidAuction(auctionId: number, bidAmount: string) {
         return true;
     } catch (error) {
         console.error("Error placing bid:", error);
+        return false;
+    }
+}
+
+export async function endAuction(auctionId: number) {
+    try {
+        const contractWithSigner = await getAuctionWriteContract();
+
+        const tx = await contractWithSigner.endAuction(auctionId);
+        await tx.wait();
+        console.log("Auction ended successfully:", tx);
+        return true;
+    } catch (error) {
+        console.error("Error ending auction:", error);
         return false;
     }
 }

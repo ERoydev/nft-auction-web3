@@ -7,8 +7,6 @@ export function useFetchTokenUrls(account: string | null) {
     const [tokensData, setTokensData] = useState<TokenData[]>([]);
     const [nftIds, setNftIds] = useState<number[]>([]); // State to store NFT IDs
 
-
-
     const setTokenIdsOwned = async () => {
         if (!account) {
             console.error('No account connected');

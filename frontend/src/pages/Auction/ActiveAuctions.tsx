@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useFetchActiveAuctions } from "../../hooks/useFetchActiveAuctions";
 import { formatUnixTimestamp } from "../../utils/formatUnixTimestamp";
-import { placeBidAuction } from "../../services/AuctionService";
+import { endAuction, placeBidAuction } from "../../services/AuctionService";
 import { useError } from "../../hooks/useError";
+import { useWallet } from "../../context/Wallet/WalletContext";
 
 interface AuctionDetails {
   seller: string;
@@ -15,7 +16,9 @@ interface AuctionDetails {
   nftName: string;
 }
 
+
 export default function ActiveAuction() {
+  const {currentAccount} = useWallet();
   const { loading, auctions: fetchedAuctions, refetch } = useFetchActiveAuctions(); // Use the hook directly
   const [auctions, setAuctions] = useState<AuctionDetails[]>([]);
   const [selectedAuction, setSelectedAuction] = useState<AuctionDetails | null>(null);
@@ -52,7 +55,21 @@ export default function ActiveAuction() {
     setSelectedAuction(null);
     // ✅ Refetch auctions after placing a bid
     refetch(); // Trigger the hook to fetch the latest auctions
-  };
+  };  
+
+  const handleEndAuction = async () => {
+    if (!selectedAuction) return;
+
+    const endAuctionResult = await endAuction(selectedAuction.auctionId);
+
+    if (!endAuctionResult) {
+      showError("Failed to end auction. Please try again.");
+      return;
+    }
+    
+    setSelectedAuction(null);
+    refetch();
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -94,7 +111,7 @@ export default function ActiveAuction() {
           <div className="bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-2xl relative">
             <button
               onClick={closeModal}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+              className="hover:cursor-pointer hover:scale-125 absolute top-4 right-4 text-gray-500 hover:text-gray-800"
             >
               ✖
             </button>
@@ -116,13 +133,25 @@ export default function ActiveAuction() {
             <p>
               <strong>Ends On:</strong> {formatUnixTimestamp(selectedAuction.endTime)}
             </p>
-            <div className="mt-4">
-              <button
-                onClick={handlePlaceBid}
-                className="hover:cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-              >
-                Increment Bid with {BID_VALUE} ETH
-              </button>
+            <div className="mt-4 flex justify-between">
+              {currentAccount !== selectedAuction.seller.toLocaleLowerCase() && (
+                <button
+                  onClick={handlePlaceBid}
+                  className="hover:cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+                >
+                  Increment Bid with {BID_VALUE} ETH
+                </button>
+
+              )}
+
+              {(currentAccount === selectedAuction.seller.toLocaleLowerCase() && selectedAuction.endTime < Math.floor(Date.now() / 1000)) && (
+                <button
+                  onClick={handleEndAuction}
+                  className="hover:cursor-pointer bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-400 transition"
+                >
+                  End Auction
+                </button>
+              )}
             </div>
             {errorMessage && (
               <p className="text-red-500 text-sm mt-2">{errorMessage}</p>

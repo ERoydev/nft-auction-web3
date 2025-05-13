@@ -34,12 +34,12 @@ contract EnglishAuction {
         address highestBidder
     );
 
-    event AuctionEnded(address indexed winner, uint256 auctionId, uint256 amount);
+    event AuctionEnded(address indexed winner, uint256 indexed auctionId, uint256 amount);
     event NewBid(address indexed bidder,uint256 indexed auctionId, uint256 amount);
     event AuctionExtendedBy5Minutes(uint256 indexed _tokenId, address indexed seller, uint256 newDuration);
     event Withdraw(address indexed user, uint256 indexed auctionId, uint256 amount);
 
-       // Reentrancy guard state variable
+    // Reentrancy guard state variable
     bool private locked;
 
     // Modifier to prevent reentrancy

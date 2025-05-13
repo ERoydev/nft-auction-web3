@@ -17,7 +17,7 @@ contract Deploy is Script {
         ERC20Mock erc20Mock = new ERC20Mock();
 
         // Deploy the Mock Chainlink Price Feed;
-        MockV3Aggregator chainlinkPriceFeed = new MockV3Aggregator(8, 0);
+        MockV3Aggregator chainlinkPriceFeed = new MockV3Aggregator(8, 2000 * 10**8); // price of ETH in USD
 
         // Generate merkle Root for the admin address
         bytes32 merkleRoot = keccak256(abi.encodePacked(adminAddress));

@@ -46,7 +46,7 @@ function App() {
                 >
                   <Route path="start" element={<StartAuction  />} />
                   <Route path="active" element={<ActiveAuction />} />
-                  {/* <Route path="past" element={<PastAuctions />} /> */}
+                  <Route path="past" element={<PastAuctions />} />
                 </Route>
 
               <Route path="/mintnft" element={

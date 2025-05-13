@@ -1,3 +1,4 @@
+import { formatEther, formatUnits, parseEther, parseUnits } from "ethers";
 import { getBrowserProvider, nftReadContract, getNFtWriteContract } from "../utils/contract";
 
 export async function mintNFT(tokenMetadataURL: string, merkleProof: Uint8Array[], priceInUSDCx: number) {
@@ -45,5 +46,40 @@ export async function approveNFT(tokenId: number) {
         console.log("NFT approved successfully:", tx);
     } catch (error) {
         console.log("Error approving NFT:", error);
+    }
+}
+
+export async function purchaseNFT(tokenId: number, payWithETH: boolean, merkleProof: Uint8Array[], priceInUsdc: string) {
+    try {
+        const contractWithSigner = await getNFtWriteContract();
+
+        let tx;
+        if (payWithETH) {
+            // If paying with ETH, convert the price to Wei, 
+            const ethPriceInWei = await contractWithSigner.getETHPriceForUSDCAmount(Number(priceInUsdc));
+
+            tx = await contractWithSigner.purchaseNFT(tokenId, payWithETH, merkleProof, { value: ethPriceInWei });
+        } else {
+            // If paying with USDC, no need to include msg.value
+            tx = await contractWithSigner.purchaseNFT(tokenId, payWithETH, merkleProof);
+        }
+
+        // await tx.wait();
+        console.log("NFT purchased successfully:", tx);
+        return true;
+    } catch (error) {
+        console.error("Error purchasing NFT:", error);
+        return false;
+    }
+}
+
+export async function getNFTPriceInEth(priceInUsdc: string) {
+    try {
+        const contractWithSigner = await getNFtWriteContract();
+        const ethPriceInWei = await contractWithSigner.getETHPriceForUSDCAmount(Number(priceInUsdc));
+        const ethPriceInEth = formatUnits(ethPriceInWei, 18); // to convert to ETH
+        return ethPriceInEth;
+    } catch (error) {
+        console.error("Error fetching NFT price in ETH:", error);
     }
 }

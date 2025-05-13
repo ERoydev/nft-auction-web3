@@ -37,6 +37,7 @@ export function useFetchActiveAuctions() {
                 const tokenData = await res.json();
                 activeAuctions[i].imageurl = tokenData.image;
                 activeAuctions[i].nftName = tokenData.name;
+                activeAuctions[i].seller = activeAuctions[i].seller.toLocaleLowerCase();
             } catch (error) {
                 console.error("Error fetching token metadata:", error);
             }
