@@ -1,5 +1,5 @@
 import { formatEther, formatUnits, parseEther, parseUnits } from "ethers";
-import { getBrowserProvider, nftReadContract, getNFtWriteContract } from "../utils/contract";
+import { getBrowserProvider, nftReadContract, getNFtWriteContract, getUsdcWriteContract } from "../utils/contract";
 
 export async function mintNFT(tokenMetadataURL: string, merkleProof: Uint8Array[], priceInUSDCx: number) {
     const contractWithSigner = await getNFtWriteContract();
@@ -61,10 +61,14 @@ export async function purchaseNFT(tokenId: number, payWithETH: boolean, merklePr
             tx = await contractWithSigner.purchaseNFT(tokenId, payWithETH, merkleProof, { value: ethPriceInWei });
         } else {
             // If paying with USDC, no need to include msg.value
+            // if paying with USDC i need to approve the contract to spend USDC
+            const usdcContractWithSigner = await getUsdcWriteContract();
+            usdcContractWithSigner.approve(import.meta.env.VITE_NFT_CONTRACT_ADDRESS, priceInUsdc);
+
             tx = await contractWithSigner.purchaseNFT(tokenId, payWithETH, merkleProof);
         }
 
-        // await tx.wait();
+        await tx.wait();
         console.log("NFT purchased successfully:", tx);
         return true;
     } catch (error) {

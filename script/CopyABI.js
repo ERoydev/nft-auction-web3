@@ -8,10 +8,6 @@ const path = require('path');
 function copyABI(contract) {
     const fileName = contract;
     let contractName = contract;
-
-    if (fileName === "Auction") {
-        contractName = "EnglishAuction";
-    }
  
     const sourcePath = path.join(__dirname, `../out/${fileName}.sol/${contractName}.json`);
     const destinationPath = path.join(__dirname, `../frontend/src/abi/${contractName}.json`);
@@ -47,3 +43,4 @@ function copyABI(contract) {
 // Copy both NFT and Auction ABIs
 copyABI("NFT");
 copyABI("Auction");
+copyABI("ERC20Mock");

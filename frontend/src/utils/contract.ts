@@ -1,11 +1,13 @@
 import { ethers } from 'ethers';
 import nftContractABI from "../abi/NFT.json";
 import auctionContractABI from "../abi/EnglishAuction.json";
+import usdcContractABI from "../abi/ERC20Mock.json";
 
 
 // Contract addresses
 const nftContractAddress = import.meta.env.VITE_NFT_CONTRACT_ADDRESS;
 const auctionContractAddress = import.meta.env.VITE_AUCTION_CONTRACT_ADDRESS;
+const usdcContractAddress = import.meta.env.VITE_USDC_CONTRACT_ADDRESS;
 
 // 1. Read-only provider
 const jsonRpcProvider = new ethers.JsonRpcProvider(import.meta.env.VITE_SEPOLIA_RPC);
@@ -35,6 +37,12 @@ const getAuctionWriteContract = async () => {
   return new ethers.Contract(auctionContractAddress, auctionContractABI, signer);
 }
 
+const getUsdcWriteContract = async () => {
+  const provider = getBrowserProvider();
+  const signer = await provider.getSigner();
+  return new ethers.Contract(usdcContractAddress, usdcContractABI, signer);
+}
+
 export { 
   jsonRpcProvider, 
 
@@ -45,5 +53,6 @@ export {
   // Write contracts
   getBrowserProvider, 
   getNFtWriteContract, 
-  getAuctionWriteContract 
+  getAuctionWriteContract,
+  getUsdcWriteContract
 };

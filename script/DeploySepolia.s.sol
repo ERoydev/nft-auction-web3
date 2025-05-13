@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "forge-std/Script.sol";
 import {NFT} from "../src/NFT.sol";
-import {EnglishAuction} from  "../src/Auction.sol";
+import {EnglishAuction} from  "../src/EnglishAuction.sol";
 
 /*
 Deploy with the following command in terminal:
