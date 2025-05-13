@@ -87,7 +87,6 @@ export default function Auction() {
       <div className="flex-grow p-6">
         <Outlet context={{ tokensData, handleStartAuction }} />
       </div>
-      {/* <StartAuction handleStartAuction={handleStartAuction} /> */}
     </div>
   );
 }

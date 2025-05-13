@@ -1,30 +1,23 @@
 import { useState, useEffect } from "react";
-import { useFetchActiveAuctions } from "../../hooks/useFetchActiveAuctions";
+import { useFetchAuctions } from "../../hooks/useFetchAuctions";
 import { formatUnixTimestamp } from "../../utils/formatUnixTimestamp";
 import { endAuction, placeBidAuction } from "../../services/AuctionService";
 import { useError } from "../../hooks/useError";
 import { useWallet } from "../../context/Wallet/WalletContext";
-
-interface AuctionDetails {
-  seller: string;
-  startPrice: string;
-  endTime: number;
-  highestBid: string;
-  auctionId: number;
-  highestBidder: string;
-  imageurl: string;
-  nftName: string;
-}
+import { AuctionDetails } from "../../intefaces/AuctionDetails";
+import AuctionCard from "./reusable/AuctionCard";
+import AuctionModal from "./reusable/AuctionModal";
 
 
 export default function ActiveAuction() {
   const {currentAccount} = useWallet();
-  const { loading, auctions: fetchedAuctions, refetch } = useFetchActiveAuctions(); // Use the hook directly
+  const { loading, auctions: fetchedAuctions, refetch } = useFetchAuctions(); // Use the hook directly
   const [auctions, setAuctions] = useState<AuctionDetails[]>([]);
   const [selectedAuction, setSelectedAuction] = useState<AuctionDetails | null>(null);
   const [showSuccess, setShowSuccess] = useState(false); // State for success effect
   const { errorMessage, showError } = useError(); // Hook to manage error messages]
   const BID_VALUE = 1;
+
 
   useEffect(() => {
     setAuctions(fetchedAuctions); // Update auctions whenever fetchedAuctions changes
@@ -76,88 +69,26 @@ export default function ActiveAuction() {
       <h1 className="text-4xl font-bold mb-6">Active Auctions</h1>
       {loading ? (
         <p>Loading auctions...</p>
-      ) : (
+      ) : auctions.length === 0 ? (
+        <p className="text-center text-gray-600">No active auctions currently.</p>
+      ): (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {auctions.map((auction) => (
-            <div
-              onClick={() => handleAuctionClick(auction)}
-              key={auction.auctionId}
-              className="hover:cursor-pointer rounded-lg shadow-md bg-white overflow-hidden hover:shadow-xl hover:scale-105 transition-transform duration-300"
-            >
-              <img
-                src={auction.imageurl}
-                alt={auction.nftName}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  {auction.nftName}
-                </h2>
-                <p className="text-sm text-gray-600 mt-2">
-                  Current Bid: <span className="font-bold">{auction.highestBid} ETH</span>
-                </p>
-                <p className="text-sm text-gray-600 mt-2">
-                  Ends On: {formatUnixTimestamp(auction.endTime)}
-                </p>
-              </div>
-            </div>
+          {auctions.map((auction, idx) => (
+            <AuctionCard auction={auction} handleAuctionClick={handleAuctionClick} key={idx} />
           ))}
         </div>
       )}
 
       {/* Modal */}
       {selectedAuction && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-2xl relative">
-            <button
-              onClick={closeModal}
-              className="hover:cursor-pointer hover:scale-125 absolute top-4 right-4 text-gray-500 hover:text-gray-800"
-            >
-              ✖
-            </button>
-            <h2 className="text-2xl font-bold mb-4">{selectedAuction.nftName}</h2>
-            <img
-              src={selectedAuction.imageurl}
-              alt={selectedAuction.nftName}
-              className="w-full h-64 object-cover rounded-lg mb-4"
-            />
-            <p>
-              <strong>Seller:</strong> {selectedAuction.seller}
-            </p>
-            <p>
-              <strong>Current Bid:</strong> {parseFloat(selectedAuction.highestBid).toFixed(6)} ETH
-            </p>
-            <p>
-              <strong>Highest Bidder:</strong> {selectedAuction.highestBidder || "No bids yet"}
-            </p>
-            <p>
-              <strong>Ends On:</strong> {formatUnixTimestamp(selectedAuction.endTime)}
-            </p>
-            <div className="mt-4 flex justify-between">
-              {currentAccount !== selectedAuction.seller.toLocaleLowerCase() && (
-                <button
-                  onClick={handlePlaceBid}
-                  className="hover:cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-                >
-                  Increment Bid with {BID_VALUE} ETH
-                </button>
-
-              )}
-
-              {(currentAccount === selectedAuction.seller.toLocaleLowerCase() && selectedAuction.endTime < Math.floor(Date.now() / 1000)) && (
-                <button
-                  onClick={handleEndAuction}
-                  className="hover:cursor-pointer bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-400 transition"
-                >
-                  End Auction
-                </button>
-              )}
-            </div>
-            {errorMessage && (
-              <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
-            )}
-          </div>
-        </div>
+        <AuctionModal 
+          selectedAuction={selectedAuction}
+          closeModal={closeModal}
+          handlePlaceBid={handlePlaceBid}
+          currentAccount={currentAccount? currentAccount.toLocaleLowerCase() : ""}
+          BID_VALUE={BID_VALUE}
+          isBiddable={true}
+        />
       )}
 
       {/* Success Effect */}

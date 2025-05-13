@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import SmallBanner from "../components/ui/SmallBanner";
 
 export default function Hero() {
@@ -15,13 +16,13 @@ export default function Hero() {
           digital assets. Secure your place in the future of digital art.
         </p>
         <div className="mt-10 flex items-center justify-center gap-x-6">
-          <a
-            href="#"
+          <Link
+            to="/marketplace"
             className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
             Explore NFTs
-          </a>
-          <a href="#" className="text-sm/6 font-semibold text-gray-900">
+          </Link>
+          <a href="https://www.investopedia.com/non-fungible-tokens-nft-5115211" className="text-sm/6 font-semibold text-gray-900">
             Learn more <span aria-hidden="true">→</span>
           </a>
         </div>

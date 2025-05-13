@@ -1,75 +1,46 @@
-import React, { useState, useEffect } from "react";
-import { fetchNonActiveAuctions } from "../../services/AuctionService";
-
-interface AuctionData {
-  auctionId: number;
-  nftName: string;
-  highestBid: string;
-  endTime: number;
-  imageurl: string;
-}
+import { useState } from "react";
+import { useWallet } from "../../context/Wallet/WalletContext";
+import { useFetchAuctions } from "../../hooks/useFetchAuctions";
+import AuctionCard from "./reusable/AuctionCard";
+import AuctionModal from "./reusable/AuctionModal";
 
 export default function PastAuctions() {
-  const [pastAuctions, setPastAuctions] = useState<AuctionData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { currentAccount } = useWallet();
+  const { auctions, loading } = useFetchAuctions(false); // Use the hook with isActive set to false
+  const [selectedAuction, setSelectedAuction] = useState(null);
 
-  useEffect(() => {
-    const loadPastAuctions = async () => {
-      setLoading(true);
-      const auctions = await fetchNonActiveAuctions(); // Fetch non-active auctions
-      setPastAuctions(auctions);
-      setLoading(false);
-    };
-
-    loadPastAuctions();
-  }, []);
-
-  console.log(pastAuctions)
-
-  const formatEndDate = (endTime: number) => {
-    const date = new Date(endTime * 1000); // Convert Unix timestamp to milliseconds
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+  const handleAuctionClick = (auction: any) => {
+    setSelectedAuction(auction); // Set the selected auction to display in the modal
   };
 
-  if (loading) {
-    return <p>Loading past auctions...</p>;
-  }
+  const closeModal = () => {
+    setSelectedAuction(null); // Close the modal
+  };
 
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-4xl font-bold mb-6">Past Auctions</h1>
-      {pastAuctions.length === 0 ? (
-        <p>No past auctions found.</p>
+      {loading ? (
+        <p>Loading past auctions...</p>
+      ) : auctions.length === 0 ? (
+        <p className="text-center text-gray-600">No past auctions available.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {pastAuctions.map((auction) => (
-            <div
-              key={auction.auctionId}
-              className="rounded-lg shadow-md bg-white overflow-hidden hover:shadow-xl hover:scale-105 transition-transform duration-300"
-            >
-              <img
-                src={auction.imageurl || "https://via.placeholder.com/150"} // Use placeholder if imageurl is empty
-                alt={auction.nftName}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  {auction.nftName || "Unnamed NFT"}
-                </h2>
-                <p className="text-sm text-gray-600 mt-2">
-                  Final Bid: <span className="font-bold">{auction.highestBid} ETH</span>
-                </p>
-                <p className="text-sm text-gray-600 mt-2">
-                  Ended On: {formatEndDate(auction.endTime)}
-                </p>
-              </div>
-            </div>
+          {auctions.map((auction, idx) => (
+            <AuctionCard auction={auction} handleAuctionClick={handleAuctionClick} key={idx} />
           ))}
         </div>
+      )}
+
+      {/* Modal */}
+      {selectedAuction && (
+        <AuctionModal
+          selectedAuction={selectedAuction}
+          closeModal={closeModal}
+          currentAccount={currentAccount ? currentAccount.toLocaleLowerCase() : ""}
+          BID_VALUE={0} // No bidding value for past auctions
+          isBiddable={false} // No bidding allowed for past auctions
+        />
       )}
     </div>
   );
