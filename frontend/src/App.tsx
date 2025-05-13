@@ -75,7 +75,7 @@ function App() {
         </WalletProvider>
       </div>
 
-      {errorMessage && <ErrorMessageComponent message={errorMessage} />}
+      {/* {errorMessage && <ErrorMessageComponent message={errorMessage} />} */}
       <Footer />
     </div>
   );

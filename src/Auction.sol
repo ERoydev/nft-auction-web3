@@ -144,4 +144,23 @@ contract EnglishAuction {
 
         emit Withdraw(msg.sender, _auctionId, amount);
     }
+
+   function getAuction(uint256 _auctionId) public view returns (
+        address seller,
+        uint256 startPrice,
+        uint256 endTime,
+        uint256 highestBid,
+        address highestBidder
+    ) {
+        require(_auctionId < nextAuctionId, "auction with this id does not exists");
+        
+        Auction storage auction = auctions[_auctionId];
+        return (
+            auction.seller,
+            auction.startPrice,
+            auction.endTime,
+            auction.highestBid,
+            auction.highestBidder
+        );
+    }
 }

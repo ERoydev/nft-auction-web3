@@ -157,6 +157,45 @@
   },
   {
     "type": "function",
+    "name": "getAuction",
+    "inputs": [
+      {
+        "name": "_auctionId",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "seller",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "startPrice",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "endTime",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "highestBid",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "highestBidder",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "placeBid",
     "inputs": [
       {

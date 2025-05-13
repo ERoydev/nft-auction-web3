@@ -8,9 +8,10 @@ import {ERC20Mock} from "./mocks/ERC20Mock.sol";
 import {MockV3Aggregator} from "./mocks/MockChainlinkAddress.sol";
 import {EnglishAuction} from  "../src/Auction.sol";
 
-contract DeployNFT is Script {
+contract Deploy is Script {
     function run() external {
         vm.startBroadcast();
+        address adminAddress = vm.envAddress("INITIAL_ADMIN_ADDRESS");  // Replace with your actual admin address
 
         // Deploy The Mock contract
         ERC20Mock erc20Mock = new ERC20Mock();
@@ -18,10 +19,14 @@ contract DeployNFT is Script {
         // Deploy the Mock Chainlink Price Feed;
         MockV3Aggregator chainlinkPriceFeed = new MockV3Aggregator(8, 0);
 
+        // Generate merkle Root for the admin address
+        bytes32 merkleRoot = keccak256(abi.encodePacked(adminAddress));
+
         // Deploy the NFT contract
         NFT nft = new NFT();
         EnglishAuction auction = new EnglishAuction();
 
+        nft.setMerkleRoot(merkleRoot); // Set admin in whitelist
 
         nft.updatePriceFeedAddress(address(chainlinkPriceFeed)); // To setup the deployed Chainlink Price Feed
         nft.updateUsdcTokenAddress(address(erc20Mock)); // setup usdToken mock

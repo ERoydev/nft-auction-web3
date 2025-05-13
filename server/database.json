@@ -1,6 +1,30 @@
 {
+  "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266": [
+    false,
+    false,
+    false,
+    false
+  ],
+  "0xa0ee7a142d267c1f36714e4a8f75612f20a79720": [
+    false,
+    false,
+    false,
+    false
+  ],
   "0x9f4bf05551f5cb1a2bf3cba1d27a4e025ff2e716": [
     true,
+    false,
+    false,
+    false
+  ],
+  "0xbefe329a70d20bcfaedd2ff4f3b91b5d46cafd50": [
+    false,
+    false,
+    false,
+    false
+  ],
+  "0x14dc79964da2c08b23698b3d3cc7ca32193d9955": [
+    false,
     false,
     false,
     false

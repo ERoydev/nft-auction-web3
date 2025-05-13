@@ -49,5 +49,5 @@ export function useFetchActiveAuctions() {
         fetchAllAuctions();
     }, []);
 
-    return {loading, auctions};
+    return {loading, auctions, refetch: fetchAllAuctions};
 }
