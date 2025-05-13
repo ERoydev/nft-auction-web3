@@ -1,4 +1,4 @@
-import { getBrowserProvider, getAuctionWriteContract, auctionReadContract } from "../utils/contract";
+import { getBrowserProvider, getAuctionWriteContract, auctionReadContract, usdcReadContract } from "../utils/contract";
 import { approveNFT } from "./nftContractService";
 import { ethers, parseEther } from "ethers";
 
@@ -95,6 +95,34 @@ export async function fetchNonActiveAuctions() {
         return nonActiveAuctions
     } catch (error) {
         console.error("Error fetching non-active auctions:", error);
+        return [];
+    }
+}
+
+export async function fetchUserBidHistory(userAddress: string) {
+    try {
+        // Create a filter for the NewBid event
+        const filter = auctionReadContract.filters.NewBid(userAddress, null); // Filter by bidder (userAddress)
+
+        // Query the events using the filter
+        const events = await auctionReadContract.queryFilter(filter, 0, "latest");
+
+        // Map and process events
+        const userBids = await Promise.all(
+            events.map(async (event: any) => {
+                const block = await event.getBlock(); // Fetch block details for the timestamp
+                return {
+                    auctionId: Number(event.args.auctionId),
+                    bidAmount: ethers.formatEther(event.args.amount), // Decode the amount
+                    transactionHash: event.transactionHash, // Include transaction hash for reference
+                    timestamp: new Date(block.timestamp * 1000).toLocaleString(), // Convert to readable date
+                };
+            })
+        );
+
+        return userBids;
+    } catch (error) {
+        console.error("Error fetching user bid history:", error);
         return [];
     }
 }

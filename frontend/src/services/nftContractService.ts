@@ -8,8 +8,10 @@ export async function mintNFT(tokenMetadataURL: string, merkleProof: Uint8Array[
         const tx = await contractWithSigner.safeMint(tokenMetadataURL, merkleProof, priceInUSDCx);
         await tx.wait();
         console.log("NFT minted successfully:", tx);
+        return {}
     } catch (error) {
         console.error("Error minting NFT:", error);
+        return { error: error };
     }
 }
 

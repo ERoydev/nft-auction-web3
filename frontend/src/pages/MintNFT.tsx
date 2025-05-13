@@ -49,7 +49,12 @@ export default function MintNFT() {
         return;
       }
 
-      await mintNFT(metadataURL, merkleProof, priceInUSDCx);
+      const result = await mintNFT(metadataURL, merkleProof, priceInUSDCx);
+      if (result.error) { 
+        alert("Error minting NFT. Check if you are whitelisted.");
+        navigate("/");
+        return;
+      }
 
       alert("NFT minted successfully!");
       navigate("/");

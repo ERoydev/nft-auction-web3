@@ -15,6 +15,7 @@ const jsonRpcProvider = new ethers.JsonRpcProvider(import.meta.env.VITE_SEPOLIA_
 // 2. Contract with read-only provider
 const nftReadContract = new ethers.Contract(nftContractAddress, nftContractABI, jsonRpcProvider);
 const auctionReadContract = new ethers.Contract(auctionContractAddress, auctionContractABI, jsonRpcProvider);
+const usdcReadContract = new ethers.Contract(usdcContractAddress, usdcContractABI, jsonRpcProvider);
 
 // 3. Wallet provider (for frontend)
 const getBrowserProvider = () => {
@@ -49,6 +50,7 @@ export {
   // Read-only contracts
   nftReadContract, 
   auctionReadContract,
+  usdcReadContract,
 
   // Write contracts
   getBrowserProvider, 
