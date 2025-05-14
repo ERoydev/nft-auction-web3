@@ -10,7 +10,7 @@ export function useFetchTokenUrls(account: string | null) {
 
     const setTokenIdsOwned = async () => {
         if (!account) {
-            console.error('No account connected');
+            // console.error('No account connected');
             return [];
         }
         const tokenIds = await getNFTsByOwner(account);
@@ -43,21 +43,22 @@ export function useFetchTokenUrls(account: string | null) {
         setLoading(false);
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const tokenIds = await setTokenIdsOwned(); // Wait for token IDs to be fetched
-            if (tokenIds && tokenIds.length > 0) {
-                await fetchTokenURLs(tokenIds); // Pass the fetched token IDs to fetchTokenURLs
-            } else {
-                setLoading(false); // No tokens, stop loading
-            }
-        };
+    const fetchData = async () => {
+        const tokenIds = await setTokenIdsOwned(); // Wait for token IDs to be fetched
+        if (tokenIds && tokenIds.length > 0) {
+            await fetchTokenURLs(tokenIds); // Pass the fetched token IDs to fetchTokenURLs
+        } else {
+            setLoading(false); // No tokens, stop loading
+        }
+    };
 
+    useEffect(() => {
         fetchData();
     }, [account]); // Re-run when the account changes
 
     // Use useMemo to memoize the tokensData and avoid unnecessary re-fetching
+    // Not tested how it behaves in reality, but it works
     const memoizedTokensData = useMemo(() => tokensData, [tokensData]);
 
-    return { loading, tokensData: memoizedTokensData, removeToken };
+    return { loading, tokensData: memoizedTokensData, removeToken, refetch: fetchData };
 }

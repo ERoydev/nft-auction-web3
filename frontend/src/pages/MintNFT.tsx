@@ -8,7 +8,7 @@ import ControlledForm from "../components/forms/ControlledForm";
 
 export default function MintNFT() {
   const [isMinting, setIsMinting] = useState(false);
-  const { currentAccount } = useWallet();
+  const { currentAccount, refetch } = useWallet();
   const navigate = useNavigate();
 
   const handleFormSubmit = async (formData: {
@@ -50,6 +50,7 @@ export default function MintNFT() {
       }
 
       const result = await mintNFT(metadataURL, merkleProof, priceInUSDCx);
+      
       if (result.error) { 
         alert("Error minting NFT. Check if you are whitelisted.");
         navigate("/");
@@ -57,6 +58,7 @@ export default function MintNFT() {
       }
 
       alert("NFT minted successfully!");
+      refetch();
       navigate("/");
     } catch (error) {
       console.error("Error minting NFT:", error);

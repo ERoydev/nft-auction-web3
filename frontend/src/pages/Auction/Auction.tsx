@@ -1,14 +1,11 @@
-import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
+import { Link, useLocation, Outlet } from "react-router-dom";
 import TokenData from "../../intefaces/TokenData";
-import { useFetchTokenUrls } from "../../hooks/useFetchTokenUrls";
 import { useWallet } from "../../context/Wallet/WalletContext";
 import { createAuction } from "../../services/AuctionService";
 
 export default function Auction() {
-  const { nftIds, currentAccount } = useWallet();
-  const { tokensData, removeToken } = useFetchTokenUrls(currentAccount);
+  const { tokensData, currentAccount, removeToken } = useWallet();
   const location = useLocation(); // Get the current route
-  const { setTokenIdsOwned } = useWallet();
 
   const handleStartAuction = async (selectedNFT: TokenData, startingPrice: number, duration: number) => {
     const data = {
@@ -19,7 +16,7 @@ export default function Auction() {
 
     await createAuction(data);
     alert(`Auction started for ${selectedNFT.name}!`);
-    setTokenIdsOwned(); // Refresh the token IDs after starting an auction
+    removeToken(selectedNFT.tokenId); // Remove the NFT from the list after starting the auction
   };
 
   return (

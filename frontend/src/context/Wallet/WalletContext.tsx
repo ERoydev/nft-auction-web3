@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { getRoles } from '../../services/RolesService';
-import { getNFTsByOwner } from '../../services/nftContractService';
+import { useFetchTokenUrls } from '../../hooks/useFetchTokenUrls';
 
 /*
 Keeps track of the current wallet address, connect, disconnect, and roles of the user:
@@ -18,8 +18,9 @@ interface WalletContextType {
   isWhitelistManager: boolean;
   isSalesPriceManager: boolean;
   isPaymentTokensConfigurator: boolean; 
-  nftIds: number[];
-  setTokenIdsOwned: () => Promise<void>; // Function to set NFT IDs
+  tokensData: any[]; // Add the type for tokensData
+  removeToken: (tokenId: number) => void; // Add the type for removeToken
+  refetch: () => void; // Add the type for refetch
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -30,7 +31,7 @@ interface WalletProviderProps {
 
 export const WalletProvider = ({ children }: WalletProviderProps) => {
   const [currentAccount, setCurrentAccount] = useState<string | null>(null);
-  const [nftIds, setNftIds] = useState([]); // State to store NFT IDs
+  const { tokensData, removeToken, refetch } = useFetchTokenUrls(currentAccount);
 
   const [roles, setRoles] = useState({
     isAdmin: false,
@@ -39,26 +40,14 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     isPaymentTokensConfigurator: false,
   });
 
-  const setTokenIdsOwned = async () => {
-    if (!currentAccount) {
-      console.error('No account connected');
-      return;
-    }
-    const tokenIds = await getNFTsByOwner(currentAccount);
-    setNftIds(tokenIds); // Update state with fetched NFT IDs
-  }
-
 
   // Connect to wallet (MetaMask)
   const connectWallet = async (): Promise<void> => {
     if (typeof window.ethereum !== 'undefined') {
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        await setCurrentAccount(accounts[0]);
+        setCurrentAccount(accounts[0]);
         window.localStorage.setItem('walletConnected', accounts[0]); // Store account in localStorage
-
-        // Fetch nftIds for the connected account
-        setTokenIdsOwned();
 
       } catch (error) {
         console.error('Error connecting wallet:', error);
@@ -88,6 +77,7 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     if (typeof window.ethereum !== 'undefined') {
       const handleAccountsChanged = (accounts: string[]) => {
         if (accounts.length > 0) {
+          
           setCurrentAccount(accounts[0]); // Update the account if it changes
           window.localStorage.setItem('walletConnected', accounts[0]); // Save the new account to localStorage
           fetchRoles(accounts[0]); // Fetch roles for the new account
@@ -111,12 +101,6 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     }
   }, []);
 
-  // Fetch NFTs whenever currentAccount changes
-  useEffect(() => {
-    if (currentAccount) {
-      setTokenIdsOwned(); 
-    }
-  }, [currentAccount]);
 
   // Fetch roles from smart contract whenever currentAccount changes
   const fetchRoles = async (account: string) => {
@@ -136,8 +120,9 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
         isWhitelistManager: roles.isWhitelistManager,
         isSalesPriceManager: roles.isSalesPriceManager,
         isPaymentTokensConfigurator: roles.isPaymentTokensConfigurator,
-        nftIds: nftIds, // Provide the NFT IDs to the context
-        setTokenIdsOwned, // Provide the function to set NFT IDs
+        tokensData,
+        removeToken,
+        refetch, // Expose refetch function to refresh tokensData
       }}
     >
       {children}

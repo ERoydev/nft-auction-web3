@@ -3,7 +3,7 @@ import { getBrowserProvider, nftReadContract, getNFtWriteContract, getUsdcWriteC
 
 export async function mintNFT(tokenMetadataURL: string, merkleProof: Uint8Array[], priceInUSDCx: number) {
     const contractWithSigner = await getNFtWriteContract();
-
+    
     try {
         const tx = await contractWithSigner.safeMint(tokenMetadataURL, merkleProof, priceInUSDCx);
         await tx.wait();

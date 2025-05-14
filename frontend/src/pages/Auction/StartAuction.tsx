@@ -12,6 +12,8 @@ export default function StartAuction() {
   const [duration, setDuration] = useState("");
   const { errorMessage, showError, clearError } = useError();
 
+  console.log("tokensData", tokensData);
+
   const StartAuctionClickHandler = () => {
     if (!selectedNFT || !startingPrice || !duration) {
       showError("Please select an NFT, starting price, and duration.");

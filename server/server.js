@@ -53,7 +53,9 @@ app.post('/getProof', (req, res) => {
         return res.status(400).send('Address is required');
     }
 
-    const leaf = Buffer.from(solidityPackedKeccak256(['address'], [getAddress(address)]).slice(2), 'hex');
+    const normalizedAddress = getAddress(address);
+
+    const leaf = Buffer.from(solidityPackedKeccak256(['address'], [getAddress(normalizedAddress)]).slice(2), 'hex');
     const proof = tree.getProof(leaf).map(x => '0x' + x.data.toString('hex'));
 
     res.json({ proof });
@@ -69,7 +71,6 @@ app.post('/addAddress', (req, res) => {
     // Normalize the address to ensure consistency
     const normalizedAddress = getAddress(address);
 
-    console.log("add", normalizedAddress)
 
     // Step 1: Delete the address from the database if it exists
     try {

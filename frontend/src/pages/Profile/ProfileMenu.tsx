@@ -2,12 +2,10 @@ import { useEffect, useState } from "react";
 import { useWallet } from "../../context/Wallet/WalletContext";
 import { Link } from "react-router-dom";
 import Spinner from "../../components/reusable/Spinner";
-import { useFetchTokenUrls } from "../../hooks/useFetchTokenUrls";
 import { fetchUserBidHistory } from "../../services/AuctionService";
 
 export default function ProfileMenu() {
-  const { currentAccount } = useWallet();
-  const { loading, tokensData } = useFetchTokenUrls(currentAccount);
+  const { currentAccount, tokensData } = useWallet();
   const [bidHistory, setBidHistory] = useState<any[]>([]);
   const [loadingBids, setLoadingBids] = useState(false);
 
@@ -39,7 +37,7 @@ export default function ProfileMenu() {
           Below is a list of NFTs you own. Click on an NFT to view more details or manage it.
         </p>
 
-        {loading && <Spinner />}
+        {/* {loading && <Spinner />} */}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {tokensData.map((nft, idx) => (
