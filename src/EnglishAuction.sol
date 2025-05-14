@@ -24,6 +24,7 @@ contract EnglishAuction is ReentrancyGuard {
     uint256 public auctionId;
     uint256 private nextAuctionId;
 
+    uint256 private constant AUCTION_MIN_DURATION = 5 minutes;
     uint256 constant private AUCTION_EXTEND_TIME = 5 minutes; // Bid placed in withit 2 minutes before endTime, extends endTime by 5 min
 
     event AuctionStarted(
@@ -55,6 +56,8 @@ contract EnglishAuction is ReentrancyGuard {
         Auction storage auction = auctions[auctionId];
 
         require(IERC721(_nftAddress).getApproved(_nftTokenId) == address(this), "Nft must approve this address as a spender");
+        require(_startPrice > 0, "Starting price must be greater than 0");
+        require(_durationInMinutes >= AUCTION_MIN_DURATION, "Duration must be longer than or equal to 5 mintues");
 
         auction.seller = msg.sender;
         auction.nft = IERC721(_nftAddress);
