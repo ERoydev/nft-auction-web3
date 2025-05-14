@@ -125,15 +125,24 @@ contract NFTTest is BaseNFTTest {
         oneToken[0] = 0;
         assertEq(nft.tokensOfOwner(owner), oneToken);
 
-
-        uint256 expectedEth = nft.getTokenPriceInEth(_tokenId);
+        uint256 expectedEthInWei = nft.getTokenPriceInEth(_tokenId);
         vm.deal(addr1, 1 ether);
         vm.prank(addr1);
-        nft.purchaseNFT{value: expectedEth}(_tokenId, true, addr1Proof);
+        nft.purchaseNFT{value: expectedEthInWei}(_tokenId, true, addr1Proof);
+
+        // Check balances for eth transfer
+        assertEq(addr1.balance, 1 ether - expectedEthInWei);
+        // Check balance of owner with pull-over-push strategy
+        assertEq(owner.balance, 0);
+        vm.prank(owner);
+        nft.withdrawFunds();
+        assertEq(owner.balance, expectedEthInWei);
+
         
         uint256[] memory noTokens = new uint256[](0);
         assertEq(nft.tokensOfOwner(owner), noTokens);
 
+        // Check token ownership for nft transfer
         assertNotEq(nft.ownerOf(_tokenId), owner);
         assertEq(nft.ownerOf(_tokenId), addr1);
     }

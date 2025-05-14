@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract EnglishAuction {
     struct Auction {
@@ -39,17 +40,6 @@ contract EnglishAuction {
     event AuctionExtendedBy5Minutes(uint256 indexed _tokenId, address indexed seller, uint256 newDuration);
     event Withdraw(address indexed user, uint256 indexed auctionId, uint256 amount);
 
-    // Reentrancy guard state variable
-    bool private locked;
-
-    // Modifier to prevent reentrancy
-    modifier nonReentrant() {
-        require(!locked, "ReentrancyGuard: reentrant call");
-        locked = true;
-        _;
-        locked = false;
-    }
-
     constructor() {
         contractLabel = "Auction Contract v1";
     }
@@ -63,6 +53,8 @@ contract EnglishAuction {
         auctionId = nextAuctionId++;
         Auction storage auction = auctions[auctionId];
 
+        require(IERC721(_nftAddress).getApproved(_nftTokenId) == address(this), "Nft must approve this address as a spender");
+
         auction.seller = msg.sender;
         auction.nft = IERC721(_nftAddress);
         auction.nftTokenId = _nftTokenId;
@@ -72,8 +64,6 @@ contract EnglishAuction {
 
         require(auction.nft.ownerOf(_nftTokenId) == msg.sender, "Caller is not the owner of the NFT");
 
-        auction.nft.transferFrom(auction.seller, address(this), _nftTokenId);
-
         emit AuctionStarted(
             auction.seller, 
             auctionId, 
@@ -82,14 +72,17 @@ contract EnglishAuction {
             auction.highestBid,
             auction.highestBidder
         );
+
+        auction.nft.transferFrom(auction.seller, address(this), _nftTokenId);
+
         return auctionId;
     }
 
-    function placeBid(uint256 _auctionId) external payable nonReentrant {
+    function placeBid(uint256 _auctionId) external payable {
         require(_auctionId < nextAuctionId, "Auction with this id doesn't exist");
-        
         Auction storage auction = auctions[_auctionId];
 
+        require(!auction.auctionEnded, "Auction is ended by owner");
         require(block.timestamp < auction.endTime, "Auction has ended");
         require(msg.value > auction.highestBid, "Bid must be higher the the current highest bid");
         require(msg.sender != auction.highestBidder, "You are already the highest bidder");
@@ -110,27 +103,28 @@ contract EnglishAuction {
         emit NewBid(auction.highestBidder, _auctionId, auction.highestBid);
     }
 
-    function endAuction(uint256 _auctionId) external nonReentrant {
+    function endAuction(uint256 _auctionId) external {
         require(_auctionId < nextAuctionId, "Auction with this id doesn't exist");
         Auction storage auction = auctions[_auctionId];
 
-        require(block.timestamp >= auction.endTime, "Auction is still active");
         require(!auction.auctionEnded, "Auction has already ended");
+        require(block.timestamp >= auction.endTime, "Auction is still active");
         require(msg.sender == auction.seller, "Only the seller can end the auction");
 
         auction.auctionEnded = true;
+        emit AuctionEnded(auction.highestBidder, auction.highestBid, _auctionId);
 
         if (auction.highestBidder != address(0)) {
+            deposits[_auctionId][auction.highestBidder] = 0; // clear highest bidder
+
             (bool sent, ) = auction.seller.call{value: auction.highestBid}("");
             require(sent, "Transfer to seller failed");
-            
-            deposits[_auctionId][auction.highestBidder] = 0; // clear highest bidder
 
             auction.nft.transferFrom(address(this), auction.highestBidder, auction.nftTokenId);
         }
-        emit AuctionEnded(auction.highestBidder, auction.highestBid, _auctionId);
     }
-    function withdraw(uint256 _auctionId) external nonReentrant {
+
+    function withdraw(uint256 _auctionId) external  {
         require(_auctionId < nextAuctionId, "Auction with this id doesn't exist");
         Auction storage auction = auctions[_auctionId];
 

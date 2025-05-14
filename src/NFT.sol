@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -11,7 +11,7 @@ import {ERC721Consecutive} from "@openzeppelin/contracts/token/ERC721/extensions
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {PriceConsumer} from "./abstract-contracts/PriceConsumer.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
-import {ReentrancyGuard} from "../src/guards/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 
@@ -32,8 +32,7 @@ Core Logic:
 /// @title Nft Contract
 /// @author E.Roydev
 /// @notice Used to mint nfts
-contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsumer, ReentrancyGuard  {
-    /// @dev links a token's unique tokenId to its metadata URL stored on nft.storage service
+contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsumer, ReentrancyGuard {
     uint256 private _currentTokenId;
 
     /// @dev to have a name when deployed
@@ -43,6 +42,9 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
     mapping(address => uint256[]) private _ownedTokens;
     mapping(uint256 => uint256) private _ownedTokensIndex; // inside the array of tokens that address holds gives the index of the specific tokenId (tokenId => index)
     mapping(uint256 => TokenInfo) public tokenInfo; // tokenId => TokenInfo to get metadataURL
+    
+    /// @dev track how much ETH each owner is owed => using in Pull over push stragegy
+    mapping(address => uint256) public fundsOwed;
 
     event TokenMinted(address indexed user, uint256 indexed tokenId);
     event TokenPurchased(address indexed seller, address indexed receiver, uint256 indexed tokenId);
@@ -101,14 +103,12 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
             string calldata tokenMetadataURL, 
             bytes32[] calldata merkleProof,
             uint256 _priceInUSDC
-        ) external isWhitelisted(merkleProof) {
+        ) external isWhitelisted(merkleProof) nonReentrant {
 
         // TODO: I don't have good error handling when user is not Whitelisted to provide a good frontend response for this problem. Currently i give general error that something went wrong.
         uint256 tokenId = _currentTokenId;
         require(bytes(tokenMetadataURL).length > 0, "Invalid metadata URL");
         _currentTokenId ++;
-
-        _safeMint(msg.sender, tokenId);
 
         // before transfer 
         _beforeTokenTransfer(address(0), msg.sender, tokenId);
@@ -118,6 +118,8 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
             owner: payable(msg.sender),
             metadataURI: tokenMetadataURL
         });
+
+        _safeMint(msg.sender, tokenId);
 
         emit TokenMinted(msg.sender, tokenId);
     }
@@ -131,29 +133,31 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
         
         verifyProof(msg.sender, merkleProof);
     
-        TokenInfo memory info = tokenInfo[_tokenId];
-        require(info.owner != address(0), "Token not found");
-        require(ownerOf(_tokenId) == info.owner, "Already sold");
+        TokenInfo memory tokenData = tokenInfo[_tokenId];
+        require(tokenData.owner != address(0), "Token not found");
+        require(ownerOf(_tokenId) == tokenData.owner, "Already sold");
 
         if (payWithETH) {
-            uint256 requiredETH = getETHPriceForUSDCAmount(info.priceInUSDC);
+            uint256 requiredETH = getETHPriceForUSDCAmount(tokenData.priceInUSDC);
             require(msg.value >= requiredETH, "Insufficient ETH");
+            
+            // Instead of sending immediately i implement Pull-over-Push strategy
+            fundsOwed[tokenData.owner] += msg.value;
 
-            (bool success,) = info.owner.call{value: requiredETH}("");
-            require(success, "Transfer failed");
+            // Older version where i send immediately
+            // (bool success,) = info.owner.call{value: requiredETH}("");
+            // require(success, "Transfer failed");
 
-            if (msg.value > requiredETH) {
-                payable(msg.sender).transfer(msg.value - requiredETH); // refund excess 
-            } 
         } else {
             // if i use usdc i use ERC20 instructions to transfer tokens 
             // Remember user must approve that address(this) can spend this USDC => Do it in the frontend
-            require(IERC20(usdcToken).transferFrom(msg.sender, info.owner, info.priceInUSDC), "USDC transfer failed");
+            require(IERC20(usdcToken).transferFrom(msg.sender, tokenData.owner, tokenData.priceInUSDC), "USDC transfer failed");
         } 
 
-        _beforeTokenTransfer(info.owner, msg.sender, _tokenId);
-        _transfer(info.owner, msg.sender, _tokenId); // Transfers the nft from owner to the sender 
-        emit TokenPurchased(info.owner, msg.sender, _tokenId);
+        _beforeTokenTransfer(tokenData.owner, msg.sender, _tokenId);
+
+        emit TokenPurchased(tokenData.owner, msg.sender, _tokenId);
+        _transfer(tokenData.owner, msg.sender, _tokenId); // Transfers the nft from owner to the sender 
     }
 
     function getTokenPriceInEth(uint256 _tokenId) public view returns (uint256) {
@@ -166,9 +170,8 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
 
     function transferFrom(address from, address to, uint256 tokenId) public virtual override {
         // I use this to apply deletion logic from _ownedTokens when for example i create action and trasnfer this token to another contract
-        super.transferFrom(from, to, tokenId);
-
         _beforeTokenTransfer(from, to, tokenId);
+        super.transferFrom(from, to, tokenId);
     }
 
 
@@ -215,6 +218,17 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
     function getTokenURL(uint256 tokenId) public view returns (string memory) {
         require(tokenInfo[tokenId].owner != address(0), "Token doesn't exist");
         return tokenInfo[tokenId].metadataURI;
+    }
+
+    function withdrawFunds() external nonReentrant {
+        // Pull-Over-Push strategy making owner withdraw his money from selling nft's
+        uint256 amount = fundsOwed[msg.sender];
+        require(amount > 0, "No funds to withdraw");
+
+        fundsOwed[msg.sender] = 0; // Update state first
+
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, "Withdraw failed");
     }
 
     // =============================================== TOKENS Functions
