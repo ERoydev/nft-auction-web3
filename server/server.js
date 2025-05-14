@@ -1,11 +1,12 @@
-const express = require('express');
-const { MerkleTree } = require('merkletreejs');
-const keccak256 = require('keccak256');
-const { solidityPackedKeccak256, getAddress } = require('ethers');
-const fs = require('fs');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const { getRolesForUser } = require('./methods');
+import express from 'express';
+import { MerkleTree } from 'merkletreejs';
+import keccak256 from 'keccak256';
+import { solidityPackedKeccak256, getAddress } from 'ethers';
+import fs from 'fs';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { getRolesForUser } from './methods.js';
+
 
 
 const app = express();

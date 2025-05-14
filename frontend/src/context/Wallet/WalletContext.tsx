@@ -1,7 +1,5 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { contract } from "../../utils/contract"; // Import your contract instance
-import { ethers } from 'ethers';
-import { fetchRolesFromSmartContract } from '../../services/RolesService';
+import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import { getRoles } from '../../services/RolesService';
 import { getNFTsByOwner } from '../../services/nftContractService';
 
 /*
@@ -50,6 +48,7 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     setNftIds(tokenIds); // Update state with fetched NFT IDs
   }
 
+  console.log('roles', roles);
 
   // Connect to wallet (MetaMask)
   const connectWallet = async (): Promise<void> => {
@@ -123,7 +122,7 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
   // Fetch roles from smart contract whenever currentAccount changes
   const fetchRoles = async (account: string) => {
     if (account) {
-      const roles = await fetchRolesFromSmartContract(account);
+      const roles = await getRoles(account);
       setRoles(roles);
     }
   };

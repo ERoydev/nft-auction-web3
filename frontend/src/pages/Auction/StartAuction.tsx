@@ -4,7 +4,9 @@ import { useError } from "../../hooks/useError";
 import TokenData from "../../intefaces/TokenData";
 
 export default function StartAuction() {
-  const { tokensData, handleStartAuction }: { tokensData: TokenData[]; handleStartAuction: (selectedNFT: TokenData, startingPrice: number, duration: number) => void } = useOutletContext();
+  // Come from outlet(parent) context
+  const { tokensData, handleStartAuction, removeToken }: { removeToken: (tokenId: number) => void , tokensData: TokenData[]; handleStartAuction: (selectedNFT: TokenData, startingPrice: number, duration: number) => void } = useOutletContext();
+  
   const [selectedNFT, setSelectedNFT] = useState<TokenData | null>(null);
   const [startingPrice, setStartingPrice] = useState("");
   const [duration, setDuration] = useState("");
@@ -26,6 +28,7 @@ export default function StartAuction() {
     setStartingPrice("");
     setDuration("");
     clearError();
+    removeToken(selectedNFT.tokenId); // Remove the NFT from the list after starting the auction
   };
 
   return (

@@ -38,7 +38,7 @@ const nftContractABI = [
     ],
     "stateMutability": "view"
   },
-  ];
+];
   
 
 // Connect to Sepolia

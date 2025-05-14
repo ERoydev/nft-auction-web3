@@ -6,7 +6,7 @@ import { createAuction } from "../../services/AuctionService";
 
 export default function Auction() {
   const { nftIds, currentAccount } = useWallet();
-  const { tokensData } = useFetchTokenUrls(currentAccount);
+  const { tokensData, removeToken } = useFetchTokenUrls(currentAccount);
   const location = useLocation(); // Get the current route
   const { setTokenIdsOwned } = useWallet();
 
@@ -85,7 +85,7 @@ export default function Auction() {
       </div>
       
       <div className="flex-grow p-6">
-        <Outlet context={{ tokensData, handleStartAuction }} />
+        <Outlet context={{ tokensData, handleStartAuction, removeToken }} />
       </div>
     </div>
   );

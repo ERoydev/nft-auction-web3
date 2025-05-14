@@ -17,6 +17,10 @@ export function useFetchTokenUrls(account: string | null) {
         return tokenIds; // Return the fetched token IDs
     };
 
+    const removeToken = (tokenId: number) => {
+        setTokensData((prevTokens) => prevTokens.filter((token) => token.tokenId !== tokenId));
+    }
+
     const fetchTokenURLs = async (tokenIds: number[]) => {
         setLoading(true);
         const allTokenData: TokenData[] = [];
@@ -54,5 +58,5 @@ export function useFetchTokenUrls(account: string | null) {
     // Use useMemo to memoize the tokensData and avoid unnecessary re-fetching
     const memoizedTokensData = useMemo(() => tokensData, [tokensData]);
 
-    return { loading, tokensData: memoizedTokensData };
+    return { loading, tokensData: memoizedTokensData, removeToken };
 }

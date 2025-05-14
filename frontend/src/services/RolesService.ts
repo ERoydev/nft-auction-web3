@@ -69,7 +69,7 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
 }
 
 
-export const fetchRolesFromSmartContract = async (account: string) => {
+export const getRoles = async (account: string) => {
   if (typeof window.ethereum === 'undefined') {
     throw new Error('Metamask is not installed.');
   } 
