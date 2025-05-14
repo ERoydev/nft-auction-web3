@@ -24,7 +24,7 @@ contract EnglishAuction is ReentrancyGuard {
     uint256 public auctionId;
     uint256 private nextAuctionId;
 
-    uint256 private constant AUCTION_MIN_DURATION = 5 minutes;
+    uint256 private constant AUCTION_MIN_DURATION = 5; // 5 minutes
     uint256 constant private AUCTION_EXTEND_TIME = 5 minutes; // Bid placed in withit 2 minutes before endTime, extends endTime by 5 min
 
     event AuctionStarted(
