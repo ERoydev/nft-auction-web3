@@ -12,8 +12,6 @@ export default function StartAuction() {
   const [duration, setDuration] = useState("");
   const { errorMessage, showError, clearError } = useError();
 
-  console.log("tokensData", tokensData);
-
   const StartAuctionClickHandler = () => {
     if (!selectedNFT || !startingPrice || !duration) {
       showError("Please select an NFT, starting price, and duration.");
@@ -30,7 +28,6 @@ export default function StartAuction() {
     setStartingPrice("");
     setDuration("");
     clearError();
-    removeToken(selectedNFT.tokenId); // Remove the NFT from the list after starting the auction
   };
 
   return (

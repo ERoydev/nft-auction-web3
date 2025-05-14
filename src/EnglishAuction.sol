@@ -150,7 +150,9 @@ contract EnglishAuction {
         uint256 startPrice,
         uint256 endTime,
         uint256 highestBid,
-        address highestBidder
+        address highestBidder,
+        address nft,
+        uint256 nftTokenId
     ) {
         require(_auctionId < nextAuctionId, "auction with this id does not exists");
         
@@ -160,7 +162,9 @@ contract EnglishAuction {
             auction.startPrice,
             auction.endTime,
             auction.highestBid,
-            auction.highestBidder
+            auction.highestBidder,
+            address(auction.nft),
+            auction.nftTokenId
         );
     }
 }

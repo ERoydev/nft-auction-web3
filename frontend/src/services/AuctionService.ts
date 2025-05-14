@@ -16,9 +16,12 @@ export async function createAuction(data: any) {
         const tx = await contractWithSigner.createAuction(_nftAddress, data.tokenId, priceInWei, data.duration);
         await tx.wait();
         console.log("Auction created successfully:", tx);
+        return {}
     } catch (error) {
         console.error("Error creating auction:", error);
+        return { error: "fail"}
     }
+
 }
 
 export async function fetchActiveAuctions() {
@@ -46,6 +49,7 @@ export async function fetchActiveAuctions() {
                     endTime: Number(auctionData.endTime),
                     highestBid: ethers.formatEther(auctionData.highestBid),
                     highestBidder: auctionData.highestBidder,
+                    nftTokenId: auctionData.nftTokenId,
                     imageurl: "", // Placeholder for image URL
                     nftName: "", // Placeholder for NFT name
                 };
@@ -83,6 +87,7 @@ export async function fetchNonActiveAuctions() {
                         highestBid: ethers.formatEther(auctionData.highestBid),
                         highestBidder: auctionData.highestBidder,
                         auctionEnded: auctionData.auctionEnded, // Fetch auctionEnded status
+                        nftTokenId: auctionData.nftTokenId,
                         imageurl: "", // Placeholder for image URL
                         nftName: "", // Placeholder for NFT name
                     };

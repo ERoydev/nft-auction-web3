@@ -12,6 +12,7 @@ interface ActiveAuctions {
     highestBidder: string;
     imageurl: string;
     nftName: string;
+    nftTokenId: number;
 }
 
 
@@ -27,7 +28,8 @@ export function useFetchAuctions(isActive: boolean = true) {
         const fetchedAuctions = isActive ? await fetchActiveAuctions() : await fetchNonActiveAuctions();
 
         for (let i = 0; i < fetchedAuctions.length; i++) {
-            const tokenMetadata = await getTokenURLFromTokenId(fetchedAuctions[i].auctionId);
+            const tokenId = Number(fetchedAuctions[i].nftTokenId);
+            const tokenMetadata = await getTokenURLFromTokenId(tokenId);
             try {
                 const res = await fetch(tokenMetadata);
                 if (!res.ok) {

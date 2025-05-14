@@ -2,6 +2,7 @@ import { Link, useLocation, Outlet } from "react-router-dom";
 import TokenData from "../../intefaces/TokenData";
 import { useWallet } from "../../context/Wallet/WalletContext";
 import { createAuction } from "../../services/AuctionService";
+import { useError } from "../../hooks/useError";
 
 export default function Auction() {
   const { tokensData, currentAccount, removeToken } = useWallet();
@@ -14,7 +15,13 @@ export default function Auction() {
       duration: duration,
     };
 
-    await createAuction(data);
+    const auctionCreationResult = await createAuction(data);
+
+    if (auctionCreationResult.error) {
+      alert("Failed to create auction. Please try again.");
+      return;
+    }
+
     alert(`Auction started for ${selectedNFT.name}!`);
     removeToken(selectedNFT.tokenId); // Remove the NFT from the list after starting the auction
   };

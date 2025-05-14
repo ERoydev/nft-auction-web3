@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useFetchAuctions } from "../../hooks/useFetchAuctions";
-import { formatUnixTimestamp } from "../../utils/formatUnixTimestamp";
 import { endAuction, placeBidAuction } from "../../services/AuctionService";
 import { useError } from "../../hooks/useError";
 import { useWallet } from "../../context/Wallet/WalletContext";
@@ -10,14 +9,13 @@ import AuctionModal from "./reusable/AuctionModal";
 
 
 export default function ActiveAuction() {
-  const {currentAccount} = useWallet();
+  const {currentAccount, tokensData} = useWallet();
   const { loading, auctions: fetchedAuctions, refetch } = useFetchAuctions(); // Use the hook directly
   const [auctions, setAuctions] = useState<AuctionDetails[]>([]);
   const [selectedAuction, setSelectedAuction] = useState<AuctionDetails | null>(null);
   const [showSuccess, setShowSuccess] = useState(false); // State for success effect
   const { errorMessage, showError } = useError(); // Hook to manage error messages]
   const BID_VALUE = 1;
-
 
   useEffect(() => {
     setAuctions(fetchedAuctions); // Update auctions whenever fetchedAuctions changes

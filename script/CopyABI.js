@@ -42,5 +42,5 @@ function copyABI(contract) {
 
 // Copy both NFT and Auction ABIs
 copyABI("NFT");
-copyABI("Auction");
+copyABI("EnglishAuction");
 copyABI("ERC20Mock");
