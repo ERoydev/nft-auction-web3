@@ -48,7 +48,6 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     setNftIds(tokenIds); // Update state with fetched NFT IDs
   }
 
-  console.log('roles', roles);
 
   // Connect to wallet (MetaMask)
   const connectWallet = async (): Promise<void> => {

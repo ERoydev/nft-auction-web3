@@ -8,7 +8,6 @@ import dotenv from 'dotenv';
 import { getRolesForUser } from './methods.js';
 
 
-
 const app = express();
 const port = 3000;
 dotenv.config();
@@ -60,7 +59,6 @@ app.post('/getProof', (req, res) => {
     res.json({ proof });
 });
 
-// Add address to whitelist
 app.post('/addAddress', (req, res) => {
     const { address, senderRole } = req.body;
 
@@ -68,13 +66,33 @@ app.post('/addAddress', (req, res) => {
         return res.status(400).send('Address is required');
     }
 
+    // Normalize the address to ensure consistency
+    const normalizedAddress = getAddress(address);
+
+    console.log("add", normalizedAddress)
+
+    // Step 1: Delete the address from the database if it exists
+    try {
+        const data = JSON.parse(fs.readFileSync(databasePath, 'utf8'));
+
+        if (data[normalizedAddress]) {
+            delete data[normalizedAddress];
+            fs.writeFileSync(databasePath, JSON.stringify(data, null, 2), 'utf8');
+            console.log(`Address ${normalizedAddress} deleted from the database`);
+        }
+    } catch (err) {
+        console.error('Error deleting address from database:', err);
+        return res.status(500).send('Error deleting address from database');
+    }
+
+    // Step 2: Add the address to the whitelist
     const whitelist = getWhitelist();
 
-    if (whitelist.includes(address)) {
+    if (whitelist.includes(normalizedAddress)) {
         return res.status(400).send('Address already exists in the whitelist');
     }
 
-    whitelist.push(address);
+    whitelist.push(normalizedAddress);
 
     try {
         fs.writeFileSync(whitelistFilePath, JSON.stringify(whitelist, null, 2));
@@ -96,13 +114,16 @@ app.post('/removeAddress', (req, res) => {
         return res.status(400).send('Address is required');
     }
 
+    // Normalize the address to ensure consistency
+    const normalizedAddress = getAddress(address);
+
     const whitelist = getWhitelist();
 
-    if (!whitelist.includes(address)) {
+    if (!whitelist.includes(normalizedAddress)) {
         return res.status(400).send('Address does not exist in the whitelist');
     }
 
-    const updatedWhitelist = whitelist.filter(addr => addr !== address);
+    const updatedWhitelist = whitelist.filter(addr => addr !== normalizedAddress);
 
     try {
         fs.writeFileSync(whitelistFilePath, JSON.stringify(updatedWhitelist, null, 2));
@@ -123,6 +144,8 @@ app.post('/roles', async (req, res) => {
         return res.status(400).send('Address is required');
     }
 
+    const normalizedAddress = getAddress(address);
+
     try {
         // Read the database
         let database = {};
@@ -134,20 +157,22 @@ app.post('/roles', async (req, res) => {
         }
 
         // Check if the address already exists in the database
-        if (database[address]) {
+        if (database[normalizedAddress]) {
             console.log("Returning roles from database");
-            return res.json({ roles: database[address] });
+            return res.json({ roles: database[normalizedAddress] });
         }
 
         // Fetch roles if not already in the database
-        const roles = await getRolesForUser(address);
+        const roles = await getRolesForUser(normalizedAddress);
+
+        console.log("Fetched roles from contract", roles);
 
         if (!roles) {
             return res.status(500).send('Could not retrieve roles');
         }
 
         // Add the address and roles to the database
-        database[address] = roles;
+        database[normalizedAddress] = roles;
 
         // Write to the database only if the address is new
         fs.writeFileSync(databasePath, JSON.stringify(database, null, 2));
@@ -159,31 +184,9 @@ app.post('/roles', async (req, res) => {
     }
 });
 
-// Used to delete the address from the database, because he need to fetch his roles again. Used after admin has made an operation that changes the roles of the user
-app.post('/deleteAddress', (req, res) => {
-    const { address } = req.body;
 
-    if (!address) {
-        return res.status(400).send('Address is required');
-    }
+// TODO: Add route for tokenData for tokenId. To skip refetching the same data through my frontend components
 
-    try {
-        const data = JSON.parse(fs.readFileSync(databasePath, 'utf8'));
-
-        if (!data[address]) {
-            return res.status(200).send('Address does not exist in the database');
-        }
-
-        delete data[address];
-
-        fs.writeFileSync(databasePath, JSON.stringify(data, null, 2), 'utf8');
-
-        return res.status(200).send('Address deleted successfully');
-    } catch (err) {
-        console.error('Error deleting address:', err);
-        return res.status(500).send('Error deleting address');
-    }
-})
 
 // Start the server
 app.listen(port, () => {

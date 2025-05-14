@@ -29,8 +29,6 @@ Core Logic:
         - admin functions(set price, update whitelist, etc.)
 */
 
-
-
 /// @title Nft Contract
 /// @author E.Roydev
 /// @notice Used to mint nfts
