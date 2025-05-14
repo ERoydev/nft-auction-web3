@@ -3,7 +3,7 @@ import { ROLES } from "../pages/admin";
 import { getBrowserProvider, nftReadContract, getNFtWriteContract } from "../utils/contract";
 import { addToWhitelist, updateTheRoot } from "./WhitelistService";
 import axios from "axios";
-
+import { logger } from "../utils/logger";
 
 export async function assignRole(role: string, userAddress: string, senderRole: string) {
     /*
@@ -13,7 +13,7 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
 
     try {
         if (role == ROLES[0]) {
-            console.log("Assigning Whitelist Manager role to:", userAddress);
+            logger.log("Assigning Whitelist Manager role to:", userAddress);
 
             const contractWithSigner = await getNFtWriteContract();
 
@@ -22,7 +22,7 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
             // This should be added to the whitelist
             addToWhitelist(userAddress, senderRole);
             updateTheRoot();
-            console.log("Whitelist Manager role assigned:", result);
+            logger.log("Whitelist Manager role assigned:", result);
 
             // Should delete the roles saved in the database, because they are changed and need to be fetched again
             const deleteAddressResult = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/deleteAddress/`, {
@@ -32,12 +32,12 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
             return;
 
         } else if (role == ROLES[1]) {
-            console.log("Assigning Sales Price Manager role to:", userAddress);
+            logger.log("Assigning Sales Price Manager role to:", userAddress);
 
             const contractWithSigner = await getNFtWriteContract();
 
             const result = await contractWithSigner.addSalesPriceManager(userAddress);
-            console.log("Sales Price Manager role assigned:", result);
+            logger.log("Sales Price Manager role assigned:", result);
 
             // Should delete the roles saved in the database, because they are changed and need to be fetched again
             const deleteAddressResult = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/deleteAddress/`, {
@@ -47,12 +47,12 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
             return;
 
         } else if (role == ROLES[2]) {
-            console.log("Assigning Payment Tokens Configurator role to:", userAddress);
+            logger.log("Assigning Payment Tokens Configurator role to:", userAddress);
 
             const contractWithSigner = await getNFtWriteContract();
 
             const result = await contractWithSigner.addPaymentTokensConfigurator(userAddress);
-            console.log("Payment Tokens Configurator role assigned:", result);
+            logger.log("Payment Tokens Configurator role assigned:", result);
             return;
 
             // Should delete the roles saved in the database, because they are changed and need to be fetched again
@@ -63,7 +63,7 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
 
         throw new Error("Invalid Role");
     } catch (error) {
-        console.error("Error assigning role:", error);
+        logger.error("Error assigning role:", error);
         throw error;
     }
 }
@@ -89,7 +89,7 @@ export const getRoles = async (account: string) => {
       isPaymentTokensConfigurator: roles[3],
     };
   } catch (error) {
-    console.error('Error fetching roles:', error);
+    logger.error('Error fetching roles:', error);
     // Return default values if there's an error
     return {
       isAdmin: false,

@@ -2,7 +2,7 @@ import axios from "axios"
 import { ethers } from "ethers";
 import {arrayify} from "@ethersproject/bytes";
 import { getBrowserProvider, nftReadContract, getNFtWriteContract} from "../utils/contract";
-
+import { logger } from "../utils/logger";
 
 // Used only from admins to add/remove users from the whitelist
 
@@ -23,7 +23,7 @@ export async function getMerkleProof(userAddress: string) {
         return proofBytes32;
 
     } catch (error) {
-        console.error("Error fetching Merkle proof:", error);
+        logger.error("Error fetching Merkle proof:", error);
         throw error;
     }
 }
@@ -43,7 +43,7 @@ export async function addToWhitelist(walletAddress: string, senderRole: string) 
 
         return response.data;
     } catch (error) {
-        console.error("Error adding to whitelist:", error);
+        logger.error("Error adding to whitelist:", error);
         if (error.response.data == "Address already exists in the whitelist") {
             alert("Address already exists in the whitelist");
         }
@@ -66,7 +66,7 @@ export async function removeFromWhitelist(walletAddress: string, senderRole: str
 
         return response.data;
     } catch (error) {
-        console.error("Error removing from whitelist:", error);
+        logger.error("Error removing from whitelist:", error);
         if (error.response.data == "Address does not exist in the whitelist") {
             alert("Address does not exist in the whitelist");
         }
@@ -87,7 +87,7 @@ export async function updateTheRoot() {
         await contractWithSigner.setMerkleRoot(newRoot);
 
     } catch (error) {
-        console.error("Error updating the root:", error);
+        logger.error("Error updating the root:", error);
         throw error;
     }
 }

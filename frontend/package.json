@@ -16,6 +16,7 @@
     "axios": "^1.9.0",
     "ethers": "^6.13.7",
     "flowbite": "^3.1.2",
+    "loglevel": "^1.9.2",
     "pinata": "^2.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

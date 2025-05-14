@@ -372,5 +372,10 @@
       }
     ],
     "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "ReentrancyGuardReentrantCall",
+    "inputs": []
   }
 ]

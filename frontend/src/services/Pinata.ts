@@ -1,4 +1,6 @@
 import { PinataSDK } from "pinata";
+import { logger } from "../utils/logger";
+
 
 const pinata = new PinataSDK({
   pinataJwt: import.meta.env.VITE_PINATA_API_KEY_JWT,
@@ -41,7 +43,7 @@ export async function uploadFileToPinata(
             metadataURL: `https://${import.meta.env.VITE_PINATA_GATEWAY}/ipfs/${metadataUpload.cid}`, // URL to access the metadata => pass this to the contract as parameter
         }
     } catch (error) {
-        console.error("Upload failed:", error);
+        logger.error("Upload failed:", error);
         throw error;
     }
 }

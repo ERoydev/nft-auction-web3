@@ -1,3 +1,5 @@
+import { logger } from "../utils/logger";
+
 export const connectWallet = async (): Promise<string | null> => {
     if (typeof window.ethereum !== "undefined") {
       try {
@@ -6,7 +8,7 @@ export const connectWallet = async (): Promise<string | null> => {
         });
         return accounts[0]; // Return the first connected account
       } catch (error) {
-        console.error("Error connecting to wallet:", error);
+        logger.error("Error connecting to wallet:", error);
         return null;
       }
     } else {
@@ -24,7 +26,7 @@ export const disconnectWallet = (): boolean => {
       }
       return true; // Return true to indicate successful disconnection
     } catch (error) {
-      console.error("Error disconnecting wallet:", error);
+      logger.error("Error disconnecting wallet:", error);
       return false; // Return false if an error occurs
     }
   };

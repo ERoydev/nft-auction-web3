@@ -1,5 +1,7 @@
 import { formatEther, formatUnits, parseEther, parseUnits } from "ethers";
 import { getBrowserProvider, nftReadContract, getNFtWriteContract, getUsdcWriteContract } from "../utils/contract";
+import { logger } from "../utils/logger";
+
 
 export async function mintNFT(tokenMetadataURL: string, merkleProof: Uint8Array[], priceInUSDCx: number) {
     const contractWithSigner = await getNFtWriteContract();
@@ -7,10 +9,11 @@ export async function mintNFT(tokenMetadataURL: string, merkleProof: Uint8Array[
     try {
         const tx = await contractWithSigner.safeMint(tokenMetadataURL, merkleProof, priceInUSDCx);
         await tx.wait();
-        console.log("NFT minted successfully:", tx);
+        logger.info("NFT minted successfully:", tx);
+        // console.log("NFT minted successfully:", tx);
         return {}
     } catch (error) {
-        console.error("Error minting NFT:", error);
+        logger.error("Error minting NFT:", error);
         return { error: error };
     }
 }
@@ -25,7 +28,7 @@ export async function getNFTsByOwner(ownerAddress: string) {
         const tokenIdsArray = tokenIds.map((token: any) => Number(token));
         return tokenIdsArray;
     } catch (error) {
-        console.error("Error fetching NFTs:", error);
+        logger.error("Error fetching NFTs:", error);
     }
 }
 
@@ -34,7 +37,7 @@ export async function getTokenURLFromTokenId(tokenId: number) {
         const tokenURL = await nftReadContract.getTokenURL(tokenId);
         return tokenURL;
     } catch (error) {
-        console.error("Error fetching token URL:", error);
+        logger.error("Error fetching token URL:", error);
     }
 }
 
@@ -45,9 +48,9 @@ export async function approveNFT(tokenId: number) {
 
         const tx = await contractWithSigner.approve(_contractToApprove, tokenId);
         await tx.wait();
-        console.log("NFT approved successfully:", tx);
+        logger.log("NFT approved successfully:", tx);
     } catch (error) {
-        console.log("Error approving NFT:", error);
+        logger.log("Error approving NFT:", error);
     }
 }
 
@@ -71,10 +74,10 @@ export async function purchaseNFT(tokenId: number, payWithETH: boolean, merklePr
         }
 
         await tx.wait();
-        console.log("NFT purchased successfully:", tx);
+        logger.log("NFT purchased successfully:", tx);
         return true;
     } catch (error) {
-        console.error("Error purchasing NFT:", error);
+        logger.error("Error purchasing NFT:", error);
         return false;
     }
 }
@@ -86,6 +89,6 @@ export async function getNFTPriceInEth(priceInUsdc: string) {
         const ethPriceInEth = formatUnits(ethPriceInWei, 18); // to convert to ETH
         return ethPriceInEth;
     } catch (error) {
-        console.error("Error fetching NFT price in ETH:", error);
+        logger.error("Error fetching NFT price in ETH:", error);
     }
 }

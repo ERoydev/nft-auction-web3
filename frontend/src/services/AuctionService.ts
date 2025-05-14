@@ -1,7 +1,7 @@
 import { getBrowserProvider, getAuctionWriteContract, auctionReadContract, usdcReadContract } from "../utils/contract";
 import { approveNFT } from "./nftContractService";
 import { ethers, parseEther } from "ethers";
-
+import { logger } from "../utils/logger";
 
 export async function createAuction(data: any) {
     await approveNFT(data.tokenId);
@@ -15,10 +15,10 @@ export async function createAuction(data: any) {
     try {
         const tx = await contractWithSigner.createAuction(_nftAddress, data.tokenId, priceInWei, data.duration);
         await tx.wait();
-        console.log("Auction created successfully:", tx);
+        logger.log("Auction created successfully:", tx);
         return {}
     } catch (error) {
-        console.error("Error creating auction:", error);
+        logger.error("Error creating auction:", error);
         return { error: "fail"}
     }
 
@@ -59,7 +59,7 @@ export async function fetchActiveAuctions() {
         // Filter only active auctions
         return activeAuctions.filter((auction) => auction.endTime > now);
     } catch (error) {
-        console.error("Error fetching auctions:", error);
+        logger.error("Error fetching auctions:", error);
         return [];
     }
 }
@@ -100,7 +100,7 @@ export async function fetchNonActiveAuctions() {
         // Filter out null values (auctions that haven't ended yet)
         return nonActiveAuctions.filter((auction) => auction !== null);
     } catch (error) {
-        console.error("Error fetching non-active auctions:", error);
+        logger.error("Error fetching non-active auctions:", error);
         return [];
     }
 }
@@ -129,7 +129,7 @@ export async function fetchUserBidHistory(userAddress: string) {
 
         return userBids;
     } catch (error) {
-        console.error("Error fetching user bid history:", error);
+        logger.error("Error fetching user bid history:", error);
         return [];
     }
 }
@@ -141,10 +141,10 @@ export async function placeBidAuction(auctionId: number, bidAmount: string) {
         const bidAmountInWei = parseEther(bidAmount);
         const tx = await contractWithSigner.placeBid(auctionId, { value: bidAmountInWei });
         await tx.wait();
-        console.log("Bid placed successfully:", tx);
+        logger.log("Bid placed successfully:", tx);
         return true;
     } catch (error) {
-        console.error("Error placing bid:", error);
+        logger.error("Error placing bid:", error);
         return false;
     }
 }
@@ -155,10 +155,10 @@ export async function endAuction(auctionId: number) {
 
         const tx = await contractWithSigner.endAuction(auctionId);
         await tx.wait();
-        console.log("Auction ended successfully:", tx);
+        logger.log("Auction ended successfully:", tx);
         return true;
     } catch (error) {
-        console.error("Error ending auction:", error);
+        logger.error("Error ending auction:", error);
         return false;
     }
 }
