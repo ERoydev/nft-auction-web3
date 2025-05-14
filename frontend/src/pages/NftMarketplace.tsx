@@ -116,42 +116,48 @@ export default function NFTMarketplace({
               Price: {selectedNFT.price} USDCx
             </p>
 
+            {/* Payment Operations */}
+            {currentAccount !== import.meta.env.VITE_OWNER_OF_CONTRACTS.toLowerCase() && (
+              <div>
 
-            {/* Play with ETH Option */}
-            <div className="mb-4">
-              <label className="block text-gray-700 font-semibold mb-2">
-                Pay with ETH:
-              </label>
-              <div className="flex items-center gap-4">
+                <div className="mb-4">
+                  <label className="block text-gray-700 font-semibold mb-2">
+                    Pay with ETH:
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => setPlayWithETH(true)}
+                      className={`px-4 py-2 rounded-lg ${
+                        playWithETH
+                          ? "bg-green-500 text-white"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => setPlayWithETH(false)}
+                      className={`px-4 py-2 rounded-lg ${
+                        !playWithETH
+                          ? "bg-green-500 text-white"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      No
+                    </button>
+                  </div>
+                </div>
+  
                 <button
-                  onClick={() => setPlayWithETH(true)}
-                  className={`px-4 py-2 rounded-lg ${
-                    playWithETH
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-200 text-gray-700"
-                  }`}
+                  onClick={handlePurchase}
+                  className="hover:cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
                 >
-                  Yes
+                  Purchase
                 </button>
-                <button
-                  onClick={() => setPlayWithETH(false)}
-                  className={`px-4 py-2 rounded-lg ${
-                    !playWithETH
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-200 text-gray-700"
-                  }`}
-                >
-                  No
-                </button>
+              
               </div>
-            </div>
+            )}
 
-            <button
-              onClick={handlePurchase}
-              className="hover:cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
-            >
-              Purchase
-            </button>
           </div>
         </div>
       )}

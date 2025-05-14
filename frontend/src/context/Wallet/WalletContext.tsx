@@ -1,7 +1,7 @@
 import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { getRoles } from '../../services/RolesService';
 import { useFetchTokenUrls } from '../../hooks/useFetchTokenUrls';
-
+import { ethers } from 'ethers';
 /*
 Keeps track of the current wallet address, connect, disconnect, and roles of the user:
   - Added functionality to fetch roles from the smart contract.
@@ -46,8 +46,9 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     if (typeof window.ethereum !== 'undefined') {
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        setCurrentAccount(accounts[0]);
-        window.localStorage.setItem('walletConnected', accounts[0]); // Store account in localStorage
+        const normalizedAddress = ethers.getAddress(accounts[0]); // Normalize the address to lowercase
+        setCurrentAccount(normalizedAddress);
+        window.localStorage.setItem('walletConnected', normalizedAddress); // Store account in localStorage
 
       } catch (error) {
         console.error('Error connecting wallet:', error);
