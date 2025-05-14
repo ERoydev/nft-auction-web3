@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract EnglishAuction {
+contract EnglishAuction is ReentrancyGuard {
     struct Auction {
         address seller;
         IERC721 nft;
@@ -49,7 +49,8 @@ contract EnglishAuction {
         uint256 _nftTokenId,
         uint256 _startPrice,
         uint256 _durationInMinutes
-    ) external returns (uint256 _auctionId) {
+    ) external nonReentrant returns (uint256 _auctionId) {
+
         auctionId = nextAuctionId++;
         Auction storage auction = auctions[auctionId];
 
@@ -74,7 +75,6 @@ contract EnglishAuction {
         );
 
         auction.nft.transferFrom(auction.seller, address(this), _nftTokenId);
-
         return auctionId;
     }
 
@@ -103,7 +103,7 @@ contract EnglishAuction {
         emit NewBid(auction.highestBidder, _auctionId, auction.highestBid);
     }
 
-    function endAuction(uint256 _auctionId) external {
+    function endAuction(uint256 _auctionId) external nonReentrant {
         require(_auctionId < nextAuctionId, "Auction with this id doesn't exist");
         Auction storage auction = auctions[_auctionId];
 
@@ -124,7 +124,7 @@ contract EnglishAuction {
         }
     }
 
-    function withdraw(uint256 _auctionId) external  {
+    function withdraw(uint256 _auctionId) external nonReentrant {
         require(_auctionId < nextAuctionId, "Auction with this id doesn't exist");
         Auction storage auction = auctions[_auctionId];
 
@@ -134,9 +134,9 @@ contract EnglishAuction {
         uint amount = deposits[_auctionId][msg.sender];
         deposits[_auctionId][msg.sender] = 0;
 
-        payable(msg.sender).transfer(amount);
-
         emit Withdraw(msg.sender, _auctionId, amount);
+
+        payable(msg.sender).transfer(amount);
     }
 
    function getAuction(uint256 _auctionId) public view returns (
