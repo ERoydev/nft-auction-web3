@@ -45,11 +45,8 @@ export function useFetchTokenUrls(account: string | null) {
 
     const fetchData = async () => {
         const tokenIds = await setTokenIdsOwned(); // Wait for token IDs to be fetched
-        if (tokenIds && tokenIds.length > 0) {
-            await fetchTokenURLs(tokenIds); // Pass the fetched token IDs to fetchTokenURLs
-        } else {
-            setLoading(false); // No tokens, stop loading
-        }
+        await fetchTokenURLs(tokenIds);
+        setLoading(false);
     };
 
     useEffect(() => {

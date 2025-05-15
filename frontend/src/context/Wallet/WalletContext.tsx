@@ -82,8 +82,10 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
           setCurrentAccount(accounts[0]); // Update the account if it changes
           window.localStorage.setItem('walletConnected', accounts[0]); // Save the new account to localStorage
           fetchRoles(accounts[0]); // Fetch roles for the new account
+          refetch();
         } else {
           setCurrentAccount(null); // If no accounts, set to null
+          refetch();
           window.localStorage.removeItem('walletConnected'); // Remove from localStorage if no account is selected
         }
       };

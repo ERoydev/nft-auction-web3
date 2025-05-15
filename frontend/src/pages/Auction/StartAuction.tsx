@@ -4,11 +4,10 @@ import TokenData from "../../intefaces/TokenData";
 
 export default function StartAuction() {
   // Come from outlet(parent) context
-  const { tokensData, handleStartAuction, removeToken, errorMessage, showError, clearError }: {
+  const { tokensData, handleStartAuction, errorMessage, showError, clearError }: {
     errorMessage: string, 
     showError: (msg: string) => void, 
     clearError: () => void, 
-    removeToken: (tokenId: number) => void , 
     tokensData: TokenData[], 
     handleStartAuction: (selectedNFT: TokenData, 
     startingPrice: number, 

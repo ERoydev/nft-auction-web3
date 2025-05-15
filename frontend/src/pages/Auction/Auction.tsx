@@ -3,10 +3,9 @@ import TokenData from "../../intefaces/TokenData";
 import { useWallet } from "../../context/Wallet/WalletContext";
 import { createAuction } from "../../services/AuctionService";
 import { useError } from "../../hooks/useError";
-import { error } from "loglevel";
 
 export default function Auction() {
-  const { tokensData, currentAccount, removeToken } = useWallet();
+  const { tokensData, removeToken } = useWallet();
   const location = useLocation(); // Get the current route
   const { showError, errorMessage, clearError } = useError();
 

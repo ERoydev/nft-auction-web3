@@ -2,6 +2,7 @@ import { getBrowserProvider, getAuctionWriteContract, auctionReadContract, usdcR
 import { approveNFT } from "./nftContractService";
 import { ethers, parseEther } from "ethers";
 import { logger } from "../utils/logger";
+import { extractRevertMessageFromError } from "../utils/extractRevertMessageFromError";
 
 export async function createAuction(data: any) {
     await approveNFT(data.tokenId);
@@ -19,13 +20,9 @@ export async function createAuction(data: any) {
         return {};
     } catch (error) {
         logger.error("Error creating auction:", error);
-        let revertMessage;
-
-        if (error?.revert?.args && error?.revert?.args[0]) {
-            revertMessage = error.revert.args[0]; // revert reason string
-        }
         
-        return { error: revertMessage }
+        const errorResult = extractRevertMessageFromError(error);
+        return errorResult;
     }
 }
 
