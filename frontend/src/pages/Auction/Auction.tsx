@@ -89,6 +89,7 @@ export default function Auction() {
         </nav>
       </div>
       
+
       <div className="flex-grow p-6">
         <Outlet context={{ tokensData, handleStartAuction, removeToken, errorMessage, showError, clearError }} />
       </div>
