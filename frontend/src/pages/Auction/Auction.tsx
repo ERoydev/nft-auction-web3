@@ -3,10 +3,12 @@ import TokenData from "../../intefaces/TokenData";
 import { useWallet } from "../../context/Wallet/WalletContext";
 import { createAuction } from "../../services/AuctionService";
 import { useError } from "../../hooks/useError";
+import { error } from "loglevel";
 
 export default function Auction() {
   const { tokensData, currentAccount, removeToken } = useWallet();
   const location = useLocation(); // Get the current route
+  const { showError, errorMessage, clearError } = useError();
 
   const handleStartAuction = async (selectedNFT: TokenData, startingPrice: number, duration: number) => {
     const data = {
@@ -18,7 +20,7 @@ export default function Auction() {
     const auctionCreationResult = await createAuction(data);
 
     if (auctionCreationResult.error) {
-      alert("Failed to create auction. Please try again.");
+      showError(auctionCreationResult.error);
       return;
     }
 
@@ -89,7 +91,7 @@ export default function Auction() {
       </div>
       
       <div className="flex-grow p-6">
-        <Outlet context={{ tokensData, handleStartAuction, removeToken }} />
+        <Outlet context={{ tokensData, handleStartAuction, removeToken, errorMessage, showError, clearError }} />
       </div>
     </div>
   );

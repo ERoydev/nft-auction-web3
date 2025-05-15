@@ -16,12 +16,17 @@ export async function createAuction(data: any) {
         const tx = await contractWithSigner.createAuction(_nftAddress, data.tokenId, priceInWei, data.duration);
         await tx.wait();
         logger.log("Auction created successfully:", tx);
-        return {}
+        return {};
     } catch (error) {
         logger.error("Error creating auction:", error);
-        return { error: "fail"}
-    }
+        let revertMessage;
 
+        if (error?.revert?.args && error?.revert?.args[0]) {
+            revertMessage = error.revert.args[0]; // revert reason string
+        }
+        
+        return { error: revertMessage }
+    }
 }
 
 export async function fetchActiveAuctions() {

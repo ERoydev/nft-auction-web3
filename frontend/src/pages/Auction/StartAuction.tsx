@@ -1,16 +1,23 @@
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { useError } from "../../hooks/useError";
 import TokenData from "../../intefaces/TokenData";
 
 export default function StartAuction() {
   // Come from outlet(parent) context
-  const { tokensData, handleStartAuction, removeToken }: { removeToken: (tokenId: number) => void , tokensData: TokenData[]; handleStartAuction: (selectedNFT: TokenData, startingPrice: number, duration: number) => void } = useOutletContext();
+  const { tokensData, handleStartAuction, removeToken, errorMessage, showError, clearError }: {
+    errorMessage: string, 
+    showError: (msg: string) => void, 
+    clearError: () => void, 
+    removeToken: (tokenId: number) => void , 
+    tokensData: TokenData[], 
+    handleStartAuction: (selectedNFT: TokenData, 
+    startingPrice: number, 
+    duration: number) => void 
+  } = useOutletContext();
   
   const [selectedNFT, setSelectedNFT] = useState<TokenData | null>(null);
   const [startingPrice, setStartingPrice] = useState("");
   const [duration, setDuration] = useState("");
-  const { errorMessage, showError, clearError } = useError();
 
   const StartAuctionClickHandler = () => {
     if (!selectedNFT || !startingPrice || !duration) {
