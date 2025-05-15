@@ -200,6 +200,11 @@
         "name": "nftTokenId",
         "type": "uint256",
         "internalType": "uint256"
+      },
+      {
+        "name": "auctionEnded",
+        "type": "bool",
+        "internalType": "bool"
       }
     ],
     "stateMutability": "view"

@@ -142,7 +142,7 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
             require(msg.value >= requiredETH, "Insufficient ETH");
             
             // Instead of sending immediately i implement Pull-over-Push strategy
-            fundsOwed[tokenData.owner] += msg.value;
+            fundsOwed[tokenData.owner] += requiredETH;
 
             // Older version where i send immediately
             // (bool success,) = info.owner.call{value: requiredETH}("");

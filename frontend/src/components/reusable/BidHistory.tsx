@@ -14,7 +14,7 @@ export default function BidHistory({
     }[];
 }) {
     return(
-         <div className="mt-12">
+         <div className="mt-12 text-center pb-16">
             <h2 className="text-2xl font-bold mb-4">Your Bid History</h2>
             {loading ? (
             <Spinner />

@@ -14,4 +14,4 @@ export default interface TokenData {
     price: string;
     tokenId: number;
     priceInEth: number;
-  }
+}

@@ -120,6 +120,7 @@ contract EnglishAuction is ReentrancyGuard {
         if (auction.highestBidder != address(0)) {
             deposits[_auctionId][auction.highestBidder] = 0; // clear highest bidder
 
+            // Transfer money to seller 
             (bool sent, ) = auction.seller.call{value: auction.highestBid}("");
             require(sent, "Transfer to seller failed");
 
@@ -149,7 +150,8 @@ contract EnglishAuction is ReentrancyGuard {
         uint256 highestBid,
         address highestBidder,
         address nft,
-        uint256 nftTokenId
+        uint256 nftTokenId,
+        bool auctionEnded
     ) {
         require(_auctionId < nextAuctionId, "auction with this id does not exists");
         
@@ -161,7 +163,8 @@ contract EnglishAuction is ReentrancyGuard {
             auction.highestBid,
             auction.highestBidder,
             address(auction.nft),
-            auction.nftTokenId
+            auction.nftTokenId,
+            auction.auctionEnded
         );
     }
 }

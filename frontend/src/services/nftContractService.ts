@@ -2,7 +2,7 @@ import { formatEther, formatUnits, parseEther, parseUnits } from "ethers";
 import { getBrowserProvider, nftReadContract, getNFtWriteContract, getUsdcWriteContract } from "../utils/contract";
 import { logger } from "../utils/logger";
 import { extractRevertMessageFromError } from "../utils/extractRevertMessageFromError";
-
+import { ethers } from "ethers";
 
 export async function mintNFT(tokenMetadataURL: string, merkleProof: Uint8Array[], priceInUSDCx: number) {
     const contractWithSigner = await getNFtWriteContract();
@@ -92,5 +92,33 @@ export async function getNFTPriceInEth(priceInUsdc: string) {
         return ethPriceInEth;
     } catch (error) {
         logger.error("Error fetching NFT price in ETH:", error);
+    }
+}
+
+export async function withdrawFunds() {
+    try {
+        const contractWithSigner = await getNFtWriteContract();
+        const tx = await contractWithSigner.withdrawFunds();
+        await tx.wait();
+        logger.log("Funds withdrawn successfully:", tx);
+        return {};
+    } catch (error) {
+        logger.error("Error withdrawing funds:", error);
+        const revertMessage = extractRevertMessageFromError(error);
+        return revertMessage;
+    }
+
+}
+
+export async function getLockedFunds(account: string) {
+    try {
+        const normalizeAccount = ethers.getAddress(account);
+        const lockedFunds = await nftReadContract.fundsOwed(normalizeAccount);
+        logger.log("Successfully fetched locked funds:", lockedFunds);
+        return lockedFunds
+    } catch (error) {
+        logger.error("Error fetching locked funds:", error);
+        const revertMessage = extractRevertMessageFromError(error);
+        return revertMessage;
     }
 }

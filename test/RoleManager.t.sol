@@ -193,5 +193,13 @@ contract RoleManagerTest is BaseNFTTest {
         assertEq(isWhitelist, false);
         assertEq(isSales, true);
         assertEq(isPayment, false);
+
+        vm.prank(owner);
+        nft.addPaymentTokensConfigurator(addr2);
+        (isAdmin, isWhitelist, isSales, isPayment) = nft.getRoles(addr2);
+        assertEq(isAdmin, false);
+        assertEq(isWhitelist, false);
+        assertEq(isSales, true);
+        assertEq(isPayment, true);
     }
 }

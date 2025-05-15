@@ -96,6 +96,7 @@ npm install</code></pre>
 ## Usefull links
 - https://dev.to/jamiescript/design-patterns-in-solidity-1i28
 - https://www.cyfrin.io/blog/what-is-a-reentrancy-attack-solidity-smart-contracts
+- https://docs.ipfs.tech/how-to/best-practices-for-nft-data/
 
 1. forge script .... Deploy the NFT contract
 2. node script/CopyABI.js to update the abi contract in the frontend

@@ -16,7 +16,7 @@ export default function DisplayNftModal({
 }: {
     closeModal: () => void;
     selectedNft: DisplayableNft;
-    handlePurchase: () => void;
+    handlePurchase?: () => void;
     errorMessage?: string | null;
     currentAccount?: string;
     isBiddable?: boolean;
