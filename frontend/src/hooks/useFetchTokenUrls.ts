@@ -60,5 +60,5 @@ export function useFetchTokenUrls(account: string | null) {
     // Not tested how it behaves in reality, but it works
     const memoizedTokensData = useMemo(() => tokensData, [tokensData]);
 
-    return { loading, tokensData: memoizedTokensData, removeToken, refetch: fetchData };
+    return { loading, tokensData: memoizedTokensData, removeToken, refetchData: fetchData };
 }

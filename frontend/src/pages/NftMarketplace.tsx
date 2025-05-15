@@ -19,8 +19,8 @@ export default function NFTMarketplace({
 }: {
   title: string;
 }) {
-  const { currentAccount } = useWallet(); // Get the user's wallet address from context
-  const { tokensData, loading } = useFetchTokenUrls(import.meta.env.VITE_OWNER_OF_CONTRACTS); // Use the custom hook
+  const { currentAccount, refetch } = useWallet(); // Get the user's wallet address from context
+  const { tokensData, loading, removeToken } = useFetchTokenUrls(import.meta.env.VITE_OWNER_OF_CONTRACTS); // Use the custom hook
   const [selectedNFT, setSelectedNFT] = useState<TokenData | null>(null); // State for selected NFT
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
   const [playWithETH, setPlayWithETH] = useState(false); // State for "Play with ETH" option
@@ -29,6 +29,8 @@ export default function NFTMarketplace({
     setSelectedNFT(nft); // Set the selected NFT
     setIsModalOpen(true); // Open the modal
   };
+
+  console.log("Selected NFT:", selectedNFT);
 
   const handlePurchase = async () => {
     if (!selectedNFT) return;
@@ -43,6 +45,8 @@ export default function NFTMarketplace({
     const purchaseResult = await purchaseNFT(selectedNFT.tokenId, playWithETH, merkleProof, selectedNFT.price);
     // Close the modal after purchase
     setIsModalOpen(false);
+    removeToken(selectedNFT.tokenId); // Remove the purchased token from the list
+    refetch(); // Refetch the userWallet data to update the changes.
   };
 
   const closeModal = () => {
@@ -60,6 +64,10 @@ export default function NFTMarketplace({
 
       {loading ? ( // Show loading indicator while loading
         <Spinner />
+      ) : tokensData.length === 0 ? (
+        <div className="text-center text-gray-600 text-lg">
+          No listed NFTs available.
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {tokensData.map((nft, idx) => (

@@ -31,7 +31,7 @@ interface WalletProviderProps {
 
 export const WalletProvider = ({ children }: WalletProviderProps) => {
   const [currentAccount, setCurrentAccount] = useState<string | null>(null);
-  const { tokensData, removeToken, refetch } = useFetchTokenUrls(currentAccount);
+  const { tokensData, removeToken, refetchData: refetch } = useFetchTokenUrls(currentAccount);
 
   const [roles, setRoles] = useState({
     isAdmin: false,
