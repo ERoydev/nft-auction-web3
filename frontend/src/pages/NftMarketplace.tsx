@@ -30,8 +30,6 @@ export default function NFTMarketplace({
     setIsModalOpen(true); // Open the modal
   };
 
-  console.log("Selected NFT:", selectedNFT);
-
   const handlePurchase = async () => {
     if (!selectedNFT) return;
     if (!currentAccount) {

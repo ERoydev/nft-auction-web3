@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-
+import { logger } from "../../utils/logger";
 interface ErrorProps {
   message: string;
   duration?: number; // Duration in milliseconds before the error disappears
@@ -9,7 +9,7 @@ const ErrorMessageComponent: React.FC<ErrorProps> = ({ message, duration = 5000 
   const [visible, setVisible] = useState<boolean>(false); // State to track visibility
   const [currentMessage, setCurrentMessage] = useState<string>(""); // To keep track of the current message
 
-  console.log("Error Message:", message); // Logs the message for debugging
+  logger.info("Error Message: ", message)
 
   // Whenever the message changes, reset visibility and message state
   useEffect(() => {

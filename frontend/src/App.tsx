@@ -13,11 +13,11 @@ import Auction from "./pages/Auction/Auction";
 import { WalletProvider } from "./context/Wallet/WalletContext";
 import AuthenticatedRoute from "./guards/AuthenticatedRoute";
 import { useState } from "react";
-import ErrorMessageComponent from "./components/reusable/ErrorMessageComponent";
 import AdminRoute from "./guards/AdminGuard";
 import StartAuction from "./pages/Auction/StartAuction";
 import ActiveAuction from "./pages/Auction/ActiveAuctions";
 import PastAuctions from "./pages/Auction/PastAuctions";
+import ErrorMessageComponent from "./components/reusable/ErrorMessageComponent";
 
 function App() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -66,7 +66,7 @@ function App() {
               {/* Admin Routes*/}
               
               <Route path="/admin" element={
-                <AdminRoute>
+                <AdminRoute setErrorMessage={setErrorMessage}>
                   <AdminPanel />
                 </AdminRoute>
                 } 
@@ -77,7 +77,7 @@ function App() {
         </WalletProvider>
       </div>
 
-      {/* {errorMessage && <ErrorMessageComponent message={errorMessage} />} */}
+      {errorMessage && <ErrorMessageComponent message={errorMessage} />}
       <Footer />
     </div>
   );

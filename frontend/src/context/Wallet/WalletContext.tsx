@@ -21,6 +21,7 @@ interface WalletContextType {
   tokensData: any[]; // Add the type for tokensData
   removeToken: (tokenId: number) => void; // Add the type for removeToken
   refetch: () => void; // Add the type for refetch
+  loadingRoles: boolean; // Add the type for loadingRoles
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -32,6 +33,7 @@ interface WalletProviderProps {
 export const WalletProvider = ({ children }: WalletProviderProps) => {
   const [currentAccount, setCurrentAccount] = useState<string | null>(null);
   const { tokensData, removeToken, refetchData: refetch } = useFetchTokenUrls(currentAccount);
+  const [loadingRoles, setLoadingRoles] = useState(true);
 
   const [roles, setRoles] = useState({
     isAdmin: false,
@@ -107,10 +109,12 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
 
   // Fetch roles from smart contract whenever currentAccount changes
   const fetchRoles = async (account: string) => {
+    setLoadingRoles(true);
     if (account) {
       const roles = await getRoles(account);
       setRoles(roles);
     }
+    setLoadingRoles(false);
   };
 
   return (
@@ -126,6 +130,7 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
         tokensData,
         removeToken,
         refetch, // Expose refetch function to refresh tokensData
+        loadingRoles,
       }}
     >
       {children}

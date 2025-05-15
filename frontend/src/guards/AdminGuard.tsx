@@ -1,34 +1,48 @@
-import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useWallet } from "../context/Wallet/WalletContext";
 
 interface AdminRouteProps {
   children: React.ReactNode;
+  setErrorMessage: (msg: string) => void;
 }
+const AdminRoute: React.FC<AdminRouteProps> = ({ children, setErrorMessage }) => {
+  const {
+    currentAccount,
+    isAdmin,
+    isWhitelistManager,
+    isSalesPriceManager,
+    isPaymentTokensConfigurator,
+    loadingRoles, // new from WalletContext
+  } = useWallet();
 
-const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { currentAccount, isAdmin, isWhitelistManager, isSalesPriceManager, isPaymentTokensConfigurator } = useWallet();
-  const [loading, setLoading] = useState(true); // Loading state to handle async fetching
-
-  // Check if the user has any admin role
-  const hasAdminAccess =
-    isAdmin || isWhitelistManager || isSalesPriceManager || isPaymentTokensConfigurator;
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (currentAccount) {
-      // Only stop loading when the account is available
-      setLoading(false);
+    if (loadingRoles) return; // Wait until roles are loaded
+
+    if (currentAccount === null) return; // Or handle no account case as needed
+
+    const hasAccess =
+      isAdmin || isWhitelistManager || isSalesPriceManager || isPaymentTokensConfigurator;
+
+    if (!hasAccess) {
+      setErrorMessage("You are not authorized to access this page.");
+      navigate("/", { replace: true });
     }
-  }, [currentAccount]); // When currentAccount changes, stop loading
+  }, [
+    currentAccount,
+    isAdmin,
+    isWhitelistManager,
+    isSalesPriceManager,
+    isPaymentTokensConfigurator,
+    loadingRoles,
+    navigate,
+    setErrorMessage,
+  ]);
 
-  if (loading) {
-    // Show loading state until the account is connected and roles are fetched
-    return <div>Loading...</div>;
-  }
-
-  if (!hasAdminAccess) {
-    // Redirect to home or another page if the user doesn't have admin access
-    return <Navigate to="/" replace />;
+  if (loadingRoles || currentAccount === null) {
+    return null; // or spinner
   }
 
   return <>{children}</>;
