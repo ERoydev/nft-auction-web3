@@ -113,10 +113,11 @@ export default function ProfileMenu() {
           >
             Withdraw Funds
           </button>
+          
+          {errorMessage && (
+            <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+          )}
         </div>
-        {errorMessage && (
-          <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
-        )}
       </div>
 
 
