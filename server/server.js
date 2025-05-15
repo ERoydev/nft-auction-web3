@@ -19,6 +19,7 @@ app.use(express.json());
 const whitelistFilePath = './whitelist.json';
 const databasePath = './database.json';
 
+
 const getWhitelist = () => {
     try {
         const data = fs.readFileSync(whitelistFilePath, 'utf8');
@@ -70,6 +71,7 @@ app.post('/addAddress', (req, res) => {
 
     // Normalize the address to ensure consistency
     const normalizedAddress = getAddress(address);
+    totalWhitelistedUsers++; // Increment the total whitelisted users count in DB
 
 
     // Step 1: Delete the address from the database if it exists
@@ -119,6 +121,8 @@ app.post('/removeAddress', (req, res) => {
     const normalizedAddress = getAddress(address);
 
     const whitelist = getWhitelist();
+
+    totalWhitelistedUsers--; // Decrement the total whitelisted users count in DB
 
     if (!whitelist.includes(normalizedAddress)) {
         return res.status(400).send('Address does not exist in the whitelist');
@@ -185,6 +189,31 @@ app.post('/roles', async (req, res) => {
     }
 });
 
+
+// STATISTICS STUFF
+
+// Simple in-memory database to keep track of the number of NFTs minted
+// This should be replaced with a proper database in production
+let nftMintedCount = 0;
+let platformRevenue = 0; // In ETH
+let totalWhitelistedUsers = 1; // Initial admin
+
+app.get('/adminStatistics', (req, res) => {
+    res.json({ nftMintedCount, platformRevenue, totalWhitelistedUsers });
+});
+
+app.post('/mintNft', (req, res) => {
+    nftMintedCount++;
+});
+
+app.post('/revenue', (req, res) => {
+    const { amount } = req.body;
+    if (!amount) {
+        return res.status(400).send('Amount is required');
+    }
+    platformRevenue += amount;
+    res.json({ message: 'Revenue updated successfully', platformRevenue });
+});
 
 // TODO: Add route for tokenData for tokenId. To skip refetching the same data through my frontend components
 

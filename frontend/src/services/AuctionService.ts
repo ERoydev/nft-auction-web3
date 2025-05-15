@@ -75,9 +75,10 @@ export async function fetchNonActiveAuctions() {
 
         // Fetch the latest state of each auction
         const nonActiveAuctions = await Promise.all(
-            Array.from({ length: maxAuctionId }, (_, index) => index + 1).map(async (auctionId) => {
+            Array.from({ length: maxAuctionId + 1}, (_, index) => index).map(async (auctionId) => {
                 // Query the latest state of the auction from the contract
                 const auctionData = await auctionReadContract.getAuction(auctionId);
+
 
                 // Only include auctions where endTime has passed
                 if (Number(auctionData.endTime) <= now) {
@@ -94,7 +95,6 @@ export async function fetchNonActiveAuctions() {
                         nftName: "", // Placeholder for NFT name
                     };
                 }
-
                 return null; // Exclude auctions where endTime has not passed
             })
         );
@@ -128,7 +128,6 @@ export async function fetchUserBidHistory(userAddress: string) {
                 };
             })
         );
-
         return userBids;
     } catch (error) {
         logger.error("Error fetching user bid history:", error);
@@ -144,10 +143,11 @@ export async function placeBidAuction(auctionId: number, bidAmount: string) {
         const tx = await contractWithSigner.placeBid(auctionId, { value: bidAmountInWei });
         await tx.wait();
         logger.log("Bid placed successfully:", tx);
-        return true;
+        return {};
     } catch (error) {
         logger.error("Error placing bid:", error);
-        return false;
+        const errorResult = extractRevertMessageFromError(error);
+        return errorResult;
     }
 }
 
@@ -158,9 +158,10 @@ export async function endAuction(auctionId: number) {
         const tx = await contractWithSigner.endAuction(auctionId);
         await tx.wait();
         logger.log("Auction ended successfully:", tx);
-        return true;
+        return {}
     } catch (error) {
         logger.error("Error ending auction:", error);
-        return false;
+        const errorResult = extractRevertMessageFromError(error);
+        return errorResult;
     }
 }

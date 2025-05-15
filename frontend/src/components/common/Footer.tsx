@@ -28,9 +28,9 @@ export default function Footer() {
               <Link to="/mintnft" className="text-sm font-medium hover:text-white transition">
                 Mint NFT
               </Link>
-              <a href="/auctions" className="text-sm font-medium hover:text-white transition">
+              <Link to="/auction" className="text-sm font-medium hover:text-white transition">
                 Auctions
-              </a>
+              </Link>
               <Link to="/company" className="text-sm font-medium hover:text-white transition">
                 Company
               </Link>

@@ -1,5 +1,3 @@
-import TokenData from "../../../intefaces/TokenData";
-import { AuctionDetails } from "../../../intefaces/AuctionDetails";
 import { DisplayableNft } from "../../../intefaces/DisplayableNft";
 import { formatUnixTimestamp } from "../../../utils/formatUnixTimestamp";
 
@@ -12,15 +10,21 @@ export default function DisplayNftModal({
     handleEndAuction,
     BID_VALUE,
     handlePlaceBid,
+    handlePurchase,
+    payWithETH,
+    setPayWithETH,
 }: {
     closeModal: () => void;
     selectedNft: DisplayableNft;
+    handlePurchase: () => void;
     errorMessage?: string | null;
     currentAccount?: string;
     isBiddable?: boolean;
     handleEndAuction?: () => void;
     BID_VALUE?: number;
     handlePlaceBid?: () => void;
+    payWithETH?: boolean;
+    setPayWithETH?: (value: boolean) => void;
 }) {
 
     return (
@@ -113,6 +117,48 @@ export default function DisplayNftModal({
                         )}
 
                     </div>
+                )}
+
+                {/* If its marketplace */}
+                {setPayWithETH && !selectedNft.auctiondetails && (
+                    <div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 font-semibold mb-2">
+                            Pay with ETH:
+                            </label>
+
+                            <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => setPayWithETH(true)}
+                                className={`px-4 py-2 rounded-lg hover:cursor-pointer ${
+                                payWithETH
+                                    ? "bg-green-500 text-white"
+                                    : "bg-gray-200 text-gray-700"
+                                }`}
+                            >
+                                Yes
+                            </button>
+                            <button
+                                onClick={() => setPayWithETH(false)}
+                                className={`px-4 py-2 rounded-lg hover:cursor-pointer ${
+                                !payWithETH
+                                    ? "bg-green-500 text-white"
+                                    : "bg-gray-200 text-gray-700"
+                                }`}
+                            >
+                                No
+                            </button>
+                            </div>
+                        </div>
+            
+                        <button
+                            onClick={handlePurchase}
+                            className="hover:cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+                        >
+                            Purchase
+                        </button>
+                    </div>
+
                 )}
 
                 {errorMessage && (

@@ -7,6 +7,8 @@ import { purchaseNFT } from "../services/nftContractService";
 import DisplayNftList from "../components/reusable/NFT/DisplayNftList";
 import DisplayNftModal from "../components/reusable/NFT/DisplayNftModal";
 import TokenData from "../intefaces/TokenData";
+import { error } from "loglevel";
+import { useError } from "../hooks/useError";
 
 
 export default function NFTMarketplace({
@@ -18,7 +20,8 @@ export default function NFTMarketplace({
   const { tokensData, loading, removeToken } = useFetchTokenUrls(import.meta.env.VITE_OWNER_OF_CONTRACTS); // Use the custom hook
   const [selectedNFT, setSelectedNFT] = useState<TokenData | null>(null); // State for selected NFT
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
-  const [playWithETH, setPlayWithETH] = useState(false); // State for "Play with ETH" option
+  const [payWithETH, setPayWithETH] = useState(false); // State for "Pay with ETH" option
+  const { showError, errorMessage } = useError();
 
   const handleCardClick = (nft: TokenData) => {
     setSelectedNFT(nft); // Set the selected NFT
@@ -35,7 +38,12 @@ export default function NFTMarketplace({
     // Add your purchase logic here
     const merkleProof = await getMerkleProof(currentAccount);
 
-    const purchaseResult = await purchaseNFT(selectedNFT.tokenId, playWithETH, merkleProof, selectedNFT.price);
+    const purchaseResult = await purchaseNFT(selectedNFT.tokenId, payWithETH, merkleProof, selectedNFT.price);
+    
+    if (purchaseResult.error) {
+      showError(purchaseResult.error); // Show error message
+      return;
+    }
     // Close the modal after purchase
     setIsModalOpen(false);
     removeToken(selectedNFT.tokenId); // Remove the purchased token from the list
@@ -45,7 +53,7 @@ export default function NFTMarketplace({
   const closeModal = () => {
     setIsModalOpen(false); // Close the modal
     setSelectedNFT(null); // Clear the selected NFT
-    setPlayWithETH(false); // Reset the "Play with ETH" option
+    setPayWithETH(false); // Reset the "Play with ETH" option
   };
   
 
@@ -67,7 +75,14 @@ export default function NFTMarketplace({
 
       {/* Modal */}
       {isModalOpen && selectedNFT && (
-        <DisplayNftModal closeModal={closeModal} selectedNft={selectedNFT} />
+        <DisplayNftModal 
+          closeModal={closeModal} 
+          selectedNft={selectedNFT} 
+          handlePurchase={handlePurchase} 
+          payWithETH={payWithETH}
+          setPayWithETH={setPayWithETH}
+          errorMessage={errorMessage}
+        />
       )}
 
     </div>

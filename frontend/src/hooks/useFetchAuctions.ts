@@ -15,7 +15,6 @@ interface ActiveAuctions {
     nftTokenId: number;
 }
 
-
 // TODO: This is not the best way to do this, but it works for now.
 // We should consider using a more efficient way to fetch and store token metadata.
 export function useFetchAuctions(isActive: boolean = true) {

@@ -1,6 +1,7 @@
 import { formatEther, formatUnits, parseEther, parseUnits } from "ethers";
 import { getBrowserProvider, nftReadContract, getNFtWriteContract, getUsdcWriteContract } from "../utils/contract";
 import { logger } from "../utils/logger";
+import { extractRevertMessageFromError } from "../utils/extractRevertMessageFromError";
 
 
 export async function mintNFT(tokenMetadataURL: string, merkleProof: Uint8Array[], priceInUSDCx: number) {
@@ -75,10 +76,11 @@ export async function purchaseNFT(tokenId: number, payWithETH: boolean, merklePr
 
         await tx.wait();
         logger.log("NFT purchased successfully:", tx);
-        return true;
+        return {};
     } catch (error) {
         logger.error("Error purchasing NFT:", error);
-        return false;
+        const revertMessage = extractRevertMessageFromError(error);
+        return revertMessage;
     }
 }
 

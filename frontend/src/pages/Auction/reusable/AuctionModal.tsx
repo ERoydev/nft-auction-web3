@@ -27,12 +27,12 @@ export default function AuctionModal({
     const handleEndAuction = async () => {
         const endAuctionResult = await endAuction(selectedAuction.auctionId);
 
-        if (!endAuctionResult) {
-            showError("Auction already ended.");
+        if (endAuctionResult.error) {
+            showError(endAuctionResult.error);
             return;
+        } else {    
+            closeModal();
         }
-
-        navigate("/");
     }
 
     return(

@@ -18,6 +18,7 @@ import StartAuction from "./pages/Auction/StartAuction";
 import ActiveAuction from "./pages/Auction/ActiveAuctions";
 import PastAuctions from "./pages/Auction/PastAuctions";
 import ErrorMessageComponent from "./components/reusable/ErrorMessageComponent";
+import NotFound from "./components/common/NotFound";
 
 function App() {
   const [errorMessage, setErrorMessage] = useState("");
@@ -71,6 +72,8 @@ function App() {
                 </AdminRoute>
                 } 
               />
+              
+              <Route path="*" element={<NotFound />} />
 
             </Routes>
           <BottomBackgroundBlur />
