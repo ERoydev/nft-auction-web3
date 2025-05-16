@@ -7,7 +7,6 @@ import { purchaseNFT } from "../services/nftContractService";
 import DisplayNftList from "../components/reusable/NFT/DisplayNftList";
 import DisplayNftModal from "../components/reusable/NFT/DisplayNftModal";
 import TokenData from "../intefaces/TokenData";
-import { error } from "loglevel";
 import { useError } from "../hooks/useError";
 
 

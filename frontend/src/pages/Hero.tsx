@@ -7,7 +7,7 @@ export default function Hero() {
       {/* Buy NFT Section */}
       <div className="flex gap-12 items-center justify-center max-w-[1400px]">
         {/* Text Side */}
-        <div className="text-center w-1/2">
+        <div className="text-center xl:w-1/2">
           <SmallBanner title="Explore our latest NFT collections." />
 
           <h1 className="text-5xl font-semibold tracking-tight text-gray-800 sm:text-7xl">
@@ -47,7 +47,7 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="hover:cursor-pointer relative rounded-full overflow-hidden border-8 border-slate-800 shadow-lg group">
+        <div className="hidden xl:block hover:cursor-pointer relative rounded-full overflow-hidden border-8 border-slate-800 shadow-lg group">
           {/* Image */}
           <img
             src="/images/hero.png"

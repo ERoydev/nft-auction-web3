@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
+/// @dev - I use pull-over-push strategy and implemente withdraw functions for all transactions calling ".call()"
 contract EnglishAuction is ReentrancyGuard {
     struct Auction {
         address seller;
@@ -20,11 +21,14 @@ contract EnglishAuction is ReentrancyGuard {
 
     mapping(uint256 => Auction) public auctions; // index => Auction struct
     mapping(uint256 => mapping(address => uint256)) public deposits; // auction index => deposits
+    
+    mapping(uint256 => uint256) public sold; // auctionId => sold for price
+    mapping(uint256 => bool) public isWithdrawedByOwner; // auctionId => bool if owner withdrawed his funds
 
     uint256 public auctionId;
     uint256 private nextAuctionId;
 
-    uint256 private constant AUCTION_MIN_DURATION = 5; // 5 minutes
+    uint256 private constant AUCTION_MIN_DURATION = 2; // minutes
     uint256 constant private AUCTION_EXTEND_TIME = 5 minutes; // Bid placed in withit 2 minutes before endTime, extends endTime by 5 min
 
     event AuctionStarted(
@@ -40,6 +44,7 @@ contract EnglishAuction is ReentrancyGuard {
     event NewBid(address indexed bidder,uint256 indexed auctionId, uint256 amount);
     event AuctionExtendedBy5Minutes(uint256 indexed _tokenId, address indexed seller, uint256 newDuration);
     event Withdraw(address indexed user, uint256 indexed auctionId, uint256 amount);
+    event SellerWithdraw(address indexed seller, uint256 indexed auctionId, uint256 amount);
 
     constructor() {
         contractLabel = "Auction Contract v1";
@@ -115,19 +120,45 @@ contract EnglishAuction is ReentrancyGuard {
         require(msg.sender == auction.seller, "Only the seller can end the auction");
 
         auction.auctionEnded = true;
-        emit AuctionEnded(auction.highestBidder, auction.highestBid, _auctionId);
+        emit AuctionEnded(auction.highestBidder, _auctionId, auction.highestBid);
 
-        if (auction.highestBidder != address(0)) {
+        if (auction.highestBidder == address(0)) {
+            // No bidder return nft to seller
+            require(sold[_auctionId] == 0, "You cannot take your nft that has active bid");
+
+            auction.nft.transferFrom(address(this), auction.seller, auction.nftTokenId);
+
+        } else if (auction.highestBidder != address(0)) {
+            // I can do this on withdraw to reuse deposits => Check if this cause some issues
             deposits[_auctionId][auction.highestBidder] = 0; // clear highest bidder
 
-            // Transfer money to seller 
-            (bool sent, ) = auction.seller.call{value: auction.highestBid}("");
-            require(sent, "Transfer to seller failed");
+            // Instead of transfering funds i will hold and make the seller pull them
+            sold[_auctionId] = auction.highestBid;
 
             auction.nft.transferFrom(address(this), auction.highestBidder, auction.nftTokenId);
-        }
+        } 
     }
 
+    /// @dev - Used by the person who owns the auction to withdraw his money
+    function withdrawFunds(uint256 _auctionId) external nonReentrant {
+        require(_auctionId < nextAuctionId, "Auction with this id doesn't exist");
+        Auction storage auction = auctions[_auctionId];
+
+        require(auction.auctionEnded, "Auction not ended");
+        // The most important check is this
+        require(msg.sender == auction.seller, "This address cannot withdraw auction that he is not a seller");
+
+        uint amount = sold[_auctionId];
+        require(amount > 0, "Amount to withdraw should be greater than 0");
+        sold[_auctionId] = 0;
+
+        emit SellerWithdraw(msg.sender, _auctionId, amount);    
+
+        (bool sent, ) = payable(msg.sender).call{value: amount}(""); // .call() to work with contacts too 
+        require(sent, "Transfer failed");
+    }
+
+    /// @dev - Used by users who participated but have not won the auction
     function withdraw(uint256 _auctionId) external nonReentrant {
         require(_auctionId < nextAuctionId, "Auction with this id doesn't exist");
         Auction storage auction = auctions[_auctionId];
@@ -136,11 +167,14 @@ contract EnglishAuction is ReentrancyGuard {
         require(msg.sender != auction.highestBidder, "Auction winner cannot withdraw");
 
         uint amount = deposits[_auctionId][msg.sender];
+        require(amount > 0, "Amount to withdraw should be greater than 0");
+
         deposits[_auctionId][msg.sender] = 0;
 
         emit Withdraw(msg.sender, _auctionId, amount);
 
-        payable(msg.sender).transfer(amount);
+        (bool sent, ) = payable(msg.sender).call{value: amount}(""); // .call() to work with contacts too 
+        require(sent, "Transfer failed");
     }
 
    function getAuction(uint256 _auctionId) public view returns (
@@ -167,4 +201,6 @@ contract EnglishAuction is ReentrancyGuard {
             auction.auctionEnded
         );
     }
+
+
 }

@@ -110,7 +110,7 @@ export async function withdrawFunds() {
 
 }
 
-export async function getLockedFunds(account: string) {
+export async function getLockedNftFunds(account: string) {
     try {
         const normalizeAccount = ethers.getAddress(account);
         const lockedFunds = await nftReadContract.fundsOwed(normalizeAccount);

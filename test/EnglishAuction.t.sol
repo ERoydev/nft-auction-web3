@@ -159,7 +159,7 @@ contract EnglishAuctionTest is Test {
         assertEq(nft.balanceOf(address(auction)), 0);
 
         // Check seller should recieve highestBid
-        assertEq(seller.balance, 2 ether); // Seller is rich now
+        assertEq(seller.balance, 0); // Seller should withdraw his funds
         assertNotEq(nft.ownerOf(nftId), address(auction));
         assertEq(nft.ownerOf(nftId), bidder1);
 
@@ -186,8 +186,65 @@ contract EnglishAuctionTest is Test {
         vm.prank(bidder1);
         auction.withdraw(auctionId);
         uint256 postBalance = bidder1.balance;
-
+        
         assertGt(postBalance, preBalance);
+    }
+
+    function testWithdrawShouldRevertIfWinnerTriesToWithdraw() public {
+        vm.deal(bidder1, 2 ether);
+        vm.prank(bidder1);
+        auction.placeBid{value: 2 ether}(auctionId);
+
+        vm.deal(bidder2, 3 ether);
+        vm.prank(bidder2);
+        auction.placeBid{value: 3 ether}(auctionId);
+
+        vm.warp(block.timestamp + 121 minutes);
+        vm.prank(seller);
+        auction.endAuction(auctionId);
+
+        uint256 preBalance = bidder1.balance;
+        vm.prank(bidder1);
+        auction.withdraw(auctionId);
+        uint256 postBalance = bidder1.balance;
+        
+        assertGt(postBalance, preBalance);
+
+        vm.prank(bidder2);
+        vm.expectRevert();
+        auction.withdraw(auctionId);
+    }
+
+    function testWithdrawShouldRevertIfNotExistingAuctionId() public {
+        vm.deal(bidder1, 2 ether);
+        vm.prank(bidder1);
+        auction.placeBid{value: 2 ether}(auctionId);
+
+        vm.deal(bidder2, 2.5 ether);
+        vm.prank(bidder2);
+        auction.placeBid{value: 2.5 ether}(auctionId);
+
+        vm.warp(block.timestamp + 121 minutes);
+        vm.prank(seller);
+        auction.endAuction(auctionId);
+        
+        vm.prank(bidder1);
+        vm.expectRevert();
+        auction.withdraw(auctionId + 1);
+    }
+
+    function testWithdrawFundsShouldRevertWithNonExistingAuctionId() public {
+        vm.deal(bidder1, 2 ether);
+        vm.prank(bidder1);
+        auction.placeBid{value: 2 ether}(auctionId);
+
+        vm.warp(block.timestamp + 121 minutes);
+        vm.prank(seller);
+        auction.endAuction(auctionId);
+        
+        vm.prank(seller);
+        vm.expectRevert();
+        auction.withdrawFunds(auctionId + 1);
     }
 
     function testCannotEndAuctionTwice() public {
@@ -215,4 +272,60 @@ contract EnglishAuctionTest is Test {
         (, , , , , , uint256 newEndTime,) = auction.auctions(auctionId);
         assertGt(newEndTime, block.timestamp + 1 minutes); // auction extended
     }
+
+    function testWithdrawFunds() public {
+        vm.deal(bidder1, 2 ether);
+        vm.prank(bidder1);
+        auction.placeBid{value: 2 ether}(auctionId);
+
+        vm.deal(bidder2, 2.5 ether);
+        vm.prank(bidder2);
+        auction.placeBid{value: 2.5 ether}(auctionId);
+
+        vm.warp(block.timestamp + 121 minutes);
+        vm.prank(seller);
+        auction.endAuction(auctionId);
+
+        assertEq(seller.balance, 0);
+
+        vm.prank(seller);
+        auction.withdrawFunds(auctionId);
+
+        assertEq(seller.balance, 2.5 ether);
+    }
+
+    function testWithdrawFundsShouldRevertIfNotSeller() public {
+        vm.deal(bidder1, 2 ether);
+        vm.prank(bidder1);
+        auction.placeBid{value: 2 ether}(auctionId);
+
+        vm.deal(bidder2, 2.5 ether);
+        vm.prank(bidder2);
+        auction.placeBid{value: 2.5 ether}(auctionId);
+
+        vm.warp(block.timestamp + 121 minutes);
+        vm.prank(seller);
+        auction.endAuction(auctionId);
+
+        assertEq(seller.balance, 0);
+
+        vm.prank(bidder1);
+        vm.expectRevert();
+        auction.withdrawFunds(auctionId);
+    }
+
+    function testWithdrawFundsCannotWithdrawIfAuctionIsNotEnded() public {
+        vm.deal(bidder1, 2 ether);
+        vm.prank(bidder1);
+        auction.placeBid{value: 2 ether}(auctionId);
+
+        vm.deal(bidder2, 2.5 ether);
+        vm.prank(bidder2);
+        auction.placeBid{value: 2.5 ether}(auctionId);
+
+        vm.prank(bidder1);
+        vm.expectRevert();
+        auction.withdrawFunds(auctionId);
+    }
+    
 }

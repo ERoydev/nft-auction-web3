@@ -79,7 +79,6 @@ export async function fetchNonActiveAuctions() {
                 // Query the latest state of the auction from the contract
                 const auctionData = await auctionReadContract.getAuction(auctionId);
 
-
                 // Only include auctions where endTime has passed
                 if (Number(auctionData.endTime) <= now) {
                     return {
@@ -164,4 +163,78 @@ export async function endAuction(auctionId: number) {
         const errorResult = extractRevertMessageFromError(error);
         return errorResult;
     }
+}
+
+export async function getLockedAuctionFunds(account: string) {
+    try {
+        // TODO: Implement the logic to fetch ended Auctions so users can withdraw their funds based on this
+        // User and Sellers need to have withdraw in their profile
+        const provider = getBrowserProvider();
+        const currentBlock = await provider.getBlockNumber();
+
+        // Fetch all "AuctionStarted" events
+        const events = await auctionReadContract.queryFilter("AuctionEnded", 0, currentBlock);
+        
+        const auctionIds = events.map((event: any) => Number(event.args.auctionId));
+        // TODO: I can use `auctionIds` to fetch from the server database where i will store them
+        
+        // Bellow is the wrong approach for this implementation
+        const auctionData = await Promise.all(
+            auctionIds.map(async (auctionId: number) => {
+                const auction = await auctionReadContract.getAuction(auctionId);
+                return {
+                    auctionId: auctionId,
+                    highestBidder: auction.highestBidder,
+                    highestBid: ethers.formatEther(auction.highestBid),
+                    auctionEnded: auction.auctionEnded,
+                    endTime: Number(auction.endTime),
+                    seller: auction.seller,
+                    nftTokenId: auction.nftTokenId,
+                    imageurl: "", // Placeholder for image URL
+                    nftName: "", // Placeholder for NFT name
+                };
+            })
+        );
+        // Filter only auctions where the user is the seller so he needs to withdraw his won funds
+        const sellerAuctions = auctionData.filter((auction) => auction.seller.toLowerCase() === account.toLowerCase());
+        // filter if withdrawed after redeploy
+
+        let depositedFunds = 0;
+        let auctionDepositedIds = [];
+        // Filter deposited funds of unwon auctions
+        for (let i = 0; i < auctionIds.length; i++) {
+            const auctionId = auctionIds[i];
+            const result = await auctionReadContract.deposits(auctionId, account);
+            if (result > 0) {
+                auctionDepositedIds.push(auctionId);
+            }
+            depositedFunds += Number(result);
+        }
+
+        return {
+            soldAuctions: sellerAuctions,
+            depositedFunds: depositedFunds,
+            auctionDepositedIds: auctionDepositedIds
+        }
+
+    } catch (error) {
+        logger.error("Error fetching locked auction funds:", error);
+        const errorResult = extractRevertMessageFromError(error);
+        return errorResult;
+    }
+}
+
+export async function withdrawDepositedFunds(auctionId: number) {
+    try {
+        const contractWithSigner = await getAuctionWriteContract();
+        const tx = await contractWithSigner.withdraw(auctionId);
+        await tx.wait();
+        logger.log("Profits withdrawn successfully:", tx);
+        return {};
+    } catch (error) {
+        logger.error("Error withdrawing profits:", error);
+        const errorResult = extractRevertMessageFromError(error);
+        return errorResult;
+    }
+
 }

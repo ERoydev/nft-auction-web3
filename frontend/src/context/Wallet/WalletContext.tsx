@@ -2,6 +2,7 @@ import { createContext, useState, useContext, ReactNode, useEffect } from 'react
 import { getRoles } from '../../services/RolesService';
 import { useFetchTokenUrls } from '../../hooks/useFetchTokenUrls';
 import { ethers } from 'ethers';
+import { logger } from '../../utils/logger';
 /*
 Keeps track of the current wallet address, connect, disconnect, and roles of the user:
   - Added functionality to fetch roles from the smart contract.
@@ -48,18 +49,23 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     if (typeof window.ethereum !== 'undefined') {
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const normalizedAddress = ethers.getAddress(accounts[0]); // Normalize the address to lowercase
+        const normalizedAddress = ethers.getAddress(accounts[0]); // Normalize the address
+  
         setCurrentAccount(normalizedAddress);
-        window.localStorage.setItem('walletConnected', normalizedAddress); // Store account in localStorage
-
+        window.localStorage.setItem('walletConnected', normalizedAddress);
+  
+        // Fetch roles after wallet is connected
+        await fetchRoles(normalizedAddress);
+  
       } catch (error) {
-        console.error('Error connecting wallet:', error);
+        logger.error('Error connecting wallet:', error);
         alert('Failed to connect wallet');
       }
     } else {
       alert('MetaMask is not installed. Please install it to use this feature.');
     }
   };
+  
 
   // Disconnect wallet
   const disconnectWallet = (): boolean => {
@@ -80,18 +86,18 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     if (typeof window.ethereum !== 'undefined') {
       const handleAccountsChanged = (accounts: string[]) => {
         if (accounts.length > 0) {
-          
-          setCurrentAccount(accounts[0]); // Update the account if it changes
-          window.localStorage.setItem('walletConnected', accounts[0]); // Save the new account to localStorage
-          fetchRoles(accounts[0]); // Fetch roles for the new account
+          const normalizedAddress = ethers.getAddress(accounts[0]);
+          setCurrentAccount(normalizedAddress);
+          window.localStorage.setItem('walletConnected', normalizedAddress);
+          fetchRoles(normalizedAddress);
           refetch();
         } else {
-          setCurrentAccount(null); // If no accounts, set to null
+          setCurrentAccount(null);
+          window.localStorage.removeItem('walletConnected');
           refetch();
-          window.localStorage.removeItem('walletConnected'); // Remove from localStorage if no account is selected
         }
       };
-
+      
       // Add the event listener for account changes
       if (window.ethereum?.on) {
         window.ethereum.on('accountsChanged', handleAccountsChanged);

@@ -265,4 +265,66 @@ contract NFTTest is BaseNFTTest {
         vm.stopPrank();
     }
 
+    function testWithdrawFunds() public {
+        uint256 usdcAmount = 100;
+
+        vm.prank(owner);
+        nft.safeMint(TOKEN_METADATA_URI, ownerProof, usdcAmount); // Creates a token with id `0`
+        uint256 _tokenId = 0;
+
+        // (uint256 priceInUSDC, address tokenOwner, string memory metadataURI) = nft.tokenInfo(_tokenId);
+
+        assertEq(nft.ownerOf(_tokenId), owner);
+
+        uint256[] memory oneToken = new uint256[](1);
+        oneToken[0] = 0;
+        assertEq(nft.tokensOfOwner(owner), oneToken);
+
+        uint256 expectedEthInWei = nft.getTokenPriceInEth(_tokenId);
+        vm.deal(addr1, 1 ether);
+        vm.prank(addr1);
+        nft.purchaseNFT{value: expectedEthInWei}(_tokenId, true, addr1Proof);
+
+        // Check balances for eth transfer
+        assertEq(addr1.balance, 1 ether - expectedEthInWei);
+
+        assertEq(owner.balance, 0); // Owner should withdraw to take his price
+        vm.prank(owner);
+
+        nft.withdrawFunds();
+        assertEq(owner.balance, expectedEthInWei);
+    }
+
+    function testFunds() public {
+        uint256 usdcAmount = 100;
+
+        vm.prank(owner);
+        nft.safeMint(TOKEN_METADATA_URI, ownerProof, usdcAmount); // Creates a token with id `0`
+        uint256 _tokenId = 0;
+
+        // (uint256 priceInUSDC, address tokenOwner, string memory metadataURI) = nft.tokenInfo(_tokenId);
+
+        assertEq(nft.ownerOf(_tokenId), owner);
+
+        uint256[] memory oneToken = new uint256[](1);
+        oneToken[0] = 0;
+        assertEq(nft.tokensOfOwner(owner), oneToken);
+
+        uint256 expectedEthInWei = nft.getTokenPriceInEth(_tokenId);
+        vm.deal(addr1, 1 ether);
+        vm.prank(addr1);
+        nft.purchaseNFT{value: expectedEthInWei}(_tokenId, true, addr1Proof);
+
+        // Check balances for eth transfer
+        assertEq(addr1.balance, 1 ether - expectedEthInWei);
+        // Check balance of owner with pull-over-push strategy
+        assertEq(owner.balance, 0);
+        vm.prank(owner);
+        assertEq(nft.fundsOwed(owner), expectedEthInWei); // collection
+        vm.prank(owner);
+        nft.withdrawFunds();
+        assertEq(owner.balance, expectedEthInWei);
+        assertEq(nft.fundsOwed(owner), 0); // collection should be cleared
+    }
+
 }

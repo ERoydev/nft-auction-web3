@@ -3,6 +3,8 @@ import TokenData from "../../intefaces/TokenData";
 import { useWallet } from "../../context/Wallet/WalletContext";
 import { createAuction } from "../../services/AuctionService";
 import { useError } from "../../hooks/useError";
+import {past, active, started} from "./index";
+import InstructionCard from "../../components/ui/InstructionCard";
 
 export default function Auction() {
   const { tokensData, removeToken } = useWallet();
@@ -88,7 +90,39 @@ export default function Auction() {
           </Link>
         </nav>
       </div>
-      
+
+      {/* Initial Page */}  
+      {location.pathname === "/auction" && (
+        <div className="p-8 rounded-lg shadow-md">
+          <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Auction Details</h2>
+          <p className="text-md text-gray-600 leading-relaxed text-center mb-8">
+            Manage your auctions effortlessly. Start new auctions, track active ones, and review past auctions. Explore the future of NFT trading with ease.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Start Auction */}
+            <InstructionCard 
+              imgUrl="/images/started.svg"
+              title="Start an Auction"
+              description="Create a new auction for your NFTs and set your desired starting price and duration."
+            />
+
+            {/* Active Auctions */}
+           <InstructionCard 
+            imgUrl="/images/active.svg"
+            title="Active Auctions"
+            description="Monitor your ongoing auctions, track bids, and manage your NFT sales in real-time."
+           />
+
+            {/* Past Auctions */}
+            <InstructionCard 
+              imgUrl="/images/past.svg"
+              title="Past Auctions"
+              description="Review the history of your completed auctions and analyze your NFT trading performance."
+            />
+          </div>
+        </div>     
+      )}
 
       <div className="flex-grow p-6">
         <Outlet context={{ tokensData, handleStartAuction, removeToken, errorMessage, showError, clearError }} />

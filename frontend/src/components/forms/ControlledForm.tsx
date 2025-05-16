@@ -114,7 +114,7 @@ const ControlledForm: React.FC<ControlledFormProps> = ({ onSubmit, isSubmitting 
       {/* Submit Button */}
       <button
         type="submit"
-        className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white py-2 px-4 rounded-md shadow-md hover:from-cyan-600 hover:to-blue-600 transition"
+        className="hover:cursor-pointer w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white py-2 px-4 rounded-md shadow-md hover:from-cyan-600 hover:to-blue-600 transition"
         disabled={isSubmitting}
       >
         {isSubmitting ? "Minting..." : "Mint NFT"}

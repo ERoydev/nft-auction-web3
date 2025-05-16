@@ -17,8 +17,6 @@ export default function PastAuctions() {
     setSelectedAuction(null); // Close the modal
   };
 
-  console.log("Past Auctions:", auctions);
-
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-4xl font-bold mb-6">Past Auctions</h1>
