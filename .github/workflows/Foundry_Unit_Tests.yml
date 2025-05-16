@@ -23,7 +23,7 @@ jobs:
           version: v1.1.0
 
       - name: Install dependencies
-        run: forge install
+        run: git submodule sync & git submodule update --init --recursive
 
       - name: Run forge tests
         run: forge test --gas-report
