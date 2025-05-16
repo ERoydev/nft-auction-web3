@@ -36,7 +36,7 @@ export default function ActiveAuction() {
 
     const bidResult = await placeBidAuction(selectedAuction.auctionId, newBid.toString());
 
-    if (!bidResult) {
+    if (bidResult.error) {
       showError("Failed to place bid. Please try again.");
       return;
     }
@@ -47,20 +47,6 @@ export default function ActiveAuction() {
     // ✅ Refetch auctions after placing a bid
     refetch(); // Trigger the hook to fetch the latest auctions
   };  
-
-  const handleEndAuction = async () => {
-    if (!selectedAuction) return;
-
-    const endAuctionResult = await endAuction(selectedAuction.auctionId);
-
-    if (!endAuctionResult) {
-      showError("Failed to end auction. Please try again.");
-      return;
-    }
-    
-    setSelectedAuction(null);
-    refetch();
-  }
 
   return (
     <div className="flex flex-col gap-6">

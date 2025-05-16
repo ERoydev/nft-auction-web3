@@ -151,6 +151,7 @@ contract EnglishAuction is ReentrancyGuard {
         uint amount = sold[_auctionId];
         require(amount > 0, "Amount to withdraw should be greater than 0");
         sold[_auctionId] = 0;
+        isWithdrawedByOwner[_auctionId] = true;
 
         emit SellerWithdraw(msg.sender, _auctionId, amount);    
 

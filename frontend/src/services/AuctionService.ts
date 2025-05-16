@@ -3,6 +3,8 @@ import { approveNFT } from "./nftContractService";
 import { ethers, parseEther } from "ethers";
 import { logger } from "../utils/logger";
 import { extractRevertMessageFromError } from "../utils/extractRevertMessageFromError";
+import { log } from "loglevel";
+
 
 export async function createAuction(data: any) {
     await approveNFT(data.tokenId);
@@ -165,6 +167,7 @@ export async function endAuction(auctionId: number) {
     }
 }
 
+// TODO: Refactor this function it is very ugly, separate the logic in different functions
 export async function getLockedAuctionFunds(account: string) {
     try {
         // TODO: Implement the logic to fetch ended Auctions so users can withdraw their funds based on this
@@ -182,6 +185,8 @@ export async function getLockedAuctionFunds(account: string) {
         const auctionData = await Promise.all(
             auctionIds.map(async (auctionId: number) => {
                 const auction = await auctionReadContract.getAuction(auctionId);
+                const isWithdrawn = await auctionReadContract.isWithdrawedByOwner(auctionId);
+
                 return {
                     auctionId: auctionId,
                     highestBidder: auction.highestBidder,
@@ -190,14 +195,20 @@ export async function getLockedAuctionFunds(account: string) {
                     endTime: Number(auction.endTime),
                     seller: auction.seller,
                     nftTokenId: auction.nftTokenId,
+                    isWithdrawn: isWithdrawn,
                     imageurl: "", // Placeholder for image URL
                     nftName: "", // Placeholder for NFT name
                 };
             })
         );
+
         // Filter only auctions where the user is the seller so he needs to withdraw his won funds
-        const sellerAuctions = auctionData.filter((auction) => auction.seller.toLowerCase() === account.toLowerCase());
-        // filter if withdrawed after redeploy
+        const sellerAuctions = auctionData.filter((auction) => 
+            auction.seller.toLowerCase() === account.toLowerCase() && 
+            auction.highestBidder.toLowerCase() !== ethers.ZeroAddress &&
+            !auction.isWithdrawn
+        );
+        // Filter if already withdrawn
 
         let depositedFunds = 0;
         let auctionDepositedIds = [];
@@ -236,5 +247,18 @@ export async function withdrawDepositedFunds(auctionId: number) {
         const errorResult = extractRevertMessageFromError(error);
         return errorResult;
     }
+}
 
+export async function withdrawAuctionProfit(auctionId: number) {
+    try {
+        const contractWithSigner = await getAuctionWriteContract();
+        const tx = await contractWithSigner.withdrawFunds(auctionId);
+        await tx.wait();
+        logger.log("Auction profit withdrawn successfully:", tx);
+        return {};
+    } catch (error) {
+        logger.error("Error withdrawing auction profit:", error);
+        const errorResult = extractRevertMessageFromError(error);
+        return errorResult;
+    }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useWallet } from "../../context/Wallet/WalletContext";
-import { fetchUserBidHistory, getLockedAuctionFunds, withdrawDepositedFunds } from "../../services/AuctionService";
+import { fetchUserBidHistory, getLockedAuctionFunds, withdrawAuctionProfit, withdrawDepositedFunds } from "../../services/AuctionService";
 import BidHistory from "../../components/reusable/BidHistory";
 import DisplayNftList from "../../components/reusable/NFT/DisplayNftList";
 import TokenData from "../../intefaces/TokenData";
@@ -106,7 +106,17 @@ export default function ProfileMenu() {
     }
   }
 
-  console.log("Auction IDS", auctionDepositedIDs)
+  const withdrawFinishedAuctionFunds = async (auctionId: number) => {
+    if (currentAccount) {
+      const withdrawResult = await withdrawAuctionProfit(auctionId);
+
+      if (withdrawResult.error) {
+        showError(withdrawResult.error);
+        return;
+      }
+      setSoldAuctions((prevAuctions) => prevAuctions.filter((auction) => auction.auctionId !== auctionId));
+    }
+  }
 
   return (
     <div className="flex flex-col min-h-screen py-22">
@@ -175,7 +185,7 @@ export default function ProfileMenu() {
                   <p className="text-gray-600">Highest Bidder: {auction.highestBidder}</p>
                   <p className="text-gray-600">Highest Bid: {auction.highestBid} ETH</p>
 
-                  <button className="primary-button">Withdraw</button>
+                  <button className="primary-button" onClick={() => withdrawFinishedAuctionFunds(auction.auctionId)}>Withdraw</button>
                 </div>
               ))}
             </div>
