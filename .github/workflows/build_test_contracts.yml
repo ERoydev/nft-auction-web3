@@ -44,7 +44,6 @@ jobs:
       - name: Run forge integration tests
         run: forge test --match-path "test/integration/*"
         
-
   deploy_to_sepolia:
       needs: [unit_tests, integration_tests]
       runs-on: ubuntu-latest
