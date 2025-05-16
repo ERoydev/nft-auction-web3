@@ -1,23 +1,26 @@
-name: Foundry_Unit_Test
+name: Foundry Tests
 
 on:
+  push:
+    branches: ["main"]
+    
   pull_request:
     types: [closed]
     branches:
       - main
 
 jobs:
-  tests:
+  test:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout the repository on the machine
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Use Foundry version 1.0.1
-      uses: foundry-rs/foundry-toolchain@v1
-      with:
-        version: 1.0.1
+      - name: Install Foundry v1.0.1
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.0.1
 
-    - name: Run tests
-      run: forge test
+      - name: Run forge tests
+        run: forge test --gas-report
