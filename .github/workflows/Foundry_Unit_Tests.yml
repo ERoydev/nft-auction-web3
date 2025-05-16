@@ -17,10 +17,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Foundry v1.0.1
+      - name: Install Foundry v1.1.0
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: v1.0.1
+          version: v1.1.0
 
       - name: Run forge tests
         run: forge test --gas-report
