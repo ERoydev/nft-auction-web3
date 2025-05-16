@@ -3,7 +3,7 @@ name: Foundry Tests
 on:
   push:
     branches: ["main"]
-    
+
   pull_request:
     types: [closed]
     branches:
@@ -12,18 +12,17 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout repository
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Install Foundry v1.1.0
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: v1.1.0
-
-      - name: Install dependencies
-        run: git submodule sync & git submodule update --init --recursive
 
       - name: Run forge tests
         run: forge test --gas-report
