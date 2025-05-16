@@ -1,0 +1,37 @@
+name: Deploy to Sepolia
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+  workflow_dispatch:  # allows manual triggering
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.1.0
+
+      - name: Set up environment variables
+        run: |
+          echo "PRIVATE_KEY=${{ secrets.PRIVATE_KEY }}" >> $GITHUB_ENV
+          echo "SEPOLIA_RPC=${{ secrets.SEPOLIA_RPC }}" >> $GITHUB_ENV
+          echo "INITIAL_ADMIN_ADDRESS=${{ secrets.INITIAL_ADMIN_ADDRESS }}" >> $GITHUB_ENV
+
+      - name: Deploy contract to Sepolia
+        run: |
+          forge script script/Deploy.s.sol:DeployScript \
+            --rpc-url $SEPOLIA_RPC \
+            --private-key $PRIVATE_KEY \
+            --broadcast \
+            --verify 
+#           --etherscan-api-key ${{ secrets.ETHERSCAN_API_KEY }}  # Optional for verification
