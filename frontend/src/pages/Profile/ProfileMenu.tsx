@@ -11,6 +11,7 @@ import emptyNft from "../../intefaces/EmptyNft";
 import { useError } from "../../hooks/useError";
 import WithdrawWindow from "../../components/ui/WithdrawWindow";
 
+
 export default function ProfileMenu() {
   const { currentAccount, tokensData } = useWallet();
   const [bidHistory, setBidHistory] = useState<any[]>([]);
@@ -57,7 +58,8 @@ export default function ProfileMenu() {
 
     const fetchAuctionLockedFunds = async () => {
       if (currentAccount) {
-        const result = await getLockedAuctionFunds(currentAccount);
+        const result: any = await getLockedAuctionFunds(currentAccount);
+
         if (result.depositedFunds) {
           setDepositedFunds(result?.depositedFunds);
         }
@@ -78,7 +80,7 @@ export default function ProfileMenu() {
 
   const withdrawLockedFunds = async () => {
     if (currentAccount) {
-      const withdrawResult = await withdrawFunds();
+      const withdrawResult: any = await withdrawFunds();
 
       if (withdrawResult.error) {
         showError(withdrawResult.error);
@@ -93,7 +95,7 @@ export default function ProfileMenu() {
     if (currentAccount) {
       for (let i = 0; i < auctionDepositedIDs.length; i++) {
         const auctionId = auctionDepositedIDs[i];
-        const withdrawResult = await withdrawDepositedFunds(auctionId);
+        const withdrawResult: any = await withdrawDepositedFunds(auctionId);
 
         if (withdrawResult.error) {
           showError(withdrawResult.error);
@@ -108,13 +110,13 @@ export default function ProfileMenu() {
 
   const withdrawFinishedAuctionFunds = async (auctionId: number) => {
     if (currentAccount) {
-      const withdrawResult = await withdrawAuctionProfit(auctionId);
+      const withdrawResult: any = await withdrawAuctionProfit(auctionId);
 
       if (withdrawResult.error) {
         showError(withdrawResult.error);
         return;
       }
-      setSoldAuctions((prevAuctions) => prevAuctions.filter((auction) => auction.auctionId !== auctionId));
+      setSoldAuctions((prevAuctions) => prevAuctions.filter((auction: any) => auction.auctionId !== auctionId));
     }
   }
 
@@ -179,7 +181,7 @@ export default function ProfileMenu() {
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Auctions Ended</h2>
           {soldAuctions.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {soldAuctions.map((auction) => (
+              {soldAuctions.map((auction: any) => (
                 <div key={auction.auctionId} className="p-4 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-100">
                   <p className="text-gray-600 font-bold">Auction Id: {auction.auctionId}</p>
                   <p className="text-gray-600">Highest Bidder: {auction.highestBidder}</p>

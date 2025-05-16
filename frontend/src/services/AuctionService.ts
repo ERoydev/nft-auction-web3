@@ -1,9 +1,8 @@
-import { getBrowserProvider, getAuctionWriteContract, auctionReadContract, usdcReadContract } from "../utils/contract";
+import { getBrowserProvider, getAuctionWriteContract, auctionReadContract } from "../utils/contract";
 import { approveNFT } from "./nftContractService";
 import { ethers, parseEther } from "ethers";
 import { logger } from "../utils/logger";
 import { extractRevertMessageFromError } from "../utils/extractRevertMessageFromError";
-import { log } from "loglevel";
 
 
 export async function createAuction(data: any) {
