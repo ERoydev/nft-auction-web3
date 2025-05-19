@@ -49,25 +49,24 @@ jobs:
           NFT_ADDRESS=$(jq -r '.transactions[] | select(.contractName=="NFT") | .contractAddress' $BROADCAST_PATH)
           AUCTION_ADDRESS=$(jq -r '.transactions[] | select(.contractName=="EnglishAuction") | .contractAddress' $BROADCAST_PATH)
 
-          echo "NFT_ADDRESS=${NFT_ADDRESS}" >> $GITHUB_ENV
-          echo "AUCTION_ADDRESS=${AUCTION_ADDRESS}" >> $GITHUB_ENV
+          echo "NFT_ADDRESS=$NFT_ADDRESS" >> $GITHUB_OUTPUT
+          echo "AUCTION_ADDRESS=$AUCTION_ADDRESS" >> $GITHUB_OUTPUT
 
 
-      - name: Update Render environment variables & redeploy frontend
+      - name: Update Render environment variables
         env: 
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
-          NFT_ADDRESS: ${{ env.NFT_ADDRESS }}
-          AUCTION_ADDRESS: ${{ env.AUCTION_ADDRESS }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_FE }}
+          INITIAL_ADMIN_ADDRESS: ${{ secrets.INITIAL_ADMIN_ADDRESS }}
         run: |
           curl -X PATCH https://api.render.com/v1/services/$RENDER_SERVICE_ID \
             -H "Authorization: Bearer $RENDER_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
               "envVars": [
-                { "key": "VITE_NFT_CONTRACT_ADDRESS", "value": "'"$NFT_ADDRESS"'", "sync": true },
-                { "key": "VITE_AUCTION_CONTRACT_ADDRESS", "value": "'"$AUCTION_ADDRESS"'", "sync": true },
+                { "key": "VITE_NFT_CONTRACT_ADDRESS", "value": "${{ steps.extract_addresses.outputs.nft_address }}", "sync": true },
+                { "key": "VITE_AUCTION_CONTRACT_ADDRESS", "value": "${{ steps.extract_addresses.outputs.auction_address }}", "sync": true },
                 { "key": "VITE_OWNER_OF_CONTRACTS", "value": "'"$INITIAL_ADMIN_ADDRESS"'", "sync": true },
-                { "key": "VITE_MARKETPLACE_NFT_OWNER", "value", "'"$INITIAL_ADMIN_ADDRESS"'", "sync": true },
+                { "key": "VITE_MARKETPLACE_NFT_OWNER", "value": "'"$INITIAL_ADMIN_ADDRESS"'", "sync": true }
               ]
             }'
