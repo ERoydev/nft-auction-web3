@@ -48,6 +48,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [unit_tests, integration_tests]
 
+    outputs:
+      NFT_ADDRESS: ${{ steps.extract_addresses.outputs.nft_address }}
+      AUCTION_ADDRESS: ${{ steps.extract_addresses.outputs.auction_address }}
+
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v4
