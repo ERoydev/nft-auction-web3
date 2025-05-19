@@ -3,6 +3,7 @@ import { getRoles } from '../../services/RolesService';
 import { useFetchTokenUrls } from '../../hooks/useFetchTokenUrls';
 import { ethers } from 'ethers';
 import { logger } from '../../utils/logger';
+import { safeNormalizeAddress } from '../../utils/safeNormalizeAddress';
 /*
 Keeps track of the current wallet address, connect, disconnect, and roles of the user:
   - Added functionality to fetch roles from the smart contract.
@@ -49,8 +50,11 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     if (typeof window.ethereum !== 'undefined') {
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const normalizedAddress = ethers.getAddress(accounts[0]); // Normalize the address
-  
+        const normalizedAddress = safeNormalizeAddress(accounts[0]);
+        if (!normalizedAddress) {
+          throw new Error('Invalid address');
+        }
+        
         setCurrentAccount(normalizedAddress);
         window.localStorage.setItem('walletConnected', normalizedAddress);
   
@@ -86,7 +90,12 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     if (typeof window.ethereum !== 'undefined') {
       const handleAccountsChanged = (accounts: string[]) => {
         if (accounts.length > 0) {
-          const normalizedAddress = ethers.getAddress(accounts[0]);
+          const normalizedAddress = safeNormalizeAddress(accounts[0]);
+          if (!normalizedAddress) {
+            logger.error('Invalid address received from accountsChanged event');
+            return;
+          }
+          
           setCurrentAccount(normalizedAddress);
           window.localStorage.setItem('walletConnected', normalizedAddress);
           fetchRoles(normalizedAddress);
