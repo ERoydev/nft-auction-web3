@@ -1,9 +1,6 @@
 name: Build & Deploy Frontend to Render
 
 on:
-  push:
-    branches: ["main"]
-
   pull_request:
     types: [closed]
     branches:

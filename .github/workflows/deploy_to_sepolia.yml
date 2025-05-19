@@ -1,9 +1,6 @@
 name: Deploy to Sepolia
 
 on:
-  push:
-    branches: ["main"]
-
   pull_request:
     types: [closed]
     branches:
@@ -43,3 +40,33 @@ jobs:
             --broadcast \
             --verify 
 #           --etherscan-api-key ${{ secrets.ETHERSCAN_API_KEY }}  # Optional for verification
+
+      - name: Extract deployed contract addresses
+        id: extract_addresses
+        run: |
+          # Path to broadcast file
+          BROADCAST_PATH="broadcast/DeploySepolia.s.sol/11155111/run-latest.json"
+          NFT_ADDRESS=$(jq -r '.transactions[] | select(.contractName=="NFT") | .contractAddress' $BROADCAST_PATH)
+          AUCTION_ADDRESS=$(jq -r '.transactions[] | select(.contractName=="EnglishAuction") | .contractAddress' $BROADCAST_PATH)
+
+          echo "NFT_ADDRESS=$NFT_ADDRESS" >> $GITHUB_ENV
+          echo "AUCTION_ADDRESS=$AUCTION_ADDRESS" >> $GITHUB_ENV
+
+      - name: Update Render environment variables & redeploy frontend
+        env: 
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          NFT_ADDRESS: ${{ env.NFT_ADDRESS }}
+          AUCTION_ADDRESS: ${{ env.AUCTION_ADDRESS }}
+        run: |
+          curl -X PATCH https://api.render.com/v1/services/$RENDER_SERVICE_ID \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "envVars": [
+                { "key": "VITE_NFT_CONTRACT_ADDRESS", "value": "'"$NFT_ADDRESS"'", "sync": true },
+                { "key": "VITE_AUCTION_CONTRACT_ADDRESS", "value": "'"$AUCTION_ADDRESS"'", "sync": true },
+                { "key": "VITE_OWNER_OF_CONTRACTS", "value": "'"$INITIAL_ADMIN_ADDRESS"'", "sync": true },
+                { "key": "VITE_MARKETPLACE_NFT_OWNER", "value", "'"$INITIAL_ADMIN_ADDRESS"'", "sync": true },
+              ]
+            }'
