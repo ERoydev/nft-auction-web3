@@ -38,6 +38,7 @@ contract Deploy is Script {
         console.log("Deployed Chainlink Mock contract with an address: ", address(chainlinkPriceFeed));
         console.log("Deployed NFT contract with an address: ",  address(nft));
         console.log("Deployed Auction contract with an address: ", address(auction));
+        console.log("Initial admin address is: ", address(adminAddress));
 
         vm.stopBroadcast();
     }
