@@ -1,16 +1,17 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import { MerkleTree } from 'merkletreejs';
 import keccak256 from 'keccak256';
 import { solidityPackedKeccak256, getAddress } from 'ethers';
 import fs from 'fs';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { getRolesForUser } from './methods.js';
 
 
 const app = express();
 const port = 3000;
-dotenv.config();
 
 // Allow all origins (open CORS)
 app.use(cors());

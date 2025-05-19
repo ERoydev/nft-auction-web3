@@ -25,12 +25,6 @@ jobs:
         with:
           node-version: 23.11.0
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Start the server
-        run: npm start
-
       - name: Trigger Render deploy hook
         run: |
           curl -X POST ${{ secrets.RENDER_BE_DEPLOY_HOOK}}

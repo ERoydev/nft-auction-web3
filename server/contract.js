@@ -42,7 +42,7 @@ const nftContractABI = [
   
 
 // Connect to Sepolia
-console.log('SEPLIA RPC:', process.env.SEPOLIA_RPC);
+console.log('SEPOLIA RPC:', process.env.SEPOLIA_RPC);
 const provider = new ethers.JsonRpcProvider(process.env.SEPOLIA_RPC); 
 
 
