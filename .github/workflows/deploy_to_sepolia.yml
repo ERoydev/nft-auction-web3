@@ -13,13 +13,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-      - name: Install Foundry
+      - name: Install Foundry v1.1.0
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: v1.1.0
+      
+      - name: Run forge integration tests
+        run: forge test --match-path "test/integration/*"
 
       - name: Set up environment variables
         run: |
