@@ -31,6 +31,8 @@ jobs:
           echo "PRIVATE_KEY=${{ secrets.PRIVATE_KEY }}" >> $GITHUB_ENV
           echo "SEPOLIA_RPC=${{ secrets.SEPOLIA_RPC }}" >> $GITHUB_ENV
           echo "INITIAL_ADMIN_ADDRESS=${{ secrets.INITIAL_ADMIN_ADDRESS }}" >> $GITHUB_ENV
+          echo "PINATA_API_KEY_JWT=${{ secrets.PINATA_API_KEY_JWT }}" >> $GITHUB_ENV
+          echo "PINATA_GATEWAY=${{ secrets.PINATA_GATEWAY }}" >> $GITHUB_ENV
 
       - name: Deploy contract to Sepolia
         run: |
@@ -52,21 +54,36 @@ jobs:
           echo "NFT_ADDRESS=$NFT_ADDRESS" 
           echo "AUCTION_ADDRESS=$AUCTION_ADDRESS" 
 
+          echo "nft_address<<EOF" >> $GITHUB_OUTPUT
+          echo "$NFT_ADDRESS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "auction_address<<EOF" >> $GITHUB_OUTPUT
+          echo "$AUCTION_ADDRESS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
 
       - name: Update Render environment variables
         env: 
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_FE }}
-          INITIAL_ADMIN_ADDRESS: ${{ secrets.INITIAL_ADMIN_ADDRESS }}
+          INITIAL_ADMIN_ADDRESS: ${{ env.INITIAL_ADMIN_ADDRESS }}
+          NFT_ADDRESS: ${{ steps.extract_addresses.outputs.NFT_ADDRESS }}
+          AUCTION_ADDRESS: ${{ steps.extract_addresses.outputs.AUCTION_ADDRESS }}
         run: |
-          curl -X PATCH https://api.render.com/v1/services/$RENDER_SERVICE_ID \
-            -H "Authorization: Bearer $RENDER_API_KEY" \
+          cat <<EOF > payload.json
+          [
+            { "key": "VITE_NFT_CONTRACT_ADDRESS", "value": "${NFT_ADDRESS}", "sync": true },
+            { "key": "VITE_AUCTION_CONTRACT_ADDRESS", "value": "${AUCTION_ADDRESS}", "sync": true },
+            { "key": "VITE_OWNER_OF_CONTRACTS", "value": "${INITIAL_ADMIN_ADDRESS}", "sync": true },
+            { "key": "VITE_MARKETPLACE_NFT_OWNER", "value": "${INITIAL_ADMIN_ADDRESS}", "sync": true },
+            { "key": "VITE_SEPOLIA_RPC", "value": "${SEPOLIA_RPC}", "sync": true },
+            { "key": "VITE_PINATA_API_KEY_JWT", "value": "${PINATA_API_KEY_JWT}", "sync": true },
+            { "key": "VITE_PINATA_GATEWAY", "value": "${PINATA_GATEWAY}", "sync": true }
+          ]
+          EOF
+
+          curl -X PUT "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/env-vars" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" \
             -H "Content-Type: application/json" \
-            -d '{
-              "envVars": [
-                { "key": "VITE_NFT_CONTRACT_ADDRESS", "value": "${{ steps.extract_addresses.outputs.nft_address }}", "sync": true },
-                { "key": "VITE_AUCTION_CONTRACT_ADDRESS", "value": "${{ steps.extract_addresses.outputs.auction_address }}", "sync": true },
-                { "key": "VITE_OWNER_OF_CONTRACTS", "value": "'"$INITIAL_ADMIN_ADDRESS"'", "sync": true },
-                { "key": "VITE_MARKETPLACE_NFT_OWNER", "value": "'"$INITIAL_ADMIN_ADDRESS"'", "sync": true }
-              ]
-            }'
+            --data @payload.json
