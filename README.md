@@ -112,7 +112,3 @@ npm install</code></pre>
  - Backend was hashing addresses with just keccak256(address) — a plain string hash — while smart contract likely expected keccak256(abi.encodePacked(address)) like Solidity  does. That mismatch is why the proofs were invalid (resulting in false in cast call).
  - solidityPackedKeccak256(...) = mimics abi.encodePacked + keccak256 from Solidity
  - If the hash of your leaf in JS doesn’t match the one Solidity expects, the Merkle proof won’t validate — ever.
-
-
-SOMe changes
-AGAIN
