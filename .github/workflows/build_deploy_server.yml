@@ -1,13 +1,20 @@
 name: Deploy Express Server to Render
 
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches:
       - main
 
+  workflow_dispatch:  # allows manual triggering
+
 jobs:
-  deploy:
+  deploy_express_server:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: server
 
     steps:
       - name: Checkout repository
