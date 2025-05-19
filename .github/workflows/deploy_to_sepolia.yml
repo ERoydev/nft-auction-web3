@@ -1,11 +1,6 @@
 name: Deploy to Sepolia and update Render environment variables
 
 on:
-  pull_request:
-    types: [closed]
-    branches:
-      - main
-
   workflow_dispatch:  # allows manual triggering
 
 jobs:
