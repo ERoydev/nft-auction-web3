@@ -9,6 +9,8 @@ on:
     branches:
       - main
 
+  workflow_dispatch:  # allows manual triggering
+  
 jobs:
   unit_tests:
     runs-on: ubuntu-latest

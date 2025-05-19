@@ -1,0 +1,39 @@
+name: Build & Deploy Frontend to Render
+
+on:
+  push:
+    branches: ["main"]
+
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+  workflow_dispatch:  # allows manual triggering
+
+jobs:
+  frontend-ci:
+    name: Build and Deploy Frontend
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js with version 23.11.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23.11.0
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Trigger deployment to Render
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
