@@ -44,13 +44,14 @@ jobs:
       - name: Extract deployed contract addresses
         id: extract_addresses
         run: |
-          # Path to broadcast file
           BROADCAST_PATH="broadcast/DeploySepolia.s.sol/11155111/run-latest.json"
+
           NFT_ADDRESS=$(jq -r '.transactions[] | select(.contractName=="NFT") | .contractAddress' $BROADCAST_PATH)
           AUCTION_ADDRESS=$(jq -r '.transactions[] | select(.contractName=="EnglishAuction") | .contractAddress' $BROADCAST_PATH)
 
-          echo "NFT_ADDRESS=$NFT_ADDRESS" >> $GITHUB_ENV
-          echo "AUCTION_ADDRESS=$AUCTION_ADDRESS" >> $GITHUB_ENV
+          echo "NFT_ADDRESS=${NFT_ADDRESS}" >> $GITHUB_ENV
+          echo "AUCTION_ADDRESS=${AUCTION_ADDRESS}" >> $GITHUB_ENV
+
 
       - name: Update Render environment variables & redeploy frontend
         env: 
