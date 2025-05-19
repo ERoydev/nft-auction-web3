@@ -1,7 +1,6 @@
 import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { getRoles } from '../../services/RolesService';
 import { useFetchTokenUrls } from '../../hooks/useFetchTokenUrls';
-import { ethers } from 'ethers';
 import { logger } from '../../utils/logger';
 import { safeNormalizeAddress } from '../../utils/safeNormalizeAddress';
 /*
@@ -95,7 +94,7 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
             logger.error('Invalid address received from accountsChanged event');
             return;
           }
-          
+
           setCurrentAccount(normalizedAddress);
           window.localStorage.setItem('walletConnected', normalizedAddress);
           fetchRoles(normalizedAddress);
