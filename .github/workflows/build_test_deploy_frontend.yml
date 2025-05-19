@@ -36,4 +36,4 @@ jobs:
         run: npm run build
 
       - name: Trigger deployment to Render
-        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: curl -X POST ${{ secrets.RENDER_FE_DEPLOY_HOOK }}
