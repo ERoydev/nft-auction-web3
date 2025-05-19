@@ -133,11 +133,12 @@ jobs:
       - name: Update Back-end Render environment variables
         env:
           SEPOLIA_RPC: ${{ secrets.SEPOLIA_RPC }}
-          NFT_CONTRACT_ADDRESS: ${{ steps.extract_addresses.outputs.NFT_ADDRESS  }}
-          AUCTION_CONTRACT_ADDRESS: ${{ steps.extract_addresses.outputs.AUCTION_ADDRESS }}
+          NFT_ADDRESS: ${{ needs.deploy_to_sepolia.outputs.NFT_ADDRESS  }}
+          AUCTION_ADDRESS: ${{ needs.deploy_to_sepolia.outputs.AUCTION_ADDRESS }}
           ADMIN_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           INITIAL_ADMIN_ADDRESS: ${{ secrets.INITIAL_ADMIN_ADDRESS }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_BE}}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
           cat <<EOF > payload.json
           [
