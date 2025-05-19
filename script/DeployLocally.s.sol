@@ -13,7 +13,7 @@ import {EnglishAuction} from  "../src/EnglishAuction.sol";
 contract Deploy is Script {
     function run() external {
         vm.startBroadcast();
-        address adminAddress = vm.envAddress("INITIAL_ADMIN_ADDRESS");  // Replace with your actual admin address
+        address adminAddress = vm.envAddress("LOCALLY_INITIAL_ADMIN_ADDRESS");  // Replace with your actual admin address
 
         // Deploy The Mock contract
         ERC20Mock erc20Mock = new ERC20Mock();

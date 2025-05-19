@@ -7,7 +7,7 @@ on:
       - main
 
   workflow_run:
-    workflow: ["Build, Test & Deploy Contracts"]
+    workflows: ["Build, Test & Deploy Contracts"]
     types: 
       - completed  # Ensures it runs when the referenced workflow completes
 

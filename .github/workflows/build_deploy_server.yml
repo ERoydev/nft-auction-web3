@@ -7,7 +7,7 @@ on:
       - main
 
   workflow_run:
-    workflow: ["Build & Deploy Frontend to Render"]  # Correct key and format
+    workflows: ["Build & Deploy Frontend to Render"]  # Correct key and format
     types:
       - completed  # Ensures it runs when the referenced workflow completes
 

@@ -107,6 +107,9 @@ jobs:
           BACKEND_URL: ${{ secrets.BACKEND_URL }}
           NFT_ADDRESS: ${{ needs.deploy_to_sepolia.outputs.NFT_ADDRESS }}
           AUCTION_ADDRESS: ${{ needs.deploy_to_sepolia.outputs.AUCTION_ADDRESS }}
+          PINATA_API_KEY_JWT: ${{ secrets.PINATA_API_KEY_JWT }}
+          PINATA_GATEWAY: ${{ secrets.PINATA_GATEWAY }}
+          SEPOLIA_RPC: ${{ secrets.SEPOLIA_RPC }}
         run: |
           cat <<EOF > payload.json
           [
