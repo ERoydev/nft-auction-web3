@@ -49,8 +49,8 @@ jobs:
           NFT_ADDRESS=$(jq -r '.transactions[] | select(.contractName=="NFT") | .contractAddress' $BROADCAST_PATH)
           AUCTION_ADDRESS=$(jq -r '.transactions[] | select(.contractName=="EnglishAuction") | .contractAddress' $BROADCAST_PATH)
 
-          echo "NFT_ADDRESS=$NFT_ADDRESS" >> $GITHUB_OUTPUT
-          echo "AUCTION_ADDRESS=$AUCTION_ADDRESS" >> $GITHUB_OUTPUT
+          echo "NFT_ADDRESS=$NFT_ADDRESS" 
+          echo "AUCTION_ADDRESS=$AUCTION_ADDRESS" 
 
 
       - name: Update Render environment variables
