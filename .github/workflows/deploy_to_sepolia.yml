@@ -1,4 +1,4 @@
-name: Deploy to Sepolia
+name: Deploy to Sepolia and update Render environment variables
 
 on:
   pull_request:
@@ -33,6 +33,7 @@ jobs:
           echo "INITIAL_ADMIN_ADDRESS=${{ secrets.INITIAL_ADMIN_ADDRESS }}" >> $GITHUB_ENV
           echo "PINATA_API_KEY_JWT=${{ secrets.PINATA_API_KEY_JWT }}" >> $GITHUB_ENV
           echo "PINATA_GATEWAY=${{ secrets.PINATA_GATEWAY }}" >> $GITHUB_ENV
+          echo "BACKEND_URL=${{ secrets.BACKEND_URL }}" >> $GITHUB_ENV
 
       - name: Deploy contract to Sepolia
         run: |
@@ -64,10 +65,12 @@ jobs:
 
 
       - name: Update Render environment variables
+        # Docs used: https://api-docs.render.com/reference/update-env-vars-for-service
         env: 
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_FE }}
           INITIAL_ADMIN_ADDRESS: ${{ env.INITIAL_ADMIN_ADDRESS }}
+          BACKEND_URL: ${{ env.BACKEND_URL }}
           NFT_ADDRESS: ${{ steps.extract_addresses.outputs.NFT_ADDRESS }}
           AUCTION_ADDRESS: ${{ steps.extract_addresses.outputs.AUCTION_ADDRESS }}
         run: |
@@ -79,7 +82,8 @@ jobs:
             { "key": "VITE_MARKETPLACE_NFT_OWNER", "value": "${INITIAL_ADMIN_ADDRESS}", "sync": true },
             { "key": "VITE_SEPOLIA_RPC", "value": "${SEPOLIA_RPC}", "sync": true },
             { "key": "VITE_PINATA_API_KEY_JWT", "value": "${PINATA_API_KEY_JWT}", "sync": true },
-            { "key": "VITE_PINATA_GATEWAY", "value": "${PINATA_GATEWAY}", "sync": true }
+            { "key": "VITE_PINATA_GATEWAY", "value": "${PINATA_GATEWAY}", "sync": true },
+            { "key": "VITE_BACKEND_URL", "value": "${BACKEND_URL}", "sync": true }
           ]
           EOF
 
