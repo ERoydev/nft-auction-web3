@@ -9,7 +9,7 @@ const ConnectWallet = () => {
   
   const handleConnectWallet = async () => {
     if (typeof window.ethereum !== "undefined") {
-      const address = await connectWallet(); // Call the connectWallet function from context
+      const address: any = await connectWallet(); // Call the connectWallet function from context
       if (address) {
         window.localStorage.setItem("walletConnected", "true"); // Optional: Save connection state
       }

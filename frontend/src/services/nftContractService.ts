@@ -1,5 +1,4 @@
-import { formatEther, formatUnits, parseEther, parseUnits } from "ethers";
-import { getBrowserProvider, nftReadContract, getNFtWriteContract, getUsdcWriteContract } from "../utils/contract";
+import { nftReadContract, getNFtWriteContract, getUsdcWriteContract } from "../utils/contract";
 import { logger } from "../utils/logger";
 import { extractRevertMessageFromError } from "../utils/extractRevertMessageFromError";
 import { ethers } from "ethers";
@@ -85,6 +84,8 @@ export async function purchaseNFT(tokenId: number, payWithETH: boolean, merklePr
 }
 
 export async function getNFTPriceInEth(priceInUsdc: string) {
+    const { formatUnits} = await import('ethers');
+    
     try {
         const contractWithSigner = await getNFtWriteContract();
         const ethPriceInWei = await contractWithSigner.getETHPriceForUSDCAmount(Number(priceInUsdc));

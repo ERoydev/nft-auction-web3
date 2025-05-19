@@ -37,7 +37,7 @@ export default function NFTMarketplace({
     // Add your purchase logic here
     const merkleProof = await getMerkleProof(currentAccount);
 
-    const purchaseResult = await purchaseNFT(selectedNFT.tokenId, payWithETH, merkleProof, selectedNFT.price);
+    const purchaseResult: any = await purchaseNFT(selectedNFT.tokenId, payWithETH, merkleProof, selectedNFT.price);
     
     if (purchaseResult.error) {
       showError(purchaseResult.error); // Show error message

@@ -1,7 +1,5 @@
-import { useNavigate } from "react-router-dom";
 import { useError } from "../../../hooks/useError";
 import { endAuction } from "../../../services/AuctionService";
-import { formatUnixTimestamp } from "../../../utils/formatUnixTimestamp";
 import DisplayNftModal from "../../../components/reusable/NFT/DisplayNftModal";
 import { mapToDisplayableNft } from "../../../intefaces/DisplayableNft";
 
@@ -22,10 +20,9 @@ export default function AuctionModal({
     isBiddable: boolean;
 }) {
     const { showError, errorMessage } = useError();
-    const navigate = useNavigate();
 
     const handleEndAuction = async () => {
-        const endAuctionResult = await endAuction(selectedAuction.auctionId);
+        const endAuctionResult: any = await endAuction(selectedAuction.auctionId);
 
         if (endAuctionResult.error) {
             showError(endAuctionResult.error);

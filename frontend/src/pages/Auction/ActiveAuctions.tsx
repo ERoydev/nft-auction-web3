@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useFetchAuctions } from "../../hooks/useFetchAuctions";
-import { endAuction, placeBidAuction } from "../../services/AuctionService";
+import { placeBidAuction } from "../../services/AuctionService";
 import { useError } from "../../hooks/useError";
 import { useWallet } from "../../context/Wallet/WalletContext";
 import { AuctionDetails } from "../../intefaces/AuctionDetails";
@@ -9,12 +9,12 @@ import AuctionModal from "./reusable/AuctionModal";
 
 
 export default function ActiveAuction() {
-  const {currentAccount, tokensData} = useWallet();
+  const {currentAccount} = useWallet();
   const { loading, auctions: fetchedAuctions, refetch } = useFetchAuctions(); // Use the hook directly
   const [auctions, setAuctions] = useState<AuctionDetails[]>([]);
   const [selectedAuction, setSelectedAuction] = useState<AuctionDetails | null>(null);
   const [showSuccess, setShowSuccess] = useState(false); // State for success effect
-  const { errorMessage, showError } = useError(); // Hook to manage error messages]
+  const { showError } = useError(); // Hook to manage error messages]
   const BID_VALUE = 1;
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function ActiveAuction() {
 
     const newBid = parseFloat(selectedAuction.highestBid) + BID_VALUE;
 
-    const bidResult = await placeBidAuction(selectedAuction.auctionId, newBid.toString());
+    const bidResult: any = await placeBidAuction(selectedAuction.auctionId, newBid.toString());
 
     if (bidResult.error) {
       showError("Failed to place bid. Please try again.");

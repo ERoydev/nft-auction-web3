@@ -1,6 +1,5 @@
-import { ethers } from "ethers";
 import { ROLES } from "../pages/admin";
-import { getBrowserProvider, nftReadContract, getNFtWriteContract } from "../utils/contract";
+import { getNFtWriteContract } from "../utils/contract";
 import { addToWhitelist, updateTheRoot } from "./WhitelistService";
 import axios from "axios";
 import { logger } from "../utils/logger";
@@ -25,7 +24,7 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
             logger.log("Whitelist Manager role assigned:", result);
 
             // Should delete the roles saved in the database, because they are changed and need to be fetched again
-            const deleteAddressResult = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/deleteAddress/`, {
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/deleteAddress/`, {
                 address: userAddress,  // send the address in the body of the request
             });
 
@@ -40,7 +39,7 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
             logger.log("Sales Price Manager role assigned:", result);
 
             // Should delete the roles saved in the database, because they are changed and need to be fetched again
-            const deleteAddressResult = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/deleteAddress/`, {
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/deleteAddress/`, {
               address: userAddress,  // send the address in the body of the request
             });
 
@@ -56,7 +55,7 @@ export async function assignRole(role: string, userAddress: string, senderRole: 
             return;
 
             // Should delete the roles saved in the database, because they are changed and need to be fetched again
-            const deleteAddressResult = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/deleteAddress/`, {
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/deleteAddress/`, {
               address: userAddress,  // send the address in the body of the request
           });
         }

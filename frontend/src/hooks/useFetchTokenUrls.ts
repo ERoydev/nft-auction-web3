@@ -6,7 +6,6 @@ export function useFetchTokenUrls(account: string | null) {
     
     const [loading, setLoading] = useState(true);
     const [tokensData, setTokensData] = useState<TokenData[]>([]);
-    const [nftIds, setNftIds] = useState<number[]>([]); // State to store NFT IDs
 
     const setTokenIdsOwned = async () => {
         if (!account) {
@@ -14,7 +13,6 @@ export function useFetchTokenUrls(account: string | null) {
             return [];
         }
         const tokenIds = await getNFTsByOwner(account);
-        setNftIds(tokenIds); // Update state with fetched NFT IDs
         return tokenIds; // Return the fetched token IDs
     };
 

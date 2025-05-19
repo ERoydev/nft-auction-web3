@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import NFTMarketplace from "../NftMarketplace";
 import { addToWhitelist, removeFromWhitelist } from "../../services/WhitelistService";
 import { WHITELIST_MANAGER } from "./index.ts";

@@ -3,7 +3,6 @@ import TokenData from "../../intefaces/TokenData";
 import { useWallet } from "../../context/Wallet/WalletContext";
 import { createAuction } from "../../services/AuctionService";
 import { useError } from "../../hooks/useError";
-import {past, active, started} from "./index";
 import InstructionCard from "../../components/ui/InstructionCard";
 
 export default function Auction() {
@@ -18,7 +17,7 @@ export default function Auction() {
       duration: duration,
     };
 
-    const auctionCreationResult = await createAuction(data);
+    const auctionCreationResult: any = await createAuction(data);
 
     if (auctionCreationResult.error) {
       showError(auctionCreationResult.error);

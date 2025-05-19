@@ -1,15 +1,15 @@
 import axios from "axios"
-import { ethers } from "ethers";
 import {arrayify} from "@ethersproject/bytes";
-import { getBrowserProvider, nftReadContract, getNFtWriteContract} from "../utils/contract";
+import { getNFtWriteContract} from "../utils/contract";
 import { logger } from "../utils/logger";
 
 // Used only from admins to add/remove users from the whitelist
 
-const SERVER_URL = "http://localhost:3000";
+
 
 
 export async function getMerkleProof(userAddress: string) {
+    const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
     try {
         const response = await axios.post(`${SERVER_URL}/getProof`, {
             address: userAddress,
@@ -30,6 +30,8 @@ export async function getMerkleProof(userAddress: string) {
 
 export async function addToWhitelist(walletAddress: string, senderRole: string) {
     const wallet = walletAddress.trim();
+    const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
+
 
     try {
         // Add whitelist to the json file on the server
@@ -42,7 +44,7 @@ export async function addToWhitelist(walletAddress: string, senderRole: string) 
         updateTheRoot();
 
         return response.data;
-    } catch (error) {
+    } catch (error: any) {
         logger.error("Error adding to whitelist:", error);
         if (error.response.data == "Address already exists in the whitelist") {
             alert("Address already exists in the whitelist");
@@ -53,6 +55,7 @@ export async function addToWhitelist(walletAddress: string, senderRole: string) 
 
 export async function removeFromWhitelist(walletAddress: string, senderRole: string) {
     const wallet = walletAddress.trim();
+    const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
 
     try {
         // Remove whitelist from the json file on the server
@@ -65,7 +68,7 @@ export async function removeFromWhitelist(walletAddress: string, senderRole: str
         updateTheRoot();
 
         return response.data;
-    } catch (error) {
+    } catch (error: any) {
         logger.error("Error removing from whitelist:", error);
         if (error.response.data == "Address does not exist in the whitelist") {
             alert("Address does not exist in the whitelist");
@@ -77,6 +80,8 @@ export async function removeFromWhitelist(walletAddress: string, senderRole: str
 
 export async function updateTheRoot() {
     // Only Default admin and Whitelist Manager can update the root
+    const SERVER_URL = import.meta.env.VITE_BACKEND_URL;
+
     try {
         const response = await axios.get(`${SERVER_URL}/getMerkleRoot`);
 
