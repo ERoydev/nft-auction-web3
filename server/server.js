@@ -19,6 +19,34 @@ app.use(express.json());
 const whitelistFilePath = './whitelist.json';
 const databasePath = './database.json';
 
+// Initialize the whitelist with the initial admin address
+const initializeWhitelist = () => {
+    const initialAdminAddress = process.env.INITIAL_ADMIN_ADDRESS;
+
+    if (!initialAdminAddress) {
+        console.error('INITIAL_ADMIN_ADDRESS is not defined in .env');
+        process.exit(1); // Exit the process if the admin address is not defined
+    }
+
+    // Normalize the admin address
+    const normalizedAdminAddress = getAddress(initialAdminAddress);
+
+    // Create a new whitelist with only the admin address
+    const whitelist = [normalizedAdminAddress];
+
+    try {
+        fs.writeFileSync(whitelistFilePath, JSON.stringify(whitelist, null, 2));
+        console.log('Whitelist initialized with the initial admin address:', normalizedAdminAddress);
+    } catch (error) {
+        console.error('Error initializing whitelist:', error);
+        process.exit(1); // Exit the process if there's an error
+    }
+
+    return whitelist;
+};
+
+// Initialize the whitelist and Merkle tree on server startup
+const whitelist = initializeWhitelist(); // Reset the whitelist
 
 const getWhitelist = () => {
     try {
@@ -50,17 +78,40 @@ app.get('/getMerkleRoot', (req, res) => {
 // Route to get the Merkle proof for an address
 app.post('/getProof', (req, res) => {
     const { address } = req.body;
+
     if (!address) {
         return res.status(400).send('Address is required');
     }
 
     const normalizedAddress = getAddress(address);
 
-    const leaf = Buffer.from(solidityPackedKeccak256(['address'], [getAddress(normalizedAddress)]).slice(2), 'hex');
+    const whitelist = getWhitelist();
+
+    // If there's only one address in the whitelist
+    if (whitelist.length === 1) {
+        // Check if the provided address exists in the whitelist
+        if (whitelist[0] !== normalizedAddress) {
+            return res.status(400).send('Address does not exist in the whitelist');
+        }
+
+        // If the address exists, return an empty proof
+        return res.json({ proof: [] });
+    }
+
+    // Check if the address exists in the whitelist
+    if (!whitelist.includes(normalizedAddress)) {
+        return res.status(400).send('Address does not exist in the whitelist');
+    }
+
+    // Generate the leaf for the provided address
+    const leaf = Buffer.from(solidityPackedKeccak256(['address'], [normalizedAddress]).slice(2), 'hex');
+
+    // Generate the proof
     const proof = tree.getProof(leaf).map(x => '0x' + x.data.toString('hex'));
 
     res.json({ proof });
 });
+
 
 app.post('/addAddress', (req, res) => {
     const { address, senderRole } = req.body;

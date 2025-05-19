@@ -1,9 +1,6 @@
 name: Build_test_deploy_contracts
 
 on:
-  push:
-    branches: ["main"]
-
   pull_request:
     types: [closed]
     branches:
