@@ -1,0 +1,149 @@
+name: Build, Test, and Deploy Contracts
+# This GitHub Actions workflow automates the process of building, testing, and deploying smart contracts.
+# Deployment on Sepolia testnet and after successful deployment, it updates environment variables on Render for both front-end and back-end services.
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+  workflow_dispatch:  # allows manual triggering
+  
+jobs:
+  unit_tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry v1.1.0
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.1.0
+
+      - name: Run forge unit tests
+        run: forge test --match-path "test/unit/*"
+
+  integration_tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry v1.1.0
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.1.0
+
+      - name: Run forge integration tests
+        run: forge test --match-path "test/integration/*"
+  
+  deploy_to_sepolia:
+    runs-on: ubuntu-latest
+    needs: [unit_tests, integration_tests]
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry v1.1.0
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.1.0
+
+      - name: Set up environment variables
+        run: |
+          echo "PRIVATE_KEY=${{ secrets.PRIVATE_KEY }}" >> $GITHUB_ENV
+          echo "SEPOLIA_RPC=${{ secrets.SEPOLIA_RPC }}" >> $GITHUB_ENV
+          echo "INITIAL_ADMIN_ADDRESS=${{ secrets.INITIAL_ADMIN_ADDRESS }}" >> $GITHUB_ENV
+
+
+      - name: Deploy contract to Sepolia
+        run: |
+          forge script script/DeploySepolia.s.sol:Deploy \
+            --rpc-url $SEPOLIA_RPC \
+            --private-key $PRIVATE_KEY \
+            --broadcast \
+            --verify
+  #         --etherscan-api-key ${{ secrets.ETHERSCAN_API_KEY }}  # Optional for verification
+
+      - name: Extract deployed contract addresses
+        id: extract_addresses
+        run: |
+          BROADCAST_PATH="broadcast/DeploySepolia.s.sol/11155111/run-latest.json"
+
+          NFT_ADDRESS=$(jq -r '.transactions[] | select(.contractName=="NFT") | .contractAddress' $BROADCAST_PATH)
+          AUCTION_ADDRESS=$(jq -r '.transactions[] | select(.contractName=="EnglishAuction") | .contractAddress' $BROADCAST_PATH)
+
+          echo "NFT_ADDRESS=$NFT_ADDRESS" 
+          echo "AUCTION_ADDRESS=$AUCTION_ADDRESS" 
+
+          echo "::set-output name=nft_address::$NFT_ADDRESS"
+          echo "::set-output name=auction_address::$AUCTION_ADDRESS"
+
+  update_env_vars_on_render:
+    runs-on: ubuntu-latest
+    needs: deploy_to_sepolia
+    
+    steps:
+      - name: Update Front-end Render environment variables
+        # Docs used: https://api-docs.render.com/reference/update-env-vars-for-service
+        env: 
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_FE }}
+          INITIAL_ADMIN_ADDRESS: ${{ secrets.INITIAL_ADMIN_ADDRESS }}
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          NFT_ADDRESS: ${{ needs.deploy_to_sepolia.outputs.NFT_ADDRESS }}
+          AUCTION_ADDRESS: ${{ needs.deploy_to_sepolia.outputs.AUCTION_ADDRESS }}
+        run: |
+          cat <<EOF > payload.json
+          [
+            { "key": "VITE_NFT_CONTRACT_ADDRESS", "value": "${NFT_ADDRESS}", "sync": true },
+            { "key": "VITE_AUCTION_CONTRACT_ADDRESS", "value": "${AUCTION_ADDRESS}", "sync": true },
+            { "key": "VITE_OWNER_OF_CONTRACTS", "value": "${INITIAL_ADMIN_ADDRESS}", "sync": true },
+            { "key": "VITE_MARKETPLACE_NFT_OWNER", "value": "${INITIAL_ADMIN_ADDRESS}", "sync": true },
+            { "key": "VITE_SEPOLIA_RPC", "value": "${SEPOLIA_RPC}", "sync": true },
+            { "key": "VITE_PINATA_API_KEY_JWT", "value": "${PINATA_API_KEY_JWT}", "sync": true },
+            { "key": "VITE_PINATA_GATEWAY", "value": "${PINATA_GATEWAY}", "sync": true },
+            { "key": "VITE_BACKEND_URL", "value": "${BACKEND_URL}", "sync": true }
+          ]
+          EOF
+
+          curl -X PUT "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/env-vars" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            -H "Content-Type: application/json" \
+            --data @payload.json
+      
+
+      - name: Update Back-end Render environment variables
+        env:
+          SEPOLIA_RPC: ${{ secrets.SEPOLIA_RPC }}
+          NFT_CONTRACT_ADDRESS: ${{ steps.extract_addresses.outputs.NFT_ADDRESS  }}
+          AUCTION_CONTRACT_ADDRESS: ${{ steps.extract_addresses.outputs.AUCTION_ADDRESS }}
+          ADMIN_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          INITIAL_ADMIN_ADDRESS: ${{ secrets.INITIAL_ADMIN_ADDRESS }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID_BE}}
+        run: |
+          cat <<EOF > payload.json
+          [
+            { "key": "NFT_CONTRACT_ADDRESS", "value": "${NFT_ADDRESS}", "sync": true },
+            { "key": "AUCTION_CONTRACT_ADDRESS", "value": "${AUCTION_ADDRESS}", "sync": true },
+            { "key": "SEPOLIA_RPC", "value": "${SEPOLIA_RPC}", "sync": true },
+            { "key": "ADMIN_PRIVATE_KEY", "value": "${ADMIN_PRIVATE_KEY}", "sync": true },
+            { "key": "INITIAL_ADMIN_ADDRESS", "value": "${INITIAL_ADMIN_ADDRESS}", "sync": true }
+          ]
+          EOF
+
+          curl -X PUT "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/env-vars" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            -H "Content-Type: application/json" \
+            --data @payload.json
+      
