@@ -2,11 +2,6 @@ name: Build, Test, and Deploy Contracts
 # This GitHub Actions workflow automates the process of building, testing, and deploying smart contracts.
 # Deployment on Sepolia testnet and after successful deployment, it updates environment variables on Render for both front-end and back-end services.
 on:
-  pull_request:
-    types: [closed]
-    branches:
-      - main
-
   workflow_dispatch:  # allows manual triggering
   
 jobs:

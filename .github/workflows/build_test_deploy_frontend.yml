@@ -1,16 +1,6 @@
 name: Build & Deploy Frontend to Render
 
 on:
-  pull_request:
-    types: [closed]
-    branches:
-      - main
-
-  workflow_run:
-    workflows: ["Build, Test, and Deploy Contracts"]
-    types: 
-      - completed  # Ensures it runs when the referenced workflow completes
-
   workflow_dispatch:  # allows manual triggering
 
 jobs:
