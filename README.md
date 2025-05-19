@@ -5,7 +5,6 @@
   <title>nft-auction-web3</title>
 </head>
 <body>
-
   <h1>nft-auction-web3</h1>
   <p>A full-stack Web3 dApp that allows users to mint, purchase, and auction NFTs using ETH or USDC. Chainlink oracles fetch real-time ETH/USD prices. NFT metadata is stored using Pinata (IPFS), and minting/purchasing is restricted to whitelisted users via Merkle trees.</p>
 
@@ -113,3 +112,6 @@ npm install</code></pre>
  - Backend was hashing addresses with just keccak256(address) — a plain string hash — while smart contract likely expected keccak256(abi.encodePacked(address)) like Solidity  does. That mismatch is why the proofs were invalid (resulting in false in cast call).
  - solidityPackedKeccak256(...) = mimics abi.encodePacked + keccak256 from Solidity
  - If the hash of your leaf in JS doesn’t match the one Solidity expects, the Merkle proof won’t validate — ever.
+
+
+SOMe changes
