@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>nft-auction-web3</title>
-</head>
-<body>
   <h1>nft-auction-web3</h1>
   <p>A full-stack Web3 dApp that allows users to mint, purchase, and auction NFTs using ETH or USDC. Chainlink oracles fetch real-time ETH/USD prices. NFT metadata is stored using Pinata (IPFS), and minting/purchasing is restricted to whitelisted users via Merkle trees.</p>
+
+- Deployed on: https://nft-auction-web3-frontend.onrender.com
+- via CI/CD automation workflows
 
   <h2>Features</h2>
   <ul>
@@ -29,9 +25,9 @@
 
   <h2>Project Structure</h2>
   <ul>
-    <li><code>/contracts</code> – NFT and Auction contracts</li>
+    <li><code>/src</code> – NFT and Auction contracts</li>
     <li><code>/frontend</code> – React-based frontend app</li>
-    <li><code>/backend</code> – Express.js backend for whitelist verification</li>
+    <li><code>/server</code> – Express.js backend for whitelist verification, and future plans to be used to optimize data fetching from blockchain</li>
     <li><code>/script</code> – Deployment scripts (for local and testnet)</li>
   </ul>
 
@@ -49,7 +45,8 @@ npm install</code></pre>
 
   <p><strong>Contracts:</strong></p>
   <pre><code>forge install</code></pre>
-
+  <pre><code>git submodule sync
+git submodule update --init --recursive</code></pre>
   <h2>Local Development</h2>
   <ul>
     <li>Use Foundry’s <code>anvil</code> to spin up a local chain.</li>
