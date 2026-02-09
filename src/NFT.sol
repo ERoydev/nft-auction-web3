@@ -131,7 +131,7 @@ contract NFT is ERC721, ERC721Burnable, RoleManager, MerkleWhiteList, PriceConsu
             bytes32[] calldata merkleProof
         ) external payable nonReentrant {
         
-        verifyProof(msg.sender, merkleProof);
+        verifyProof(msg.sender, merkleProof); // This could potentially lead to more gas spend instead of using mapping for whitelisting
     
         TokenInfo memory tokenData = tokenInfo[_tokenId];
         require(tokenData.owner != address(0), "Token not found");

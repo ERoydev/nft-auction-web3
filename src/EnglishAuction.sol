@@ -56,25 +56,27 @@ contract EnglishAuction is ReentrancyGuard {
         uint256 _startPrice,
         uint256 _durationInMinutes
     ) external nonReentrant returns (uint256 _auctionId) {
+        // Latest gas cost: 230560
+        IERC721 nft_addr = IERC721(_nftAddress);
 
+        require(nft_addr.getApproved(_nftTokenId) == address(this), "Nft must approve this address as a spender");
+        require(_startPrice > 0, "Starting price must be greater than 0");
+        require(_durationInMinutes >= AUCTION_MIN_DURATION, "Duration must be longer than or equal to 5 mintues");
+        require(nft_addr.ownerOf(_nftTokenId) == msg.sender, "Caller is not the owner of the NFT");
+        
         auctionId = nextAuctionId++;
         Auction storage auction = auctions[auctionId];
 
-        require(IERC721(_nftAddress).getApproved(_nftTokenId) == address(this), "Nft must approve this address as a spender");
-        require(_startPrice > 0, "Starting price must be greater than 0");
-        require(_durationInMinutes >= AUCTION_MIN_DURATION, "Duration must be longer than or equal to 5 mintues");
-
         auction.seller = msg.sender;
-        auction.nft = IERC721(_nftAddress);
+        auction.nft = nft_addr;
         auction.nftTokenId = _nftTokenId;
         auction.startPrice = _startPrice;
         auction.endTime = block.timestamp + _durationInMinutes * 1 minutes;
         auction.highestBid = _startPrice; // Set initial highest bidd for address(0)
 
-        require(auction.nft.ownerOf(_nftTokenId) == msg.sender, "Caller is not the owner of the NFT");
 
         emit AuctionStarted(
-            auction.seller, 
+            msg.sender, 
             auctionId, 
             _startPrice, 
             auction.endTime,
@@ -82,12 +84,13 @@ contract EnglishAuction is ReentrancyGuard {
             auction.highestBidder
         );
 
-        auction.nft.transferFrom(auction.seller, address(this), _nftTokenId);
+        auction.nft.transferFrom(msg.sender, address(this), _nftTokenId);
         return auctionId;
     }
 
     function placeBid(uint256 _auctionId) external payable {
         require(_auctionId < nextAuctionId, "Auction with this id doesn't exist");
+        
         Auction storage auction = auctions[_auctionId];
 
         require(!auction.auctionEnded, "Auction is ended by owner");
